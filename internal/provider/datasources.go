@@ -42,6 +42,9 @@ import (
 	// Graph v1.0 - Directory Management datasources
 	graphDirectoryManagementSubscribedSkus "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/directory_management/graph_v1.0/subscribed_skus"
 
+	// Graph Beta - Groups datasources
+	graphBetaGroup "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/groups/graph_beta/group"
+
 	// Utilities
 	utilityItunesAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata"
 	utilityMacOSPKGAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/macos_pkg_app_metadata"
@@ -95,6 +98,8 @@ func (p *M365Provider) DataSources(ctx context.Context) []func() datasource.Data
 		graphBetaWindows365CloudPcSourceDeviceImage.NewCloudPcSourceDeviceImageDataSource,
 		// Graph v1.0 - Directory Management datasources
 		graphDirectoryManagementSubscribedSkus.NewSubscribedSkusDataSource,
+		// Graph Beta - Groups datasources
+		graphBetaGroup.NewGroupDataSource,
 
 		// Utilities
 		utilityMacOSPKGAppMetadata.NewMacOSPKGAppMetadataDataSource,
