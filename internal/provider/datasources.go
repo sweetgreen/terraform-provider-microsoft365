@@ -25,12 +25,12 @@ import (
 	graphBetaDeviceManagementWindowsDriverUpdateInventory "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_driver_update_inventory"
 	graphBetaDeviceManagementWindowsDriverUpdateProfile "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_driver_update_profile"
 	graphBetaDeviceManagementWindowsFeatureUpdateProfile "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_feature_update_profile"
-	graphBetaDeviceManagementWindowsPlatformScript "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_platform_script"
 	graphBetaDeviceManagementWindowsQualityUpdateExpeditePolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_quality_update_expedite_policy"
 	graphBetaDeviceManagementWindowsQualityUpdatePolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_quality_update_policy"
 	graphBetaDeviceManagementWindowsRemediationScript "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_remediation_script"
 	graphBetaDeviceManagementWindowsUpdateCatalogItem "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_update_catalog_item"
 	graphBetaDeviceManagementWindowsUpdateRing "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_update_ring"
+	graphBetaDeviceManagementWindowsPlatformScript "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/device_management/graph_beta/windows_platform_script"
 
 	// Graph Beta - Directory Management datasources
 	graphBetaDirectoryManagementDirectorySettingTemplates "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/directory_management/graph_beta/directory_setting_templates"
@@ -44,6 +44,9 @@ import (
 
 	// Graph Beta - Groups datasources
 	graphBetaGroup "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/groups/graph_beta/group"
+
+	// Graph v1.0 - Device & app management datasources
+	graphV1DeviceAndAppManagementIosMobileAppConfiguration "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/device_and_app_management/graph_v1.0/ios_mobile_app_configuration"
 
 	// Utilities
 	utilityItunesAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata"
@@ -100,6 +103,8 @@ func (p *M365Provider) DataSources(ctx context.Context) []func() datasource.Data
 		graphDirectoryManagementSubscribedSkus.NewSubscribedSkusDataSource,
 		// Graph Beta - Groups datasources
 		graphBetaGroup.NewGroupDataSource,
+		// Graph v1.0 - Device & app management datasources
+		graphV1DeviceAndAppManagementIosMobileAppConfiguration.NewIosMobileAppConfigurationDataSource,
 
 		// Utilities
 		utilityMacOSPKGAppMetadata.NewMacOSPKGAppMetadataDataSource,
