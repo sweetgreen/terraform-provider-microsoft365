@@ -20,6 +20,7 @@ func PlatformScriptAssignmentsSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"all_devices": schema.BoolAttribute{
 				Optional: true,
+				Computed: true,
 				MarkdownDescription: "Specifies whether this assignment applies to all devices. " +
 					"When set to `true`, the assignment targets all devices in the organization." +
 					"Can be used in conjuction with `all_users`." +
@@ -31,6 +32,7 @@ func PlatformScriptAssignmentsSchema() schema.SingleNestedAttribute {
 			},
 			"all_users": schema.BoolAttribute{
 				Optional: true,
+				Computed: true,
 				MarkdownDescription: "Specifies whether this assignment applies to all users. " +
 					"When set to `true`, the assignment targets all licensed users within the organization." +
 					"Can be used in conjuction with `all_devices`." +

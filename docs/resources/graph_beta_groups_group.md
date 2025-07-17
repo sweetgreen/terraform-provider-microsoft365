@@ -9,6 +9,10 @@ description: |-
 
 Manages Azure AD/Entra groups using the `/groups` endpoint. This resource enables creation and management of security groups, Microsoft 365 groups, and distribution groups with support for dynamic membership, role assignment capabilities, and comprehensive group configuration options for organizational identity and access management.
 
+## Related Resources
+
+- [microsoft365_graph_beta_groups_group Data Source](../data-sources/graph_beta_groups_group.md) - Query existing groups
+
 ## Microsoft Documentation
 
 - [group resource type](https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-beta)

@@ -1,0 +1,295 @@
+---
+page_title: "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration Resource - terraform-provider-microsoft365"
+subcategory: "Device and App Management"
+description: |-
+  Manages iOS mobile app configuration policies in Microsoft Intune. These policies allow you to configure app-specific settings for managed iOS applications.
+---
+
+# microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration (Resource)
+
+Manages iOS mobile app configuration policies in Microsoft Intune. These policies allow you to configure app-specific settings for managed iOS applications.
+
+## Related Resources
+
+- [microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration Data Source](../data-sources/graph_v1_device_and_app_management_ios_mobile_app_configuration.md) - Query existing iOS mobile app configurations
+
+## Microsoft Documentation
+
+- [iosMobileAppConfiguration resource type](https://learn.microsoft.com/en-us/graph/api/resources/intune-apps-iosmobileappconfiguration?view=graph-rest-1.0)
+- [Create iosMobileAppConfiguration](https://learn.microsoft.com/en-us/graph/api/intune-apps-iosmobileappconfiguration-create?view=graph-rest-1.0)
+- [Update iosMobileAppConfiguration](https://learn.microsoft.com/en-us/graph/api/intune-apps-iosmobileappconfiguration-update?view=graph-rest-1.0)
+- [Delete iosMobileAppConfiguration](https://learn.microsoft.com/en-us/graph/api/intune-apps-iosmobileappconfiguration-delete?view=graph-rest-1.0)
+
+## API Permissions
+
+The following API permissions are required in order to use this resource.
+
+### Microsoft Graph
+
+- **Application**: `DeviceManagementApps.ReadWrite.All`
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v0.15.0-alpha | Experimental | Initial release |
+
+## Example Usage
+
+### Basic Configuration
+
+```terraform
+resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration" "example" {
+  display_name = "iOS App Configuration"
+  description  = "Configuration for iOS managed apps"
+  
+  # Target specific mobile apps
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+}
+```
+
+### Configuration with Settings
+
+```terraform
+resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration" "example" {
+  display_name = "iOS Outlook Configuration"
+  description  = "Configuration settings for Microsoft Outlook on iOS"
+  
+  # Target Microsoft Outlook app
+  targeted_mobile_apps = ["0c0a76a8-5e99-479f-af2f-9fa34a74f4b7"]
+  
+  settings = [
+    {
+      app_config_key       = "com.microsoft.outlook.EmailProfile.EmailAddress"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{mail}}"
+    },
+    {
+      app_config_key       = "com.microsoft.outlook.EmailProfile.EmailAccountName"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{displayName}}"
+    },
+    {
+      app_config_key       = "com.microsoft.outlook.EmailProfile.RequireAuthentication"
+      app_config_key_type  = "booleanType"
+      app_config_key_value = "true"
+    }
+  ]
+}
+```
+
+### Configuration with Assignments
+
+```terraform
+resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration" "example" {
+  display_name = "iOS App Configuration with Assignments"
+  description  = "Configuration with group assignments"
+  
+  # Target specific mobile apps
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+  
+  settings = [
+    {
+      app_config_key       = "server_url"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "https://api.company.com"
+    }
+  ]
+  
+  # Assign to all licensed users
+  assignments {
+    target {
+      odata_type = "#microsoft.graph.allLicensedUsersAssignmentTarget"
+    }
+  }
+  
+  # Assign to specific group
+  assignments {
+    target {
+      odata_type = "#microsoft.graph.groupAssignmentTarget"
+      group_id   = "11111111-2222-3333-4444-555555555555"
+    }
+  }
+  
+  # Exclude a group
+  assignments {
+    target {
+      odata_type = "#microsoft.graph.exclusionGroupAssignmentTarget"
+      group_id   = "66666666-7777-8888-9999-000000000000"
+    }
+  }
+}
+```
+
+### Configuration with Encoded XML
+
+```terraform
+resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration" "example" {
+  display_name = "iOS App Configuration with XML"
+  description  = "Configuration using encoded XML settings"
+  
+  # Target specific mobile apps
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+  
+  # Base64 encoded configuration XML
+  encoded_setting_xml = base64encode(<<-EOT
+    <dict>
+      <key>AppConfigKey1</key>
+      <string>AppConfigValue1</string>
+      <key>AppConfigKey2</key>
+      <integer>123</integer>
+    </dict>
+  EOT
+  )
+}
+```
+
+### Kiosk Configuration Example
+
+```terraform
+resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration" "kiosk" {
+  display_name = "Kiosk Configuration"
+  description  = "Configuration settings for kiosk iOS app"
+  
+  # Target specific kiosk mobile app
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+  
+  settings = [
+    {
+      app_config_key       = "KIOSK_RESTAURANT_SLUG"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "scottsdale-quarter"
+    },
+    {
+      app_config_key       = "GRAPHQL_ENDPOINT"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "https://order.example.com/graphql"
+    },
+    {
+      app_config_key       = "KIOSK_QB_URL"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "http://172.16.1.2:3051/"
+    },
+    {
+      app_config_key       = "KIOSK_DEVICE_AUTH_URL"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "https://auth.example.com/oauth2/token?grant_type=client_credentials"
+    },
+    {
+      app_config_key       = "KIOSK_DEVICE_AUTH_USERNAME"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "client_id_placeholder"
+    },
+    {
+      app_config_key       = "KIOSK_DEVICE_AUTH_PASSWORD"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "client_secret_placeholder"
+    },
+    {
+      app_config_key       = "KIOSK_STATION_ID"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "001"
+    },
+    {
+      app_config_key       = "KIOSK_IS_EMPLOYEE_KIOSK"
+      app_config_key_type  = "booleanType"
+      app_config_key_value = "false"
+    },
+    {
+      app_config_key       = "INTUNE_DEVICE_ID"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{deviceid}}"
+    },
+    {
+      app_config_key       = "IPAD_SERIAL_NUMBER"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{serialnumber}}"
+    }
+  ]
+}
+```
+
+<!-- schema generated by tfplugindocs -->
+## Schema
+
+### Required
+
+- `display_name` (String) The display name of the iOS mobile app configuration.
+
+### Optional
+
+- `assignments` (Attributes List) The list of assignments for this iOS mobile app configuration. (see [below for nested schema](#nestedatt--assignments))
+- `description` (String) The description of the iOS mobile app configuration.
+- `encoded_setting_xml` (String, Sensitive) Base64 encoded configuration XML.
+- `settings` (Attributes List) iOS app configuration settings. (see [below for nested schema](#nestedatt--settings))
+- `targeted_mobile_apps` (List of String) The list of targeted mobile app IDs.
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+
+### Read-Only
+
+- `created_date_time` (String) DateTime the object was created. Read-only.
+- `id` (String) The unique identifier for the iOS mobile app configuration. Read-only.
+- `last_modified_date_time` (String) DateTime the object was last modified. Read-only.
+- `version` (Number) Version of the device configuration. Read-only.
+
+<a id="nestedatt--assignments"></a>
+### Nested Schema for `assignments`
+
+Required:
+
+- `target` (Attributes) Target for the assignment. (see [below for nested schema](#nestedatt--assignments--target))
+
+Read-Only:
+
+- `id` (String) Key of the entity. Read-only.
+
+<a id="nestedatt--assignments--target"></a>
+### Nested Schema for `assignments.target`
+
+Required:
+
+- `odata_type` (String) The type of assignment target. Possible values are: #microsoft.graph.allLicensedUsersAssignmentTarget, #microsoft.graph.allDevicesAssignmentTarget, #microsoft.graph.exclusionGroupAssignmentTarget, #microsoft.graph.groupAssignmentTarget.
+
+Optional:
+- `group_id` (String) The group Id that is the target of the assignment. Required when odata_type is groupAssignmentTarget or exclusionGroupAssignmentTarget.
+
+
+<a id="nestedatt--settings"></a>
+### Nested Schema for `settings`
+
+Required:
+
+- `app_config_key` (String) The application configuration key.
+- `app_config_key_type` (String) The application configuration key type. Possible values are: stringType, integerType, realType, booleanType, tokenType.
+- `app_config_key_value` (String) The application configuration key value.
+
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+## Important Notes
+
+- **App Configuration Keys**: The specific configuration keys and their formats depend on the target application. Consult the application's documentation for supported configuration keys.
+- **Configuration Methods**: You can use either the `settings` attribute for structured configuration or `encoded_setting_xml` for XML-based configuration, but not both.
+- **Token Support**: Configuration values can include tokens like `{{mail}}`, `{{username}}`, `{{displayName}}`, `{{deviceid}}`, `{{serialnumber}}` which are replaced with user or device-specific values at runtime.
+- **Assignment Order**: Assignments are processed in order. Exclusion groups take precedence over inclusion groups.
+- **Target Apps**: The `targeted_mobile_apps` attribute should contain the app IDs of the managed apps this configuration applies to.
+- **Settings Requirement**: When using the `settings` attribute, the `targeted_mobile_apps` attribute is required and must contain at least one app ID.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+#!/bin/bash
+
+# {ios_mobile_app_configuration_id}
+terraform import microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration.example 12345678-1234-1234-1234-123456789abc
+```
