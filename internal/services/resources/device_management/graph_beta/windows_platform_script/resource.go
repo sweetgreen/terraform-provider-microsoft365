@@ -120,6 +120,7 @@ func (r *WindowsPlatformScriptResource) Schema(ctx context.Context, req resource
 			"enforce_signature_check": schema.BoolAttribute{
 				MarkdownDescription: "Indicate whether the script signature needs be checked.",
 				Optional:            true,
+				Computed:            true,
 			},
 			"file_name": schema.StringAttribute{
 				MarkdownDescription: "Script file name.",
@@ -139,6 +140,7 @@ func (r *WindowsPlatformScriptResource) Schema(ctx context.Context, req resource
 			"run_as_32_bit": schema.BoolAttribute{
 				MarkdownDescription: "A value indicating whether the PowerShell script should run as 32-bit.",
 				Optional:            true,
+				Computed:            true,
 			},
 			"assignments": commonschemagraphbeta.PlatformScriptAssignmentsSchema(),
 			"timeouts":    commonschema.Timeouts(ctx),
