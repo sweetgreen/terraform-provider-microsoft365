@@ -41,42 +41,47 @@ func constructResource(ctx context.Context, data *IosMobileAppConfigurationResou
 	}
 
 	// Set settings if provided
-	if len(data.Settings) > 0 {
-		settings := make([]graphmodels.AppConfigurationSettingItemable, 0, len(data.Settings))
-		for _, setting := range data.Settings {
-			appConfigSetting := graphmodels.NewAppConfigurationSettingItem()
+	if !data.Settings.IsNull() && !data.Settings.IsUnknown() {
+		var settingsList []AppConfigurationSettingItemModel
+		data.Settings.ElementsAs(ctx, &settingsList, false)
 
-			// Set app config key
-			appConfigKey := setting.AppConfigKey.ValueString()
-			appConfigSetting.SetAppConfigKey(&appConfigKey)
+		if len(settingsList) > 0 {
+			settings := make([]graphmodels.AppConfigurationSettingItemable, 0, len(settingsList))
+			for _, setting := range settingsList {
+				appConfigSetting := graphmodels.NewAppConfigurationSettingItem()
 
-			// Set app config key type
-			keyType := setting.AppConfigKeyType.ValueString()
-			switch keyType {
-			case "stringType":
-				keyTypeEnum := graphmodels.STRINGTYPE_MDMAPPCONFIGKEYTYPE
-				appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
-			case "integerType":
-				keyTypeEnum := graphmodels.INTEGERTYPE_MDMAPPCONFIGKEYTYPE
-				appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
-			case "realType":
-				keyTypeEnum := graphmodels.REALTYPE_MDMAPPCONFIGKEYTYPE
-				appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
-			case "booleanType":
-				keyTypeEnum := graphmodels.BOOLEANTYPE_MDMAPPCONFIGKEYTYPE
-				appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
-			case "tokenType":
-				keyTypeEnum := graphmodels.TOKENTYPE_MDMAPPCONFIGKEYTYPE
-				appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
+				// Set app config key
+				appConfigKey := setting.AppConfigKey.ValueString()
+				appConfigSetting.SetAppConfigKey(&appConfigKey)
+
+				// Set app config key type
+				keyType := setting.AppConfigKeyType.ValueString()
+				switch keyType {
+				case "stringType":
+					keyTypeEnum := graphmodels.STRINGTYPE_MDMAPPCONFIGKEYTYPE
+					appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
+				case "integerType":
+					keyTypeEnum := graphmodels.INTEGERTYPE_MDMAPPCONFIGKEYTYPE
+					appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
+				case "realType":
+					keyTypeEnum := graphmodels.REALTYPE_MDMAPPCONFIGKEYTYPE
+					appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
+				case "booleanType":
+					keyTypeEnum := graphmodels.BOOLEANTYPE_MDMAPPCONFIGKEYTYPE
+					appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
+				case "tokenType":
+					keyTypeEnum := graphmodels.TOKENTYPE_MDMAPPCONFIGKEYTYPE
+					appConfigSetting.SetAppConfigKeyType(&keyTypeEnum)
+				}
+
+				// Set app config key value
+				appConfigKeyValue := setting.AppConfigKeyValue.ValueString()
+				appConfigSetting.SetAppConfigKeyValue(&appConfigKeyValue)
+
+				settings = append(settings, appConfigSetting)
 			}
-
-			// Set app config key value
-			appConfigKeyValue := setting.AppConfigKeyValue.ValueString()
-			appConfigSetting.SetAppConfigKeyValue(&appConfigKeyValue)
-
-			settings = append(settings, appConfigSetting)
+			resource.SetSettings(settings)
 		}
-		resource.SetSettings(settings)
 	}
 
 	return resource, nil

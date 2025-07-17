@@ -46,15 +46,43 @@ func (r *IosMobileAppConfigurationResource) Create(ctx context.Context, req reso
 	MapRemoteResourceToTerraform(ctx, &object, resource)
 
 	// Handle assignments if provided
-	if len(object.Assignments) > 0 {
-		err = r.updateAssignments(ctx, object.ID.ValueString(), &object)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Error updating assignments",
-				fmt.Sprintf("Could not update assignments: %s", err.Error()),
-			)
-			return
+	if !object.Assignments.IsNull() && !object.Assignments.IsUnknown() {
+		var assignmentsList []ManagedDeviceMobileAppConfigurationAssignmentModel
+		object.Assignments.ElementsAs(ctx, &assignmentsList, false)
+
+		if len(assignmentsList) > 0 {
+			err = r.updateAssignments(ctx, object.ID.ValueString(), assignmentsList)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Error updating assignments",
+					fmt.Sprintf("Could not update assignments: %s", err.Error()),
+				)
+				return
+			}
 		}
+	}
+
+	// Re-read the resource to ensure we have the exact state from the API
+	createdResource, err := r.client.DeviceAppManagement().MobileAppConfigurations().ByManagedDeviceMobileAppConfigurationId(object.ID.ValueString()).Get(ctx, nil)
+	if err != nil {
+		errors.HandleGraphError(ctx, err, resp, "Read after Create", r.ReadPermissions)
+		return
+	}
+
+	MapRemoteResourceToTerraform(ctx, &object, createdResource)
+
+	// Always read assignments to get the current state
+	assignments, err := r.client.DeviceAppManagement().MobileAppConfigurations().ByManagedDeviceMobileAppConfigurationId(object.ID.ValueString()).Assignments().Get(ctx, nil)
+	if err != nil {
+		errors.HandleGraphError(ctx, err, resp, "Read assignments after Create", r.ReadPermissions)
+		return
+	}
+
+	if assignments != nil && assignments.GetValue() != nil {
+		MapRemoteAssignmentsToTerraform(ctx, &object, assignments.GetValue())
+	} else {
+		// Ensure assignments is set to empty list if no assignments exist
+		MapRemoteAssignmentsToTerraform(ctx, &object, nil)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
@@ -101,6 +129,9 @@ func (r *IosMobileAppConfigurationResource) Read(ctx context.Context, req resour
 
 	if assignments != nil && assignments.GetValue() != nil {
 		MapRemoteAssignmentsToTerraform(ctx, &object, assignments.GetValue())
+	} else {
+		// Ensure assignments is set to empty list if no assignments exist
+		MapRemoteAssignmentsToTerraform(ctx, &object, nil)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
@@ -144,13 +175,18 @@ func (r *IosMobileAppConfigurationResource) Update(ctx context.Context, req reso
 	}
 
 	// Handle assignments update
-	err = r.updateAssignments(ctx, object.ID.ValueString(), &object)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error updating assignments",
-			fmt.Sprintf("Could not update assignments: %s", err.Error()),
-		)
-		return
+	if !object.Assignments.IsNull() && !object.Assignments.IsUnknown() {
+		var assignmentsList []ManagedDeviceMobileAppConfigurationAssignmentModel
+		object.Assignments.ElementsAs(ctx, &assignmentsList, false)
+
+		err = r.updateAssignments(ctx, object.ID.ValueString(), assignmentsList)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error updating assignments",
+				fmt.Sprintf("Could not update assignments: %s", err.Error()),
+			)
+			return
+		}
 	}
 
 	// Read the updated resource
@@ -171,6 +207,9 @@ func (r *IosMobileAppConfigurationResource) Update(ctx context.Context, req reso
 
 	if assignments != nil && assignments.GetValue() != nil {
 		MapRemoteAssignmentsToTerraform(ctx, &object, assignments.GetValue())
+	} else {
+		// Ensure assignments is set to empty list if no assignments exist
+		MapRemoteAssignmentsToTerraform(ctx, &object, nil)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
@@ -208,7 +247,7 @@ func (r *IosMobileAppConfigurationResource) Delete(ctx context.Context, req reso
 }
 
 // updateAssignments handles updating assignments for the mobile app configuration
-func (r *IosMobileAppConfigurationResource) updateAssignments(ctx context.Context, configId string, object *IosMobileAppConfigurationResourceModel) error {
+func (r *IosMobileAppConfigurationResource) updateAssignments(ctx context.Context, configId string, assignments []ManagedDeviceMobileAppConfigurationAssignmentModel) error {
 	// First, get current assignments
 	currentAssignments, err := r.client.DeviceAppManagement().MobileAppConfigurations().ByManagedDeviceMobileAppConfigurationId(configId).Assignments().Get(ctx, nil)
 	if err != nil {
@@ -228,7 +267,7 @@ func (r *IosMobileAppConfigurationResource) updateAssignments(ctx context.Contex
 	}
 
 	// Create new assignments
-	for _, assignment := range object.Assignments {
+	for _, assignment := range assignments {
 		assignmentBody, err := constructAssignment(ctx, &assignment)
 		if err != nil {
 			return err

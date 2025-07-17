@@ -8,17 +8,17 @@ import (
 
 // IosMobileAppConfigurationResourceModel represents the Terraform resource model
 type IosMobileAppConfigurationResourceModel struct {
-	ID                   types.String                                         `tfsdk:"id"`
-	DisplayName          types.String                                         `tfsdk:"display_name"`
-	Description          types.String                                         `tfsdk:"description"`
-	Version              types.Int64                                          `tfsdk:"version"`
-	CreatedDateTime      types.String                                         `tfsdk:"created_date_time"`
-	LastModifiedDateTime types.String                                         `tfsdk:"last_modified_date_time"`
-	TargetedMobileApps   types.List                                           `tfsdk:"targeted_mobile_apps"`
-	EncodedSettingXml    types.String                                         `tfsdk:"encoded_setting_xml"`
-	Settings             []AppConfigurationSettingItemModel                   `tfsdk:"settings"`
-	Assignments          []ManagedDeviceMobileAppConfigurationAssignmentModel `tfsdk:"assignments"`
-	Timeouts             timeouts.Value                                       `tfsdk:"timeouts"`
+	ID                   types.String   `tfsdk:"id"`
+	DisplayName          types.String   `tfsdk:"display_name"`
+	Description          types.String   `tfsdk:"description"`
+	Version              types.Int64    `tfsdk:"version"`
+	CreatedDateTime      types.String   `tfsdk:"created_date_time"`
+	LastModifiedDateTime types.String   `tfsdk:"last_modified_date_time"`
+	TargetedMobileApps   types.List     `tfsdk:"targeted_mobile_apps"`
+	EncodedSettingXml    types.String   `tfsdk:"encoded_setting_xml"`
+	Settings             types.List     `tfsdk:"settings"`
+	Assignments          types.List     `tfsdk:"assignments"`
+	Timeouts             timeouts.Value `tfsdk:"timeouts"`
 }
 
 // AppConfigurationSettingItemModel represents an app configuration setting

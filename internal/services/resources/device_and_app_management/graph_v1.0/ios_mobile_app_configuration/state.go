@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -45,46 +46,67 @@ func MapRemoteResourceToTerraform(ctx context.Context, data *IosMobileAppConfigu
 	}
 
 	// Map encoded setting XML
-	if iosConfig.GetEncodedSettingXml() != nil {
-		data.EncodedSettingXml = types.StringValue(string(iosConfig.GetEncodedSettingXml()))
+	encodedXml := iosConfig.GetEncodedSettingXml()
+	if encodedXml != nil && len(encodedXml) > 0 {
+		data.EncodedSettingXml = types.StringValue(string(encodedXml))
 	} else {
 		data.EncodedSettingXml = types.StringNull()
 	}
 
 	// Map settings
 	if iosConfig.GetSettings() != nil && len(iosConfig.GetSettings()) > 0 {
-		data.Settings = make([]AppConfigurationSettingItemModel, 0, len(iosConfig.GetSettings()))
+		settingsList := make([]attr.Value, 0, len(iosConfig.GetSettings()))
 		for _, setting := range iosConfig.GetSettings() {
-			settingModel := AppConfigurationSettingItemModel{
-				AppConfigKey:      convert.GraphToFrameworkString(setting.GetAppConfigKey()),
-				AppConfigKeyValue: convert.GraphToFrameworkString(setting.GetAppConfigKeyValue()),
-			}
-
 			// Map key type
+			var keyTypeStr string
 			if setting.GetAppConfigKeyType() != nil {
 				keyType := *setting.GetAppConfigKeyType()
 				switch keyType {
 				case graphmodels.STRINGTYPE_MDMAPPCONFIGKEYTYPE:
-					settingModel.AppConfigKeyType = types.StringValue("stringType")
+					keyTypeStr = "stringType"
 				case graphmodels.INTEGERTYPE_MDMAPPCONFIGKEYTYPE:
-					settingModel.AppConfigKeyType = types.StringValue("integerType")
+					keyTypeStr = "integerType"
 				case graphmodels.REALTYPE_MDMAPPCONFIGKEYTYPE:
-					settingModel.AppConfigKeyType = types.StringValue("realType")
+					keyTypeStr = "realType"
 				case graphmodels.BOOLEANTYPE_MDMAPPCONFIGKEYTYPE:
-					settingModel.AppConfigKeyType = types.StringValue("booleanType")
+					keyTypeStr = "booleanType"
 				case graphmodels.TOKENTYPE_MDMAPPCONFIGKEYTYPE:
-					settingModel.AppConfigKeyType = types.StringValue("tokenType")
-				default:
-					settingModel.AppConfigKeyType = types.StringNull()
+					keyTypeStr = "tokenType"
 				}
-			} else {
-				settingModel.AppConfigKeyType = types.StringNull()
 			}
 
-			data.Settings = append(data.Settings, settingModel)
+			settingObj, _ := types.ObjectValue(
+				map[string]attr.Type{
+					"app_config_key":       types.StringType,
+					"app_config_key_type":  types.StringType,
+					"app_config_key_value": types.StringType,
+				},
+				map[string]attr.Value{
+					"app_config_key":       convert.GraphToFrameworkString(setting.GetAppConfigKey()),
+					"app_config_key_type":  types.StringValue(keyTypeStr),
+					"app_config_key_value": convert.GraphToFrameworkString(setting.GetAppConfigKeyValue()),
+				},
+			)
+			settingsList = append(settingsList, settingObj)
 		}
+
+		settingsListType := types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"app_config_key":       types.StringType,
+				"app_config_key_type":  types.StringType,
+				"app_config_key_value": types.StringType,
+			},
+		}
+		data.Settings, _ = types.ListValue(settingsListType, settingsList)
 	} else {
-		data.Settings = []AppConfigurationSettingItemModel{}
+		// Set to null when there are no settings from the remote resource
+		data.Settings = types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"app_config_key":       types.StringType,
+				"app_config_key_type":  types.StringType,
+				"app_config_key_value": types.StringType,
+			},
+		})
 	}
 
 	tflog.Debug(ctx, "Finished mapping remote iOS mobile app configuration to Terraform state")
@@ -93,49 +115,93 @@ func MapRemoteResourceToTerraform(ctx context.Context, data *IosMobileAppConfigu
 // MapRemoteAssignmentsToTerraform maps remote assignments to Terraform state
 func MapRemoteAssignmentsToTerraform(ctx context.Context, data *IosMobileAppConfigurationResourceModel, assignments []graphmodels.ManagedDeviceMobileAppConfigurationAssignmentable) {
 	if assignments == nil || len(assignments) == 0 {
-		data.Assignments = []ManagedDeviceMobileAppConfigurationAssignmentModel{}
+		data.Assignments = types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"id": types.StringType,
+				"target": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"odata_type": types.StringType,
+						"group_id":   types.StringType,
+					},
+				},
+			},
+		})
 		return
 	}
 
 	tflog.Debug(ctx, "Starting to map remote assignments to Terraform state")
 
-	data.Assignments = make([]ManagedDeviceMobileAppConfigurationAssignmentModel, 0, len(assignments))
+	assignmentsList := make([]attr.Value, 0, len(assignments))
 	for _, assignment := range assignments {
-		assignmentModel := ManagedDeviceMobileAppConfigurationAssignmentModel{
-			ID: convert.GraphToFrameworkString(assignment.GetId()),
-		}
+		var targetValue attr.Value
 
 		// Map target
 		if assignment.GetTarget() != nil {
 			target := assignment.GetTarget()
-			targetModel := DeviceAndAppManagementAssignmentTargetModel{}
+			var odataType string
+			var groupId types.String = types.StringNull()
 
 			// Determine the type and map accordingly
 			switch target.(type) {
 			case graphmodels.AllLicensedUsersAssignmentTargetable:
-				targetModel.ODataType = types.StringValue("#microsoft.graph.allLicensedUsersAssignmentTarget")
+				odataType = "#microsoft.graph.allLicensedUsersAssignmentTarget"
 
 			case graphmodels.AllDevicesAssignmentTargetable:
-				targetModel.ODataType = types.StringValue("#microsoft.graph.allDevicesAssignmentTarget")
+				odataType = "#microsoft.graph.allDevicesAssignmentTarget"
 
 			case graphmodels.GroupAssignmentTargetable:
-				targetModel.ODataType = types.StringValue("#microsoft.graph.groupAssignmentTarget")
+				odataType = "#microsoft.graph.groupAssignmentTarget"
 				groupTarget := target.(graphmodels.GroupAssignmentTargetable)
-				targetModel.GroupId = convert.GraphToFrameworkString(groupTarget.GetGroupId())
-				// Note: Filter settings are not available in v1.0 API
+				groupId = convert.GraphToFrameworkString(groupTarget.GetGroupId())
 
 			case graphmodels.ExclusionGroupAssignmentTargetable:
-				targetModel.ODataType = types.StringValue("#microsoft.graph.exclusionGroupAssignmentTarget")
+				odataType = "#microsoft.graph.exclusionGroupAssignmentTarget"
 				exclusionTarget := target.(graphmodels.ExclusionGroupAssignmentTargetable)
-				targetModel.GroupId = convert.GraphToFrameworkString(exclusionTarget.GetGroupId())
-				// Note: Filter settings are not available in v1.0 API
+				groupId = convert.GraphToFrameworkString(exclusionTarget.GetGroupId())
 			}
 
-			assignmentModel.Target = targetModel
+			targetValue, _ = types.ObjectValue(
+				map[string]attr.Type{
+					"odata_type": types.StringType,
+					"group_id":   types.StringType,
+				},
+				map[string]attr.Value{
+					"odata_type": types.StringValue(odataType),
+					"group_id":   groupId,
+				},
+			)
 		}
 
-		data.Assignments = append(data.Assignments, assignmentModel)
+		assignmentObj, _ := types.ObjectValue(
+			map[string]attr.Type{
+				"id": types.StringType,
+				"target": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"odata_type": types.StringType,
+						"group_id":   types.StringType,
+					},
+				},
+			},
+			map[string]attr.Value{
+				"id":     convert.GraphToFrameworkString(assignment.GetId()),
+				"target": targetValue,
+			},
+		)
+		assignmentsList = append(assignmentsList, assignmentObj)
 	}
+
+	assignmentsListType := types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"id": types.StringType,
+			"target": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"odata_type": types.StringType,
+					"group_id":   types.StringType,
+				},
+			},
+		},
+	}
+	data.Assignments, _ = types.ListValue(assignmentsListType, assignmentsList)
 
 	tflog.Debug(ctx, "Finished mapping remote assignments to Terraform state")
 }

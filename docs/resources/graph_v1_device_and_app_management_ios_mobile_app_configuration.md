@@ -55,23 +55,26 @@ resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configu
   display_name = "iOS Outlook Configuration"
   description  = "Configuration settings for Microsoft Outlook on iOS"
   
-  settings {
-    app_config_key       = "com.microsoft.outlook.EmailProfile.EmailAddress"
-    app_config_key_type  = "stringType"
-    app_config_key_value = "{{mail}}"
-  }
+  # Target Microsoft Outlook app
+  targeted_mobile_apps = ["0c0a76a8-5e99-479f-af2f-9fa34a74f4b7"]
   
-  settings {
-    app_config_key       = "com.microsoft.outlook.EmailProfile.EmailAccountName"
-    app_config_key_type  = "stringType"
-    app_config_key_value = "{{displayName}}"
-  }
-  
-  settings {
-    app_config_key       = "com.microsoft.outlook.EmailProfile.RequireAuthentication"
-    app_config_key_type  = "booleanType"
-    app_config_key_value = "true"
-  }
+  settings = [
+    {
+      app_config_key       = "com.microsoft.outlook.EmailProfile.EmailAddress"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{mail}}"
+    },
+    {
+      app_config_key       = "com.microsoft.outlook.EmailProfile.EmailAccountName"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{displayName}}"
+    },
+    {
+      app_config_key       = "com.microsoft.outlook.EmailProfile.RequireAuthentication"
+      app_config_key_type  = "booleanType"
+      app_config_key_value = "true"
+    }
+  ]
 }
 ```
 
@@ -82,11 +85,16 @@ resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configu
   display_name = "iOS App Configuration with Assignments"
   description  = "Configuration with group assignments"
   
-  settings {
-    app_config_key       = "server_url"
-    app_config_key_type  = "stringType"
-    app_config_key_value = "https://api.company.com"
-  }
+  # Target specific mobile apps
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+  
+  settings = [
+    {
+      app_config_key       = "server_url"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "https://api.company.com"
+    }
+  ]
   
   # Assign to all licensed users
   assignments {
@@ -120,6 +128,9 @@ resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configu
   display_name = "iOS App Configuration with XML"
   description  = "Configuration using encoded XML settings"
   
+  # Target specific mobile apps
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+  
   # Base64 encoded configuration XML
   encoded_setting_xml = base64encode(<<-EOT
     <dict>
@@ -130,6 +141,71 @@ resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configu
     </dict>
   EOT
   )
+}
+```
+
+### Kiosk Configuration Example
+
+```terraform
+resource "microsoft365_graph_v1_device_and_app_management_ios_mobile_app_configuration" "kiosk" {
+  display_name = "Kiosk Configuration"
+  description  = "Configuration settings for kiosk iOS app"
+  
+  # Target specific kiosk mobile app
+  targeted_mobile_apps = ["12345678-1234-1234-1234-123456789012"]
+  
+  settings = [
+    {
+      app_config_key       = "KIOSK_RESTAURANT_SLUG"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "scottsdale-quarter"
+    },
+    {
+      app_config_key       = "GRAPHQL_ENDPOINT"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "https://order.example.com/graphql"
+    },
+    {
+      app_config_key       = "KIOSK_QB_URL"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "http://172.16.1.2:3051/"
+    },
+    {
+      app_config_key       = "KIOSK_DEVICE_AUTH_URL"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "https://auth.example.com/oauth2/token?grant_type=client_credentials"
+    },
+    {
+      app_config_key       = "KIOSK_DEVICE_AUTH_USERNAME"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "client_id_placeholder"
+    },
+    {
+      app_config_key       = "KIOSK_DEVICE_AUTH_PASSWORD"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "client_secret_placeholder"
+    },
+    {
+      app_config_key       = "KIOSK_STATION_ID"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "001"
+    },
+    {
+      app_config_key       = "KIOSK_IS_EMPLOYEE_KIOSK"
+      app_config_key_type  = "booleanType"
+      app_config_key_value = "false"
+    },
+    {
+      app_config_key       = "INTUNE_DEVICE_ID"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{deviceid}}"
+    },
+    {
+      app_config_key       = "IPAD_SERIAL_NUMBER"
+      app_config_key_type  = "stringType"
+      app_config_key_value = "{{serialnumber}}"
+    }
+  ]
 }
 ```
 
@@ -202,9 +278,10 @@ Optional:
 
 - **App Configuration Keys**: The specific configuration keys and their formats depend on the target application. Consult the application's documentation for supported configuration keys.
 - **Configuration Methods**: You can use either the `settings` attribute for structured configuration or `encoded_setting_xml` for XML-based configuration, but not both.
-- **Token Support**: Configuration values can include tokens like `{{mail}}`, `{{username}}`, `{{displayName}}` which are replaced with user-specific values at runtime.
+- **Token Support**: Configuration values can include tokens like `{{mail}}`, `{{username}}`, `{{displayName}}`, `{{deviceid}}`, `{{serialnumber}}` which are replaced with user or device-specific values at runtime.
 - **Assignment Order**: Assignments are processed in order. Exclusion groups take precedence over inclusion groups.
 - **Target Apps**: The `targeted_mobile_apps` attribute should contain the app IDs of the managed apps this configuration applies to.
+- **Settings Requirement**: When using the `settings` attribute, the `targeted_mobile_apps` attribute is required and must contain at least one app ID.
 
 ## Import
 

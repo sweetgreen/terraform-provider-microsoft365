@@ -117,10 +117,15 @@ func (r *IosMobileAppConfigurationResource) Schema(ctx context.Context, req reso
 			"encoded_setting_xml": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
+				Computed:            true,
 				MarkdownDescription: "Base64 encoded configuration XML.",
+				PlanModifiers: []planmodifier.String{
+					planmodifiers.UseStateForUnknownString(),
+				},
 			},
 			"settings": schema.ListNestedAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "iOS app configuration settings.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -150,6 +155,7 @@ func (r *IosMobileAppConfigurationResource) Schema(ctx context.Context, req reso
 			},
 			"assignments": schema.ListNestedAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "The list of assignments for this iOS mobile app configuration.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
