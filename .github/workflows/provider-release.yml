@@ -21,7 +21,7 @@ permissions:
 jobs:
   pre-release-checks:
     name: '🚦 Pre-release Validation'
-    runs-on: ubuntu-latest-4-cores  # 4-core ARM64 for validation checks
+    runs-on: ubuntu-large  # Self-hosted runner for validation checks
     timeout-minutes: 30  # Reduced timeout for pre-release validation
     steps:
     - name: Harden Runner

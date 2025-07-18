@@ -17,7 +17,7 @@ permissions:
 jobs:
   golint:
     name: '✨ Run golangci-lint'
-    runs-on: ubuntu-latest-4-cores  # 4-core ARM64 for faster linting
+    runs-on: ubuntu-large  # Self-hosted runner for linting
 
     steps:
       - name: Harden Runner

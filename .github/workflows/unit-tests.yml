@@ -13,7 +13,7 @@ on:
 jobs:
   test:
     name: '🧪 Run Go Unit Tests'
-    runs-on: ubuntu-latest-4-cores  # 4-core ARM64 for parallel unit tests
+    runs-on: ubuntu-large  # Self-hosted runner for unit tests
     timeout-minutes: 60  # Reduced timeout for unit tests
     steps:
       - name: Harden Runner
