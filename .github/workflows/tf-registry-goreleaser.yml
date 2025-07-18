@@ -1,6 +1,6 @@
 # Updated to use self-hosted runners for reliable ARM-compatible execution
 # Replaces ubuntu-latest-8-cores which may not be available
-name: Terraform Registry with goreleaser
+name: Provider Release with goreleaser
 
 permissions:
   contents: write

@@ -44,9 +44,41 @@ The Community Terraform Provider for Microsoft 365 empowers workplace teams and 
 - **Guardrailed Deployments**  
   Implement automated checks and guardrails in CI/CD pipelines to prevent misconfiguration and enforce best practices, reducing risk and improving governance for Microsoft 365 administration.
 
+## Installation
+
+This provider is distributed via GitHub Releases. To install:
+
+### Manual Installation
+
+1. Download the appropriate binary for your platform from the [Releases](https://github.com/sweetgreen/terraform-provider-microsoft365/releases) page
+2. Extract the archive
+3. Move the binary to the Terraform plugins directory:
+   ```bash
+   # macOS/Linux
+   mkdir -p ~/.terraform.d/plugins/sweetgreen.com/sweetgreen/microsoft365/0.22.1/darwin_arm64/
+   mv terraform-provider-microsoft365_v0.22.1 ~/.terraform.d/plugins/sweetgreen.com/sweetgreen/microsoft365/0.22.1/darwin_arm64/
+   ```
+
+### Usage in Terraform
+
+```hcl
+terraform {
+  required_providers {
+    microsoft365 = {
+      source = "sweetgreen.com/sweetgreen/microsoft365"
+      version = "0.22.1"
+    }
+  }
+}
+
+provider "microsoft365" {
+  # Configuration options
+}
+```
+
 ## Getting Started
 
-Please refer to the [Getting Started](https://registry.terraform.io/providers/deploymenttheory/microsoft365/latest/docs) guide in the terraform registry for more information on how to get started.
+For detailed documentation on provider configuration and resources, see the [docs](./docs) directory.
 
 ## Provider Key Features
 
