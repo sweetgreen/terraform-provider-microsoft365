@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 // TestAccUserLicenseAssignmentResource_Create_Minimal tests creating a license assignment with minimal configuration

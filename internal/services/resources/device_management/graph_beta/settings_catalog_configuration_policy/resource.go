@@ -3,12 +3,6 @@ package graphBetaSettingsCatalogConfigurationPolicy
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
-	commonschemagraphbeta "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
-	customValidator "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -19,6 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	planmodifiers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
+	commonschemagraphbeta "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
+	customValidator "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/validators"
 )
 
 const (
@@ -92,7 +92,7 @@ func (r *SettingsCatalogResource) Schema(ctx context.Context, req resource.Schem
 		MarkdownDescription: "Manages Intune Settings Catalog policies using the `/deviceManagement/configurationPolicies` endpoint. " +
 			"Settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, " +
 			"simplified interface that replaces traditional device configuration profiles. You can simplify the hcl creation process by using the " +
-			"`Export-IntuneSettingsCatalogConfigurationByIdToHCL.ps1` [https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/powershell/Export-IntuneSettingsCatalogConfigurationByIdToHCL.ps1] " +
+			"`Export-IntuneSettingsCatalogConfigurationByIdToHCL.ps1` [https://github.com/sweetgreen/terraform-provider-microsoft365/blob/main/scripts/powershell/Export-IntuneSettingsCatalogConfigurationByIdToHCL.ps1] " +
 			"script to export the settings catalog configuration by ID. This will build the hcl representation of the settings catalog configuration automatically.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

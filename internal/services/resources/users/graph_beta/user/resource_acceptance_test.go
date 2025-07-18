@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 // TestAccUserResource_Create_Minimal tests creating a user with minimal configuration

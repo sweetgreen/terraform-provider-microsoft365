@@ -4,11 +4,11 @@ import (
 	"context"
 	"sort"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 // StateConfigurationPolicyAssignment maps the remote policy assignment state to the Terraform state

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg/xar"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg/xar"
 )
 
 // Field defines a field to be extracted

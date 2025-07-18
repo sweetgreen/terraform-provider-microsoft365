@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
 	msgraphsdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
 )
 
 // ValidateMobileAppAssignmentSettings validates the mobile app assignment settings across all assignments

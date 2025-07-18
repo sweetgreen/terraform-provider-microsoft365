@@ -1,8 +1,8 @@
 package graphBetaWindowsQualityUpdateExpeditePolicy
 
 import (
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // MapRemoteStateToDataSource maps a Windows Quality Update Expedite Policy to a model

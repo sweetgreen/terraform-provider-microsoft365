@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks/factories"
 	"github.com/jarcoal/httpmock"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks/factories"
 )
 
 // Global variable to track if update has happened

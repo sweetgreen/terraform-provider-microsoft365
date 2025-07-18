@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
-	utilityWindowsMSIAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/windows_msi_app_metadata"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/common"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
+	utilityWindowsMSIAppMetadata "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/utility/windows_msi_app_metadata"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/common"
 )
 
 const (

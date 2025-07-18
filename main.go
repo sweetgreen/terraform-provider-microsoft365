@@ -4,9 +4,9 @@ import (
 	"context"
 	"flag"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/provider"
 )
 
 var (

@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	sharedConstructors "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_and_app_management"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	helpers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	sharedConstructors "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_and_app_management"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	helpers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
 )
 
 // constructResource maps the Terraform schema to the SDK model

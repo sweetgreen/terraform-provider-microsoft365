@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	localattr "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/attr"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
+	localattr "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/attr"
 )
 
 func TestObjectValue(t *testing.T) {

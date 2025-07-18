@@ -3,13 +3,6 @@ package graphBetaEndpointPrivilegeManagement
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
-	commonschemagraphbeta "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
-	customValidator "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validators"
-	sharedValidators "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validators/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -20,6 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	planmodifiers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
+	commonschemagraphbeta "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
+	customValidator "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/validators"
+	sharedValidators "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/validators/graph_beta/device_management"
 )
 
 const (
@@ -124,7 +124,7 @@ func (r *EndpointPrivilegeManagementResource) Schema(ctx context.Context, req re
 				Required: true,
 				MarkdownDescription: "Endpoint Privilege Management Policy settings defined as a JSON string. Please provide a valid JSON-encoded settings structure. " +
 					"This can either be extracted from an existing policy using the Intune gui `export JSON` functionality if supported, via a script such as this powershell script." +
-					" [ExportSettingsCatalogConfigurationById](https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/ExportSettingsCatalogConfigurationById.ps1) " +
+					" [ExportSettingsCatalogConfigurationById](https://github.com/sweetgreen/terraform-provider-microsoft365/blob/main/scripts/ExportSettingsCatalogConfigurationById.ps1) " +
 					"or created from scratch. The JSON structure should match the graph schema of the settings catalog. Please look at the " +
 					"terraform documentation for the Endpoint Privilege Management Policy for examples and how to correctly format the HCL.\n\n" +
 					"A correctly formatted field in the HCL should begin and end like this:\n" +

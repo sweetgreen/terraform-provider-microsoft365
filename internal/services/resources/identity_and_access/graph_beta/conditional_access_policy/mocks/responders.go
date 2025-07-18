@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	commonMocks "github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
 	"github.com/google/uuid"
 	"github.com/jarcoal/httpmock"
+	commonMocks "github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 // mockState tracks the state of resources for consistent responses

@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
-	localMocks "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/jarcoal/httpmock"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
+	localMocks "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata/mocks"
 )
 
 // Helper functions to return the test configurations by reading from files

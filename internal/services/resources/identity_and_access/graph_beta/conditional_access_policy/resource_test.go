@@ -8,8 +8,8 @@ package graphBetaConditionalAccessPolicy_test
 // 	"strings"
 // 	"testing"
 
-// 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
-// 	localMocks "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/identity_and_access/graph_beta/conditional_access_policy/mocks"
+// 	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
+// 	localMocks "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/identity_and_access/graph_beta/conditional_access_policy/mocks"
 // 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 // 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 // 	"github.com/jarcoal/httpmock"

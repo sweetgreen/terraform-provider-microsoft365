@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 func constructResource(ctx context.Context, data *CloudPcOrganizationSettingsResourceModel) (*models.CloudPcOrganizationSettings, error) {

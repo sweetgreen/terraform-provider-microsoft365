@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
 )
 
 /* tenant_id and client_id schema validator */

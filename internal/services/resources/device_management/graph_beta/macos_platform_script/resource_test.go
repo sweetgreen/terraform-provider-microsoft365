@@ -6,11 +6,11 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
-	localMocks "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/device_management/graph_beta/macos_platform_script/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/jarcoal/httpmock"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
+	localMocks "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/device_management/graph_beta/macos_platform_script/mocks"
 )
 
 // Common test configurations that can be used by both unit and acceptance tests

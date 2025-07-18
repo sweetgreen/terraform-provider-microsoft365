@@ -3,7 +3,7 @@ package provider
 import (
 	"context"
 
-	//windowsAutopilotDeviceCSVImport "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/ephemeral/windows_autopilot_device_csv_import"
+	//windowsAutopilotDeviceCSVImport "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/ephemeral/windows_autopilot_device_csv_import"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 )

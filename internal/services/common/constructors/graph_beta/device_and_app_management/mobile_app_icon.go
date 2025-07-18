@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	helpers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
-	download "github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/common"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	helpers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
+	download "github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/common"
 )
 
 // ConstructMobileAppIcon handles the app icon processing, including format detection and conversion to PNG

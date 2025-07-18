@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
 )
 
 // SetCloudConstants returns the OAuth authority URL, Graph API scope, and Graph API service root based on the provided cloud type.

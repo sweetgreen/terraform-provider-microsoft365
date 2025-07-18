@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 // TestAccTenantWideGroupSettingsResource_Create_Minimal tests creating tenant-wide group settings with minimal configuration

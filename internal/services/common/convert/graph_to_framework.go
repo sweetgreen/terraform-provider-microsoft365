@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoft/kiota-abstractions-go/serialization"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
 )
 
 // ============================================================================
