@@ -85,7 +85,7 @@ jobs:
       git-ref: ${{ github.event.inputs.release_version || github.ref }}
 
   release-notes:
-    runs-on: ubuntu-latest  # Standard runner for lightweight text processing
+    runs-on: tiny  # Standard runner for lightweight text processing
     needs: [terraform-provider-release]
     steps:
 
