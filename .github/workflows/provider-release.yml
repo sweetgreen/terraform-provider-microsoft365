@@ -21,7 +21,7 @@ permissions:
 jobs:
   pre-release-checks:
     name: '🚦 Pre-release Validation'
-    runs-on: ubuntu-large  # Self-hosted runner for validation checks
+    runs-on: ubuntu-latest
     timeout-minutes: 30  # Reduced timeout for pre-release validation
     steps:
     - name: Harden Runner
@@ -85,7 +85,7 @@ jobs:
       git-ref: ${{ github.event.inputs.release_version || github.ref }}
 
   release-notes:
-    runs-on: tiny  # Standard runner for lightweight text processing
+    runs-on: ubuntu-latest
     needs: [terraform-provider-release]
     steps:
 

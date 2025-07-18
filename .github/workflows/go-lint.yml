@@ -17,7 +17,7 @@ permissions:
 jobs:
   golint:
     name: '✨ Run golangci-lint'
-    runs-on: ubuntu-large  # Self-hosted runner for linting
+    runs-on: ubuntu-latest
 
     steps:
       - name: Harden Runner

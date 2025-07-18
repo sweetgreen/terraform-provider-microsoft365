@@ -10,7 +10,7 @@ permissions:
 jobs:
   auto-merge:
     name: '🤖 Auto-Merge Dependabot'
-    runs-on: tiny
+    runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     steps:
 

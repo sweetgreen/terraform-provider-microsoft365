@@ -10,7 +10,7 @@ on:
 jobs:
   validate-pr-title:
     name: '✅ Validate PR Title'
-    runs-on: tiny
+    runs-on: ubuntu-latest
     steps:
       - name: Check PR Title
         run: |

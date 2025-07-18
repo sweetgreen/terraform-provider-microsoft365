@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   save-artifacts:
-    runs-on: tiny
+    runs-on: ubuntu-latest
     steps:
       - shell: bash
         run: |

@@ -17,7 +17,7 @@ env:
 jobs:
   extract-graph-metadata:
     name: '🔄 Extract Graph Metadata'
-    runs-on: ubuntu-large  # Self-hosted runner for Docker builds
+    runs-on: ubuntu-latest
     steps:
 
     - name: Harden Runner

@@ -17,7 +17,7 @@ permissions:
 jobs:
   provider-docs:
     name: '📚 Generate Go and TF Provider Docs'
-    runs-on: tiny  # Standard runner for documentation generation
+    runs-on: ubuntu-latest  # Standard runner for documentation generation
     steps:
 
     - name: Harden Runner

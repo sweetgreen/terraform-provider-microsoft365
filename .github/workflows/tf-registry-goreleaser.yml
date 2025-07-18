@@ -40,7 +40,7 @@ on:
 
 jobs:
   Release:
-    runs-on: ubuntu-xlarge  # Self-hosted runner for reliable execution
+    runs-on: ubuntu-latest
     timeout-minutes: 120  # Extended timeout for large builds with parallelism
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

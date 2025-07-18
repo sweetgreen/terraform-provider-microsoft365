@@ -7,7 +7,7 @@ permissions:
 jobs:
   dependency-review:
     name: '🔎 Dependency Review'
-    runs-on: tiny
+    runs-on: ubuntu-latest
     steps:
 
       - name: Harden Runner
