@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.22.1-alpha...v0.23.0-alpha) (2025-07-18)
+
+
+### Features
+
+* remove Terraform Registry publishing, use GitHub releases only ([a6fb602](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a6fb6026086f31dadf407d35c622d8a08f71734a))
+
 ## [0.22.1-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.22.0-alpha...v0.22.1-alpha) (2025-07-18)
 
 
