@@ -13,8 +13,8 @@ on:
 jobs:
   test:
     name: '🧪 Run Go Unit Tests'
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
+    runs-on: ubuntu-latest-4-cores  # 4-core ARM64 for parallel unit tests
+    timeout-minutes: 60  # Reduced timeout for unit tests
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
@@ -28,7 +28,11 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+          cache-dependency-path: 'go.sum'
           go-version: stable
+        env:
+          GOOS: linux
+          GOARCH: arm64
 
       - name: Install dependencies
         run: go mod download

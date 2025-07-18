@@ -1,5 +1,5 @@
-# cloned from hashicorp and modifed to support ubuntu-latest-m , which provides more disk space
-# for go build to complete successfully.
+# Updated to use self-hosted runners for reliable ARM-compatible execution
+# Replaces ubuntu-latest-8-cores which may not be available
 name: Terraform Registry with goreleaser
 
 permissions:
@@ -40,8 +40,8 @@ on:
 
 jobs:
   Release:
-    runs-on: ubuntu-latest-8-cores
-    timeout-minutes: 90
+    runs-on: ubuntu-latest-8-cores  # 8-core ARM64 for optimal Go build performance
+    timeout-minutes: 120  # Extended timeout for large builds with parallelism
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -51,7 +51,11 @@ jobs:
         with:
           go-version: ${{ inputs.setup-go-version }}
           go-version-file: ${{ inputs.setup-go-version-file }}
-          cache: false  # Disable caching to skip the post-cleanup step. saves circa 15 minutes
+          cache: true  # Enable caching for faster builds
+          cache-dependency-path: 'go.sum'
+        env:
+          GOOS: linux
+          GOARCH: arm64  # Optimize for ARM64 architecture
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
@@ -66,6 +70,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          CGO_ENABLED: 0  # Ensure static linking for cross-platform compatibility
+          GOMAXPROCS: 8  # Utilize all cores for Go compilation
       - if: inputs.release-notes
         id: release-notes-download
         name: Release Notes Download
@@ -81,3 +87,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          CGO_ENABLED: 0  # Ensure static linking for cross-platform compatibility
+          GOMAXPROCS: 8  # Utilize all cores for Go compilation

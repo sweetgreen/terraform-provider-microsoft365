@@ -21,7 +21,7 @@ permissions:
 jobs:
   pre-release-checks:
     name: '🚦 Pre-release Validation'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-xlarge
     timeout-minutes: 60
     steps:
     - name: Harden Runner
@@ -78,7 +78,7 @@ jobs:
       git-ref: ${{ github.event.inputs.release_version || github.ref }}
 
   release-notes:
-    runs-on: ubuntu-latest
+    runs-on: tiny
     needs: [terraform-provider-release]
     steps:
 
