@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.21.7-alpha...v0.22.0-alpha) (2025-07-18)
+
+
+### Features
+
+* complete self-hosted runner implementation ([20f2959](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/20f2959341caafae9e96d17ec3b9689362392bc5))
+
+
+### Reverts
+
+* switch back to GitHub-hosted runners ([fb42719](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/fb4271997d1403abd95ebc47bea892022b74e00d))
+
 ## [0.21.3-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.21.2-alpha...v0.21.3-alpha) (2025-07-16)
 
 
