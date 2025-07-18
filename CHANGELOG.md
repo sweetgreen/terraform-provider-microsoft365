@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.1-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.22.0-alpha...v0.22.1-alpha) (2025-07-18)
+
+
+### Bug Fixes
+
+* reduce goreleaser parallelism for GitHub-hosted runners ([ffe957c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ffe957c3ff35fde6b6097d28a151f1fb7f10e281))
+
 ## [0.22.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.21.7-alpha...v0.22.0-alpha) (2025-07-18)
 
 
