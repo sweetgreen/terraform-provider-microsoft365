@@ -10,11 +10,16 @@ builds:
       # usage by users in CI/CD systems like Terraform Cloud where
       # they are unable to install libraries.
       - CGO_ENABLED=0
+      # Optimize for multi-core ARM64 builds
+      - GOMAXPROCS=8
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
+      - -buildmode=exe
     ldflags:
       - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+    # Optimize build performance for ARM64
+    builder: 'go'
     goos:
     - freebsd
     - linux

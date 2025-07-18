@@ -17,7 +17,7 @@ permissions:
 jobs:
   provider-docs:
     name: '📚 Generate Go and TF Provider Docs'
-    runs-on: tiny
+    runs-on: ubuntu-latest  # Standard runner for documentation generation
     steps:
 
     - name: Harden Runner
@@ -31,6 +31,7 @@ jobs:
     - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
       with:
         cache: true
+        cache-dependency-path: 'go.sum'
         go-version-file: 'go.mod'
 
     - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # 3.1.2
