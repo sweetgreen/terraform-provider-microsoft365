@@ -1,8 +1,8 @@
 package graphBetaMacosCustomAttributeScriptAssignment_test
 
 import (
-	_ "embed"
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
@@ -24,13 +24,22 @@ provider "microsoft365" {
 }
 `
 
-var (
-	//go:embed mocks/terraform/resource_minimal.tf
-	testMinimalResource string
+// Helper functions to return the test configurations by reading from files
+func testConfigMinimal() string {
+	content, err := os.ReadFile(filepath.Join("mocks", "terraform", "resource_minimal.tf"))
+	if err != nil {
+		return ""
+	}
+	return string(content)
+}
 
-	//go:embed mocks/terraform/resource_maximal.tf
-	testMaximalResource string
-)
+func testConfigMaximal() string {
+	content, err := os.ReadFile(filepath.Join("mocks", "terraform", "resource_maximal.tf"))
+	if err != nil {
+		return ""
+	}
+	return string(content)
+}
 
 // setupMockEnvironment initializes the HTTP mock environment for testing
 func setupMockEnvironment() {
@@ -196,7 +205,7 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MinimalConfig(t *testi
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: unitTestProviderConfig + testMinimalResource,
+				Config: unitTestProviderConfig + testConfigMinimal(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_custom_attribute_script_assignment.test_minimal", "macos_custom_attribute_script_id", "00000000-0000-0000-0000-000000000002"),
 					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_custom_attribute_script_assignment.test_minimal", "target.target_type", "allDevices"),
@@ -216,7 +225,7 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MaximalConfig(t *testi
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: unitTestProviderConfig + testMaximalResource,
+				Config: unitTestProviderConfig + testConfigMaximal(),
 				Check: resource.ComposeTestCheckFunc(
 					// Check first assignment
 					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_custom_attribute_script_assignment.test_maximal", "macos_custom_attribute_script_id", "00000000-0000-0000-0000-000000000004"),
