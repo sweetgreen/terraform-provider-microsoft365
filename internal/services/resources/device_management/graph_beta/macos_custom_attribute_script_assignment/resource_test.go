@@ -90,7 +90,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_Create(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -119,7 +118,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_CreateWithGroup(t *tes
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -150,7 +148,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_CreateWithFilter(t *te
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -185,7 +182,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_Update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -225,7 +221,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MinimalConfig(t *testi
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + testConfigMinimal(),
@@ -247,7 +242,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MaximalConfig(t *testi
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + testConfigMaximal(),
@@ -279,7 +273,6 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_ErrorHandling(t *testi
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `

@@ -116,7 +116,6 @@ func setupMockEnvironment(t *testing.T) (*mocks.Mocks, *localMocks.MacosPlatform
 func createTestResourceConfig() resource.TestCase {
 	return resource.TestCase{
 		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
-		Timeout:                  60 * time.Second, // Set maximum test timeout to 60 seconds
 	}
 }
 
@@ -238,7 +237,7 @@ func TestUnitMacosPlatformScriptAssignmentResource_Update_MinimalToMaximal(t *te
 // TestUnitMacosPlatformScriptAssignmentResource_Delete tests the deletion of a script assignment
 func TestUnitMacosPlatformScriptAssignmentResource_Delete(t *testing.T) {
 	// Set up mock environment
-	_, _ = setupMockEnvironment()
+	_, _ = setupMockEnvironment(t)
 	defer httpmock.DeactivateAndReset()
 
 	// Set up the test environment
