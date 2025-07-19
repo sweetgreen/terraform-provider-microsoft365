@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
