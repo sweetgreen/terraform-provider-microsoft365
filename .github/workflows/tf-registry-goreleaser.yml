@@ -1,5 +1,5 @@
-# Updated to use self-hosted runners for reliable ARM-compatible execution
-# Replaces ubuntu-latest-8-cores which may not be available
+# Based on deploymenttheory/terraform-provider-microsoft365 working configuration
+# Uses large Windows runner with more disk space for successful Go builds
 name: Provider Release with goreleaser
 
 permissions:
@@ -40,35 +40,19 @@ on:
 
 jobs:
   Release:
-    runs-on: ubuntu-latest
-    timeout-minutes: 120  # Extended timeout for large builds with parallelism
+    runs-on: ubuntu-latest-l  # Large Ubuntu runner with more disk space
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.git-ref || github.ref }}
           fetch-depth: 0
       
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-        with:
-          # Remove tools not needed for Go builds
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-          
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: ${{ inputs.setup-go-version }}
           go-version-file: ${{ inputs.setup-go-version-file }}
-          cache: true  # Enable caching for faster builds
-          cache-dependency-path: 'go.sum'
-        env:
-          GOOS: linux
-          GOARCH: arm64  # Optimize for ARM64 architecture
+          cache: false  # Disable caching to skip the post-cleanup step. saves circa 15 minutes
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
@@ -83,8 +67,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          CGO_ENABLED: 0  # Ensure static linking for cross-platform compatibility
-          GOMAXPROCS: 8  # Utilize all cores for Go compilation
       - if: inputs.release-notes
         id: release-notes-download
         name: Release Notes Download
@@ -100,5 +82,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          CGO_ENABLED: 0  # Ensure static linking for cross-platform compatibility
-          GOMAXPROCS: 8  # Utilize all cores for Go compilation
