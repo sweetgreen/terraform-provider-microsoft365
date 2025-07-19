@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.4-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.24.3-alpha...v0.24.4-alpha) (2025-07-19)
+
+
+### Bug Fixes
+
+* resolve goreleaser configuration conflicts and timeouts ([fcf7e1c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/fcf7e1c8d21bb54c20f03f305d4d0691c4fa5bb4))
+
 ## [0.24.3-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.24.2-alpha...v0.24.3-alpha) (2025-07-19)
 
 
