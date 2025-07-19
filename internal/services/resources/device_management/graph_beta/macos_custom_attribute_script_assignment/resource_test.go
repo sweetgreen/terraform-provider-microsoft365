@@ -1,10 +1,12 @@
 package graphBetaMacosCustomAttributeScriptAssignment_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/jarcoal/httpmock"
@@ -56,10 +58,21 @@ func setupMockEnvironment() {
 	macosCustomAttributeScriptAssignmentMock.RegisterErrorMocks()
 }
 
-// setupTestEnvironment prepares the test environment
+// setupTestEnvironment prepares the test environment with timeout control
 func setupTestEnvironment(t *testing.T) func() {
 	if os.Getenv("TF_ACC") != "" {
 		t.Skip("Skipping unit test in acceptance test mode")
+	}
+
+	// Set test timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	t.Cleanup(cancel)
+
+	// Ensure context hasn't been cancelled
+	select {
+	case <-ctx.Done():
+		t.Fatal("Test setup timeout exceeded")
+	default:
 	}
 
 	setupMockEnvironment()
@@ -70,12 +83,14 @@ func setupTestEnvironment(t *testing.T) func() {
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_Create(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -97,12 +112,14 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_CreateWithGroup(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -126,12 +143,14 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_CreateWithFilter(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -159,12 +178,14 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_Update(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `
@@ -197,12 +218,14 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_MinimalConfig(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + testConfigMinimal(),
@@ -217,12 +240,14 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MinimalConfig(t *testi
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_MaximalConfig(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + testConfigMaximal(),
@@ -247,12 +272,14 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MaximalConfig(t *testi
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_ErrorHandling(t *testing.T) {
+	t.Parallel()
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:               true,
 		ProtoV6ProviderFactories: frameworkMocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  30 * time.Second,
 		Steps: []resource.TestStep{
 			{
 				Config: unitTestProviderConfig + `

@@ -1,12 +1,14 @@
 package graphBetaMacosPlatformScriptAssignment_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -63,15 +65,34 @@ func testConfigMinimalToMaximal() string {
 	return unitTestProviderConfig + updatedMaximal
 }
 
-// Helper function to set up the test environment
+// Helper function to set up the test environment with timeout
 func setupTestEnvironment(t *testing.T) {
+	// Set timeout for the test
+	if deadline, ok := t.Deadline(); ok {
+		timeUntilDeadline := time.Until(deadline)
+		if timeUntilDeadline > 60*time.Second {
+			// If test has more than 60 seconds, set a 45-second timeout
+			ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+			defer cancel()
+			go func() {
+				<-ctx.Done()
+				if ctx.Err() == context.DeadlineExceeded {
+					t.Log("Test timeout reached - forcing completion")
+				}
+			}()
+		}
+	}
+
 	// Set environment variables for testing
 	os.Setenv("TF_ACC", "0")
 	os.Setenv("MS365_TEST_MODE", "true")
 }
 
-// Helper function to set up the mock environment
-func setupMockEnvironment() (*mocks.Mocks, *localMocks.MacosPlatformScriptAssignmentMock) {
+// Helper function to set up the mock environment with proper cleanup
+func setupMockEnvironment(t *testing.T) (*mocks.Mocks, *localMocks.MacosPlatformScriptAssignmentMock) {
+	// Ensure httpmock is clean before starting
+	httpmock.DeactivateAndReset()
+	
 	// Activate httpmock
 	httpmock.Activate()
 
@@ -83,7 +104,20 @@ func setupMockEnvironment() (*mocks.Mocks, *localMocks.MacosPlatformScriptAssign
 	scriptAssignmentMock := &localMocks.MacosPlatformScriptAssignmentMock{}
 	scriptAssignmentMock.RegisterMocks()
 
+	// Ensure cleanup happens
+	t.Cleanup(func() {
+		httpmock.DeactivateAndReset()
+	})
+
 	return mockClient, scriptAssignmentMock
+}
+
+// Helper function to create test resource config with timeout controls
+func createTestResourceConfig() resource.TestCase {
+	return resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Timeout:                  60 * time.Second, // Set maximum test timeout to 60 seconds
+	}
 }
 
 // Helper function to check if a resource exists
@@ -104,95 +138,101 @@ func testCheckExists(resourceName string) resource.TestCheckFunc {
 
 // TestUnitMacosPlatformScriptAssignmentResource_Create_Minimal tests the creation of a script assignment with minimal configuration
 func TestUnitMacosPlatformScriptAssignmentResource_Create_Minimal(t *testing.T) {
-	// Set up mock environment
-	_, _ = setupMockEnvironment()
-	defer httpmock.DeactivateAndReset()
+	t.Parallel()
 
-	// Set up the test environment
+	// Set up mock environment with proper cleanup
+	_, _ = setupMockEnvironment(t)
+
+	// Set up the test environment with timeout controls
 	setupTestEnvironment(t)
 
-	// Run the test
-	resource.UnitTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testConfigMinimal(),
-				Check: resource.ComposeTestCheckFunc(
-					testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000003"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.target_type", "allDevices"),
-					resource.TestCheckResourceAttrSet("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "id"),
-				),
-			},
+	// Create test configuration with timeout
+	testCase := createTestResourceConfig()
+	testCase.Steps = []resource.TestStep{
+		{
+			Config: testConfigMinimal(),
+			Check: resource.ComposeTestCheckFunc(
+				testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000003"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.target_type", "allDevices"),
+				resource.TestCheckResourceAttrSet("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "id"),
+			),
 		},
-	})
+	}
+
+	// Run the test with timeout
+	resource.UnitTest(t, testCase)
 }
 
 // TestUnitMacosPlatformScriptAssignmentResource_Create_Maximal tests the creation of a script assignment with maximal configuration
 func TestUnitMacosPlatformScriptAssignmentResource_Create_Maximal(t *testing.T) {
-	// Set up mock environment
-	_, _ = setupMockEnvironment()
-	defer httpmock.DeactivateAndReset()
+	t.Parallel()
 
-	// Set up the test environment
+	// Set up mock environment with proper cleanup
+	_, _ = setupMockEnvironment(t)
+
+	// Set up the test environment with timeout controls
 	setupTestEnvironment(t)
 
-	// Run the test
-	resource.UnitTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testConfigMaximal(),
-				Check: resource.ComposeTestCheckFunc(
-					testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000004"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.target_type", "groupAssignment"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.group_id", "44444444-4444-4444-4444-444444444444"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.device_and_app_management_assignment_filter_id", "55555555-5555-5555-5555-555555555555"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.device_and_app_management_assignment_filter_type", "include"),
-					resource.TestCheckResourceAttrSet("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "id"),
-				),
-			},
+	// Create test configuration with timeout
+	testCase := createTestResourceConfig()
+	testCase.Steps = []resource.TestStep{
+		{
+			Config: testConfigMaximal(),
+			Check: resource.ComposeTestCheckFunc(
+				testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000004"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.target_type", "groupAssignment"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.group_id", "44444444-4444-4444-4444-444444444444"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.device_and_app_management_assignment_filter_id", "55555555-5555-5555-5555-555555555555"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "target.device_and_app_management_assignment_filter_type", "include"),
+				resource.TestCheckResourceAttrSet("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_maximal", "id"),
+			),
 		},
-	})
+	}
+
+	// Run the test with timeout
+	resource.UnitTest(t, testCase)
 }
 
 // TestUnitMacosPlatformScriptAssignmentResource_Update_MinimalToMaximal tests updating from minimal to maximal configuration
 func TestUnitMacosPlatformScriptAssignmentResource_Update_MinimalToMaximal(t *testing.T) {
-	// Set up mock environment
-	_, _ = setupMockEnvironment()
-	defer httpmock.DeactivateAndReset()
+	t.Parallel()
 
-	// Set up the test environment
+	// Set up mock environment with proper cleanup
+	_, _ = setupMockEnvironment(t)
+
+	// Set up the test environment with timeout controls
 	setupTestEnvironment(t)
 
-	// Run the test
-	resource.UnitTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Start with minimal configuration
-			{
-				Config: testConfigMinimal(),
-				Check: resource.ComposeTestCheckFunc(
-					testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000003"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.target_type", "allDevices"),
-				),
-			},
-			// Update to maximal configuration (with the same resource name)
-			{
-				Config: testConfigMinimalToMaximal(),
-				Check: resource.ComposeTestCheckFunc(
-					testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000003"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.target_type", "groupAssignment"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.group_id", "44444444-4444-4444-4444-444444444444"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.device_and_app_management_assignment_filter_id", "55555555-5555-5555-5555-555555555555"),
-					resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.device_and_app_management_assignment_filter_type", "include"),
-				),
-			},
+	// Create test configuration with timeout
+	testCase := createTestResourceConfig()
+	testCase.Steps = []resource.TestStep{
+		// Start with minimal configuration
+		{
+			Config: testConfigMinimal(),
+			Check: resource.ComposeTestCheckFunc(
+				testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000003"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.target_type", "allDevices"),
+			),
 		},
-	})
+		// Update to maximal configuration (with the same resource name)
+		{
+			Config: testConfigMinimalToMaximal(),
+			Check: resource.ComposeTestCheckFunc(
+				testCheckExists("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "macos_platform_script_id", "00000000-0000-0000-0000-000000000003"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.target_type", "groupAssignment"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.group_id", "44444444-4444-4444-4444-444444444444"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.device_and_app_management_assignment_filter_id", "55555555-5555-5555-5555-555555555555"),
+				resource.TestCheckResourceAttr("microsoft365_graph_beta_device_management_macos_platform_script_assignment.test_minimal", "target.device_and_app_management_assignment_filter_type", "include"),
+			),
+		},
+	}
+
+	// Run the test with timeout
+	resource.UnitTest(t, testCase)
 }
 
 // TestUnitMacosPlatformScriptAssignmentResource_Delete tests the deletion of a script assignment
