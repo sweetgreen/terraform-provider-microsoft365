@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.24.4-alpha...v0.25.0-alpha) (2025-07-19)
+
+
+### Features
+
+* optimize build matrix to only darwin/arm64 and linux/arm64 ([b074de8](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b074de84c9ccedaa904f922b8c33ba31a969af03))
+
 ## [0.24.4-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.24.3-alpha...v0.24.4-alpha) (2025-07-19)
 
 
