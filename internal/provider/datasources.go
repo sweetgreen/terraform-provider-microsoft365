@@ -4,13 +4,13 @@ import (
 	"context"
 
 	// Graph Beta - Windows 365 datasources
-	graphBetaWindows365CloudPcAuditEvent "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_audit_event"
-	graphBetaWindows365CloudPcDeviceImages "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_device_images"
-	graphBetaWindows365CloudPcFrontlineServicePlan "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_frontline_service_plan"
-	graphBetaWindows365CloudPcGalleryImage "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_gallery_image"
-	graphBetaWindows365CloudPcSourceDeviceImage "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_source_device_image"
-	graphBetaWindows365CloudPcs "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pcs"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	graphBetaWindows365CloudPcAuditEvent "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_audit_event"
+	graphBetaWindows365CloudPcDeviceImages "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_device_images"
+	graphBetaWindows365CloudPcFrontlineServicePlan "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_frontline_service_plan"
+	graphBetaWindows365CloudPcGalleryImage "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_gallery_image"
+	graphBetaWindows365CloudPcSourceDeviceImage "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pc_source_device_image"
+	graphBetaWindows365CloudPcs "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/windows_365/graph_beta/cloud_pcs"
 
 	// Graph Beta - Intune datasources
 	graphBetaDeviceAndAppManagementApplicationCategory "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_and_app_management/graph_beta/application_category"
@@ -33,14 +33,14 @@ import (
 	graphBetaDeviceManagementWindowsPlatformScript "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/device_management/graph_beta/windows_platform_script"
 
 	// Graph Beta - Directory Management datasources
-	graphBetaDirectoryManagementDirectorySettingTemplates "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/directory_management/graph_beta/directory_setting_templates"
+	graphBetaDirectoryManagementDirectorySettingTemplates "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/directory_management/graph_beta/directory_setting_templates"
 
 	// Graph Beta - M365 Admin datasources
-	graphBetaM365AdminBrowserSite "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/m365_admin/graph_beta/browser_site"
-	graphBetaM365AdminBrowserSiteList "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/m365_admin/graph_beta/browser_site_list"
+	graphBetaM365AdminBrowserSite "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/m365_admin/graph_beta/browser_site"
+	graphBetaM365AdminBrowserSiteList "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/m365_admin/graph_beta/browser_site_list"
 
 	// Graph v1.0 - Directory Management datasources
-	graphDirectoryManagementSubscribedSkus "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/directory_management/graph_v1.0/subscribed_skus"
+	graphDirectoryManagementSubscribedSkus "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/directory_management/graph_v1.0/subscribed_skus"
 
 	// Graph Beta - Groups datasources
 	graphBetaGroup "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/groups/graph_beta/group"
@@ -49,10 +49,10 @@ import (
 	graphV1DeviceAndAppManagementIosMobileAppConfiguration "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/device_and_app_management/graph_v1.0/ios_mobile_app_configuration"
 
 	// Utilities
-	utilityItunesAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata"
-	utilityMacOSPKGAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/macos_pkg_app_metadata"
-	utilityMicrosoftStorePackageManifestMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/microsoft_store_package_manifest_metadata"
-	utilityWindowsMSIAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/windows_msi_app_metadata"
+	utilityItunesAppMetadata "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata"
+	utilityMacOSPKGAppMetadata "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/utility/macos_pkg_app_metadata"
+	utilityMicrosoftStorePackageManifestMetadata "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/utility/microsoft_store_package_manifest_metadata"
+	utilityWindowsMSIAppMetadata "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/datasources/utility/windows_msi_app_metadata"
 )
 
 // DataSources returns a slice of functions that each return a datasource.DataSource.

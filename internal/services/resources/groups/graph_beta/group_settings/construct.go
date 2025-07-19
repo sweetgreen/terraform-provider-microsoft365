@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 )

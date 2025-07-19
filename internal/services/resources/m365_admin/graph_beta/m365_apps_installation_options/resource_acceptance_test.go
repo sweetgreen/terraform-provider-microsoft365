@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 // TestAccM365AppsInstallationOptionsResource_Create_Minimal tests creating M365 Apps Installation Options with minimal configuration

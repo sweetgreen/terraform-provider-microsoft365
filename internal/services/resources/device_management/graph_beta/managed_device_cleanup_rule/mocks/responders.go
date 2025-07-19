@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks/factories"
 	"github.com/jarcoal/httpmock"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks/factories"
 )
 
 // ManagedDeviceCleanupRuleMock provides mock responses for managed device cleanup rule operations

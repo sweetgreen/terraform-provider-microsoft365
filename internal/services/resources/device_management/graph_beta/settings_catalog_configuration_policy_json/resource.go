@@ -1,14 +1,8 @@
-package graphBetaSettingsCatalogJson
+package graphBetaSettingsCatalogConfigurationPolicyJson
 
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
-	commonschemagraphbeta "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
-	customValidator "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validators"
-	sharedValidators "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validators/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -19,10 +13,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	planmodifiers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
+	commonschemagraphbeta "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
+	customValidator "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/validators"
+	sharedValidators "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/validators/graph_beta/device_management"
 )
 
 const (
-	ResourceName  = "graph_beta_device_management_settings_catalog_json"
+	ResourceName  = "graph_beta_device_management_settings_catalog_configuration_policy_json"
 	CreateTimeout = 180
 	UpdateTimeout = 180
 	ReadTimeout   = 180
@@ -113,7 +113,7 @@ func (r *SettingsCatalogJsonResource) Schema(ctx context.Context, req resource.S
 				Required: true,
 				MarkdownDescription: "Settings Catalog Policy template settings defined as a JSON string. Please provide a valid JSON-encoded settings structure. " +
 					"This can either be extracted from an existing policy using the Intune gui `export JSON` functionality if supported, via a script such as this powershell script." +
-					" [ExportSettingsCatalogConfigurationById](https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/Export-IntuneSettingsCatalogConfigurationById.ps1) " +
+					" [ExportSettingsCatalogConfigurationById](https://github.com/sweetgreen/terraform-provider-microsoft365/blob/main/scripts/powershell/Export-IntuneSettingsCatalogConfigurationById.ps1) " +
 					"or created from scratch. The JSON structure should match the graph schema of the settings catalog. Please look at the " +
 					"terraform documentation for the settings catalog template for examples and how to correctly format the HCL.\n\n" +
 					"A correctly formatted field in the HCL should begin and end like this:\n" +
@@ -155,7 +155,7 @@ func (r *SettingsCatalogJsonResource) Schema(ctx context.Context, req resource.S
 					"```\n\n",
 				Validators: []validator.String{
 					customValidator.JSONSchemaValidator(),
-					sharedValidators.SettingsCatalogValidator(),
+					sharedValidators.SettingsCatalogJSONValidator(),
 				},
 				PlanModifiers: []planmodifier.String{
 					planmodifiers.NormalizeJSONPlanModifier{},

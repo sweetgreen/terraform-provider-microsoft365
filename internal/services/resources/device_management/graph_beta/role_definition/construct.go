@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
 )
 
 // constructResource constructs a RoleDefinition resource using data from the Terraform model.

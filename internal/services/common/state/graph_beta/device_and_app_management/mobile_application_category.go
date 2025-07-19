@@ -3,11 +3,11 @@ package sharedStater
 import (
 	"context"
 
-	construct "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_and_app_management"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	construct "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_and_app_management"
 )
 
 // MapMobileAppCategoriesStateToTerraform converts API categories to a set of display names (for built-ins)

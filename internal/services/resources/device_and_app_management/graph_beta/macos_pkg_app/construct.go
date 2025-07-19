@@ -6,14 +6,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	sharedConstructors "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_and_app_management"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	helpers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
-	utility "github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	sharedConstructors "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_and_app_management"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	helpers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
+	utility "github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg"
 )
 
 // constructResource maps the Terraform schema to the SDK model, using the provided installer path

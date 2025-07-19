@@ -1,13 +1,13 @@
-package graphBetaSettingsCatalog
+package graphBetaSettingsCatalogConfigurationPolicy
 
 import (
 	"context"
 	"strconv"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // ConstructSettingsCatalogSettings constructs a collection of settings catalog settings from HCL struct
@@ -526,22 +526,20 @@ func setInstanceTemplateReference(instance graphmodels.DeviceManagementConfigura
 // - ChoiceSettingValue
 // - SimpleSettingValue
 func setValueTemplateReference(value interface{}, ref *SettingValueTemplateReference) {
-	if ref != nil {
-		templateRef := graphmodels.NewDeviceManagementConfigurationSettingValueTemplateReference()
+	if ref == nil {
+		return
+	}
 
-		// Use constructor helper to handle types.String -> *string conversion
-		convert.FrameworkToGraphString(ref.SettingValueTemplateId, templateRef.SetSettingValueTemplateId)
+	templateRef := graphmodels.NewDeviceManagementConfigurationSettingValueTemplateReference()
+	convert.FrameworkToGraphString(ref.SettingValueTemplateId, templateRef.SetSettingValueTemplateId)
+	templateRef.SetUseTemplateDefault(&ref.UseTemplateDefault)
 
-		// UseTemplateDefault is already a bool, so we can pass it directly
-		templateRef.SetUseTemplateDefault(&ref.UseTemplateDefault)
-
-		switch v := value.(type) {
-		case graphmodels.DeviceManagementConfigurationGroupSettingValueable:
-			v.SetSettingValueTemplateReference(templateRef)
-		case graphmodels.DeviceManagementConfigurationChoiceSettingValueable:
-			v.SetSettingValueTemplateReference(templateRef)
-		case graphmodels.DeviceManagementConfigurationSimpleSettingValueable:
-			v.SetSettingValueTemplateReference(templateRef)
-		}
+	// Use type assertion instead of type switch to avoid interface hierarchy issues
+	if v, ok := value.(graphmodels.DeviceManagementConfigurationSimpleSettingValueable); ok {
+		v.SetSettingValueTemplateReference(templateRef)
+	} else if v, ok := value.(graphmodels.DeviceManagementConfigurationChoiceSettingValueable); ok {
+		v.SetSettingValueTemplateReference(templateRef)
+	} else if v, ok := value.(graphmodels.DeviceManagementConfigurationGroupSettingValueable); ok {
+		v.SetSettingValueTemplateReference(templateRef)
 	}
 }

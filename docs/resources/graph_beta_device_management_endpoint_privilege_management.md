@@ -341,7 +341,7 @@ resource "microsoft365_graph_beta_device_management_endpoint_privilege_managemen
 ### Required
 
 - `name` (String) Policy name
-- `settings` (String) Endpoint Privilege Management Policy settings defined as a JSON string. Please provide a valid JSON-encoded settings structure. This can either be extracted from an existing policy using the Intune gui `export JSON` functionality if supported, via a script such as this powershell script. [ExportSettingsCatalogConfigurationById](https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/ExportSettingsCatalogConfigurationById.ps1) or created from scratch. The JSON structure should match the graph schema of the settings catalog. Please look at the terraform documentation for the Endpoint Privilege Management Policy for examples and how to correctly format the HCL.
+- `settings` (String) Endpoint Privilege Management Policy settings defined as a JSON string. Please provide a valid JSON-encoded settings structure. This can either be extracted from an existing policy using the Intune gui `export JSON` functionality if supported, via a script such as this powershell script. [ExportSettingsCatalogConfigurationById](https://github.com/sweetgreen/terraform-provider-microsoft365/blob/main/scripts/ExportSettingsCatalogConfigurationById.ps1) or created from scratch. The JSON structure should match the graph schema of the settings catalog. Please look at the terraform documentation for the Endpoint Privilege Management Policy for examples and how to correctly format the HCL.
 
 A correctly formatted field in the HCL should begin and end like this:
 ```hcl

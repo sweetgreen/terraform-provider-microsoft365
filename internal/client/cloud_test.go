@@ -3,8 +3,8 @@ package client
 import (
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/stretchr/testify/assert"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
 )
 
 func TestSetCloudConstants(t *testing.T) {

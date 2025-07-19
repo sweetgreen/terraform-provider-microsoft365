@@ -6,12 +6,12 @@ import (
 	"encoding/hex"
 	"os"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/helpers"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/powershell"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/helpers"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/powershell"
 )
 
 // TeamsCallingPolicyResource implements the Terraform resource for Teams Calling Policy

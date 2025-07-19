@@ -3,7 +3,7 @@ package sharedStater
 import (
 	"sort"
 
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
 )
 
 // sortMobileAppAssignments sorts a slice of mobile app assignments

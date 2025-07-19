@@ -3,7 +3,7 @@ package sharedValidators
 import (
 	"fmt"
 
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 // ValidateDeviceConfiguationAssignmentSettings validates the assignment configuration

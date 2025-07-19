@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	abstractions "github.com/microsoft/kiota-abstractions-go"
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/deviceappmanagement"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
 )
 
 func (d *MobileAppRelationshipDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

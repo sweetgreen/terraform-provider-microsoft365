@@ -1,10 +1,10 @@
 package schema
 
 import (
-	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	planmodifiers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
 )
 
 // MobileAppContentVersionSchema returns the schema definition for content versions

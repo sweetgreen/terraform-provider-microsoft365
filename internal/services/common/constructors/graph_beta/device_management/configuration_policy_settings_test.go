@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 func TestConstructSettingsCatalogSettings_Simple(t *testing.T) {

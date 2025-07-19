@@ -4,10 +4,6 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int32validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,6 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	planmodifiers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
 
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
 )

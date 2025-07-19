@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	utils "github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/common"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	utils "github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/common"
 )
 
 // constructResource constructs a WinGetApp resource using data from the Terraform model.

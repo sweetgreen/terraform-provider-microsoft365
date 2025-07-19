@@ -1,17 +1,17 @@
-package graphBetaSettingsCatalogJson
+package graphBetaSettingsCatalogConfigurationPolicyJson
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	sharedConstructor "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_management"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 	tfTypes "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	sharedConstructor "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_management"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 // constructResource is the main entry point to construct the intune settings catalog profile resource for the Terraform provider.

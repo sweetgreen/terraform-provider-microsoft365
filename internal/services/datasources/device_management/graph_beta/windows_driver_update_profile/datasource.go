@@ -3,16 +3,16 @@ package graphBetaWindowsDriverUpdateProfile
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
 )
 
 const (
-	DataSourceName = "graph_beta_windows_driver_update_profile"
+	DataSourceName = "graph_beta_device_management_windows_driver_update_profile"
 	ReadTimeout    = 180
 )
 

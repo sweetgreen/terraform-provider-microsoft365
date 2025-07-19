@@ -3,12 +3,12 @@ package provider
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/helpers"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/helpers"
 )
 
 // setProviderConfiguration populates the M365ProviderModel with values from the configuration

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // constructResource converts the Terraform resource model to a plain map for JSON marshaling

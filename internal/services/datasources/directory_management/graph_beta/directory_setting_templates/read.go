@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
 )
 
 // Read handles the Read operation for Directory Setting Templates data source.

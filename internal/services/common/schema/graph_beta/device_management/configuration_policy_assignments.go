@@ -3,12 +3,12 @@ package schema
 import (
 	"regexp"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
 )
 
 func ConfigurationPolicyAssignmentsSchema() schema.SingleNestedAttribute {

@@ -4,9 +4,9 @@
 package graphBetaIOSStoreApp
 
 import (
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_and_app_management"
 )
 
 // IOSStoreAppResourceModel represents the root Terraform resource model for iOS Store applications

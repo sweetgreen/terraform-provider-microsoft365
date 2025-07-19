@@ -10,32 +10,26 @@ builds:
       # usage by users in CI/CD systems like Terraform Cloud where
       # they are unable to install libraries.
       - CGO_ENABLED=0
+      # Optimize for reduced build matrix (only 2 targets)
+      - GOMAXPROCS=4
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
+      - -buildmode=exe
     ldflags:
       - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+    # Optimize build performance for ARM64
+    builder: 'go'
     goos:
-    - freebsd
-    - windows
     - linux
     - darwin
     goarch:
-      - amd64
-      - '386'
-      - arm
       - arm64
-    ignore:
-      - goos: darwin
-        goarch: '386'
     binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
   - format: zip
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
-  extra_files:
-    - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 signs:
@@ -51,8 +45,6 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
-  extra_files:
-    - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+  # GitHub release only, no extra files needed
 changelog:
   disable: true

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/devicemanagement"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
 )
 
 // Create handles the Create operation.
@@ -31,7 +31,7 @@ func (r *DeviceCustomAttributeShellScriptResource) Create(ctx context.Context, r
 	}
 	defer cancel()
 
-	requestBody, err := constructResource(ctx, &plan)
+	requestBody, err := constructResource(ctx, &plan, true)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error constructing resource for create method",
@@ -167,7 +167,7 @@ func (r *DeviceCustomAttributeShellScriptResource) Update(ctx context.Context, r
 	}
 	defer cancel()
 
-	requestBody, err := constructResource(ctx, &plan)
+	requestBody, err := constructResource(ctx, &plan, false)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error constructing resource for update method",

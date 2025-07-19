@@ -3,8 +3,8 @@ package sharedValidators
 import (
 	"testing"
 
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 func TestValidateDeviceConfiguationAssignmentSettings(t *testing.T) {

@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg/xar"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg/xar"
 )
 
 // Read fetches the data from the PKG file and sets it in the data source state

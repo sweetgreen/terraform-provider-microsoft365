@@ -3,9 +3,9 @@ package graphBetaCloudPcOrganizationSettings
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetamodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 func MapRemoteStateToTerraform(ctx context.Context, data *CloudPcOrganizationSettingsResourceModel, remote msgraphbetamodels.CloudPcOrganizationSettingsable) {

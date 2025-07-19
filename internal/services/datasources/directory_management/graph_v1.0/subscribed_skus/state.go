@@ -3,10 +3,10 @@ package graphSubscribedSkus
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // MapRemoteStateToDataSource maps a SubscribedSku to a model

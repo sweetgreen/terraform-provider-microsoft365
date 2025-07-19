@@ -3,9 +3,9 @@ package graphBetaConditionalAccessPolicy
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // MapRemoteResourceStateToTerraform maps the remote conditional access policy to Terraform state

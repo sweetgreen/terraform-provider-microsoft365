@@ -3,8 +3,8 @@ package graphVersionResourceTemplate
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/state"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/state"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"

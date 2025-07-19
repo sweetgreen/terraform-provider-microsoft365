@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks/factories"
 	"github.com/google/uuid"
 	"github.com/jarcoal/httpmock"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks/factories"
 )
 
 // mockState tracks the state of resources for consistent responses

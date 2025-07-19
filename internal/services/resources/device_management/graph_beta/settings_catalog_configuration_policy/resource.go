@@ -1,14 +1,8 @@
-package graphBetaSettingsCatalog
+package graphBetaSettingsCatalogConfigurationPolicy
 
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
-	commonschemagraphbeta "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
-	customValidator "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -19,10 +13,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	planmodifiers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
+	commonschemagraphbeta "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_management"
+	customValidator "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/validators"
 )
 
 const (
-	ResourceName  = "graph_beta_device_management_settings_catalog"
+	ResourceName  = "graph_beta_device_management_settings_catalog_configuration_policy"
 	CreateTimeout = 180
 	UpdateTimeout = 180
 	ReadTimeout   = 180
@@ -89,7 +89,11 @@ func (r *SettingsCatalogResource) ImportState(ctx context.Context, req resource.
 // Function to create the full device management configuration policy schema
 func (r *SettingsCatalogResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages Intune Settings Catalog policies using the `/deviceManagement/configurationPolicies` endpoint. Settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, simplified interface that replaces traditional device configuration profiles.",
+		MarkdownDescription: "Manages Intune Settings Catalog policies using the `/deviceManagement/configurationPolicies` endpoint. " +
+			"Settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, " +
+			"simplified interface that replaces traditional device configuration profiles. You can simplify the hcl creation process by using the " +
+			"`Export-IntuneSettingsCatalogConfigurationByIdToHCL.ps1` [https://github.com/sweetgreen/terraform-provider-microsoft365/blob/main/scripts/powershell/Export-IntuneSettingsCatalogConfigurationByIdToHCL.ps1] " +
+			"script to export the settings catalog configuration by ID. This will build the hcl representation of the settings catalog configuration automatically.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
@@ -108,12 +112,47 @@ func (r *SettingsCatalogResource) Schema(ctx context.Context, req resource.Schem
 				PlanModifiers:       []planmodifier.String{planmodifiers.DefaultValueString("")},
 				MarkdownDescription: "Optional description for the settings catalog policy.",
 			},
-			"settings_catalog_template_type": schema.StringAttribute{
-				Computed: true,
-				MarkdownDescription: "Defines which settings catalog setting template will be deployed. " +
-					"Unused by non settings catalog template items, but required in schema to satisify tfsdk model.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+			"template_reference": schema.SingleNestedAttribute{
+				Optional:            true,
+				MarkdownDescription: "Policy template reference information",
+				Attributes: map[string]schema.Attribute{
+					"template_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Template ID to reference. This is a UUID that identifies a specific template in Microsoft Intune.",
+					},
+					"template_family": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Describes the TemplateFamily for the Template entity. This is a read-only property.",
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"none",
+								"endpointSecurityAntivirus",
+								"endpointSecurityDiskEncryption",
+								"endpointSecurityFirewall",
+								"endpointSecurityEndpointDetectionAndResponse",
+								"endpointSecurityAttackSurfaceReduction",
+								"endpointSecurityAccountProtection",
+								"endpointSecurityApplicationControl",
+								"endpointSecurityEndpointPrivilegeManagement",
+								"enrollmentConfiguration",
+								"appQuietTime",
+								"baseline",
+								"unknownFutureValue",
+								"deviceConfigurationScripts",
+								"deviceConfigurationPolicies",
+								"windowsOsRecoveryPolicies",
+								"companyPortal",
+							),
+						},
+					},
+					"template_display_name": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Template Display Name of the referenced template. This property is read-only.",
+					},
+					"template_display_version": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Template Display Version of the referenced Template. This property is read-only.",
+					},
 				},
 			},
 			"configuration_policy": schema.SingleNestedAttribute{

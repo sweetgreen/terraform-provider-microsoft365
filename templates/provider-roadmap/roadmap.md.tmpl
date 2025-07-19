@@ -297,7 +297,7 @@ This roadmap reflects our current planning and is subject to change based on cus
 
 ## Feature Request Process
 
-If you need a resource that is not currently on our roadmap or would like to see a particular resource prioritized, please open an issue on our [GitHub repository](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues) with the "feature request" label.
+If you need a resource that is not currently on our roadmap or would like to see a particular resource prioritized, please open an issue on our [GitHub repository](https://github.com/sweetgreen/terraform-provider-microsoft365/issues) with the "feature request" label.
 
 ## Release Schedule
 

@@ -3,9 +3,6 @@ package graphBetaCloudPcOrganizationSettings
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,6 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
 )
 
 const (

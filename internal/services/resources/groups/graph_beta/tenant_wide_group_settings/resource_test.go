@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
-	localMocks "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/resources/groups/graph_beta/tenant_wide_group_settings/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/jarcoal/httpmock"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
+	localMocks "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/groups/graph_beta/tenant_wide_group_settings/mocks"
 )
 
 // Helper functions to return the test configurations by reading from files

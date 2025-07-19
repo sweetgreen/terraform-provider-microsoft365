@@ -1,15 +1,15 @@
-package graphBetaSettingsCatalog
+package graphBetaSettingsCatalogConfigurationPolicy
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	tfTypes "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // constructResource is the main entry point to construct the intune settings catalog profile resource for the Terraform provider.
@@ -61,6 +61,25 @@ func constructResource(ctx context.Context, data *SettingsCatalogProfileResource
 
 	if err := convert.FrameworkToGraphStringSet(ctx, data.RoleScopeTagIds, requestBody.SetRoleScopeTagIds); err != nil {
 		return nil, fmt.Errorf("failed to set role scope tags: %s", err)
+	}
+
+	// Optionally set template reference if provided
+	if data.TemplateReference != nil {
+		templateRef := graphmodels.NewDeviceManagementConfigurationPolicyTemplateReference()
+
+		if !data.TemplateReference.TemplateId.IsNull() && !data.TemplateReference.TemplateId.IsUnknown() {
+			convert.FrameworkToGraphString(data.TemplateReference.TemplateId, templateRef.SetTemplateId)
+		}
+
+		if !data.TemplateReference.TemplateFamily.IsNull() && !data.TemplateReference.TemplateFamily.IsUnknown() {
+			templateFamilyStr := data.TemplateReference.TemplateFamily.ValueString()
+			templateFamily, err := graphmodels.ParseDeviceManagementConfigurationTemplateFamily(templateFamilyStr)
+			if err == nil && templateFamily != nil {
+				templateRef.SetTemplateFamily(templateFamily.(*graphmodels.DeviceManagementConfigurationTemplateFamily))
+			}
+		}
+
+		requestBody.SetTemplateReference(templateRef)
 	}
 
 	settings := ConstructSettingsCatalogSettings(ctx, *data.ConfigurationPolicy)

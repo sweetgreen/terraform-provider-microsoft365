@@ -8,10 +8,10 @@ import (
 	"io"
 	"os"
 
-	helpers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/common"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg/xar"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	helpers "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud/graph_beta/device_and_app_management"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/common"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/utilities/device_and_app_management/installers/macos_pkg/xar"
 )
 
 // bytesToMB converts bytes to megabytes as a float64 value

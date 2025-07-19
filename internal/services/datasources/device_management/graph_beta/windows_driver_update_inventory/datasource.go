@@ -3,15 +3,15 @@ package graphBetaWindowsDriverUpdateInventory
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
 )
 
 const (
-	DataSourceName = "graph_beta_windows_driver_update_inventory"
+	DataSourceName = "graph_beta_device_management_windows_driver_update_inventory"
 	ReadTimeout    = 180
 )
 

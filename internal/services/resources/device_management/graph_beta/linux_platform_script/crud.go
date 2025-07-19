@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
-	construct "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_management"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
-	customrequest "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/custom_requests"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors"
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
-	sharedstater "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/state/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
+	construct "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/constructors/graph_beta/device_management"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud"
+	customrequest "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/custom_requests"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
+	sharedstater "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/state/graph_beta/device_management"
 )
 
 // Create handles the Create operation for Settings Catalog resources.

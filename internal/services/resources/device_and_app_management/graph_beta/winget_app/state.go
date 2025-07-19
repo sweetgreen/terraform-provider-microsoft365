@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	sharedstater "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/state/graph_beta/device_and_app_management"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
+	sharedstater "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/state/graph_beta/device_and_app_management"
 )
 
 // MapRemoteResourceStateToTerraform maps the remote WinGetApp resource to the Terraform state

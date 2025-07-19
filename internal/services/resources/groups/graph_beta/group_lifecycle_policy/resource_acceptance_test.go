@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 // TestAccGroupLifecyclePolicyResource_Create_Minimal tests creating a group lifecycle policy with minimal configuration

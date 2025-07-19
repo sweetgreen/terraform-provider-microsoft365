@@ -3,8 +3,6 @@ package utilityMicrosoftStorePackageManifest
 import (
 	"context"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
-	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -12,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/client"
+	commonschema "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/schema"
 )
 
 const (
@@ -50,7 +50,7 @@ func (d *MicrosoftStorePackageManifestDataSource) Configure(ctx context.Context,
 // Schema defines the schema for the data source
 func (d *MicrosoftStorePackageManifestDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves Microsoft Store package manifests by package identifier or search term.",
+		MarkdownDescription: "Retrieves Microsoft Store package manifests by package identifier or search term. Used for winget packages.",
 		Attributes: map[string]schema.Attribute{
 			"package_identifier": schema.StringAttribute{
 				Optional:            true,

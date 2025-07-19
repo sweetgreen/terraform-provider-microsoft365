@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/powershell"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/powershell"
 )
 
 // Create implements resource.Resource Create for TeamsMeetingPolicy
