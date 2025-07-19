@@ -40,7 +40,7 @@ on:
 
 jobs:
   Release:
-    runs-on: ubuntu-latest-l  # Large Ubuntu runner with more disk space
+    runs-on: ubuntu-latest-8-cores  # Large Ubuntu runner with more disk space and cores
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
