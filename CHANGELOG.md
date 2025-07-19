@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.3-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.24.2-alpha...v0.24.3-alpha) (2025-07-19)
+
+
+### Bug Fixes
+
+* use standard runners with aggressive disk cleanup ([c710108](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/c710108c5b0aae9b62e140b73ec6f17c3169fed3))
+
 ## [0.24.2-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.24.1-alpha...v0.24.2-alpha) (2025-07-19)
 
 
