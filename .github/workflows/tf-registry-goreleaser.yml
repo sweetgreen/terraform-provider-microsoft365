@@ -48,11 +48,27 @@ jobs:
           ref: ${{ inputs.git-ref || github.ref }}
           fetch-depth: 0
       
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false  # Keep Docker for GoReleaser
+          swap-storage: true
+      
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: ${{ inputs.setup-go-version }}
           go-version-file: ${{ inputs.setup-go-version-file }}
           cache: false  # Disable caching to avoid post-cleanup issues
+      - name: Clean Go Caches
+        run: |
+          go clean -cache
+          go clean -modcache
+      
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
@@ -63,7 +79,7 @@ jobs:
         name: goreleaser release (without release notes)
         uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         with:
-          args: release --clean --parallelism 2 ${{ inputs.goreleaser-release-args }}
+          args: release --clean --parallelism 1 ${{ inputs.goreleaser-release-args }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
@@ -78,7 +94,7 @@ jobs:
         name: goreleaser release (with release notes)
         uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         with:
-          args: release --release-notes ${{ steps.release-notes-download.outputs.download-path }}/release-notes.txt --clean --parallelism 2 ${{ inputs.goreleaser-release-args }}
+          args: release --release-notes ${{ steps.release-notes-download.outputs.download-path }}/release-notes.txt --clean --parallelism 1 ${{ inputs.goreleaser-release-args }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
