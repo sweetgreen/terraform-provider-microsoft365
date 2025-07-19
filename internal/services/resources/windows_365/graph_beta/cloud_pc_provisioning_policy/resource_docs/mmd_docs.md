@@ -11,7 +11,7 @@ https://mmdls.microsoft.com/api/v1.0/tenant
 GET
 {
   "directoryId": "2fd6bb84-ad40-4ec5-9369-a215b25c9952",
-  "domain": "deploymenttheory.com",
+  "domain": "sweetgreen.com",
   "state": "Enrolled",
   "appPackagingEnrolled": false,
   "appLockerVersion": "0.0",

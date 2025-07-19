@@ -22,7 +22,7 @@ To use this provider, add the following to your Terraform configuration:
 terraform {
   required_providers {
     microsoft365 = {
-      source  = "deploymenttheory/microsoft365"
+      source  = "sweetgreen/microsoft365"
       version = "~> 1.10.4 # Replace with the latest version
     }
   }
@@ -113,7 +113,7 @@ For a complete list of client options, refer to the provider documentation.
 terraform {
   required_providers {
     microsoft365 = {
-      source  = "deploymenttheory/terraform-provider-microsoft365"
+      source  = "sweetgreen/terraform-provider-microsoft365"
       version = "~> 1.0.0"
     }
   }
