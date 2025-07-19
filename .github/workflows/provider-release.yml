@@ -79,7 +79,7 @@ jobs:
       gpg-private-key: '${{ secrets.GPG_PRIVATE_KEY }}'  # Your GPG private key
       gpg-private-key-passphrase: '${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}'  # Passphrase for your GPG key, if applicable
     with:
-      goreleaser-release-args: --verbose --parallelism 2 --timeout 60m # Reduced for GitHub-hosted runners
+      goreleaser-release-args: --verbose --timeout 60m # Parallelism set in workflow to avoid conflicts
       release-notes: false
       setup-go-version: '1.22.5'
       git-ref: ${{ github.event.inputs.release_version || github.ref }}

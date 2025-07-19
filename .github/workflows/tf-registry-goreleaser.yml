@@ -41,7 +41,7 @@ on:
 jobs:
   Release:
     runs-on: ubuntu-latest  # Standard runner - large runners require GitHub Teams/Enterprise
-    timeout-minutes: 90
+    timeout-minutes: 60  # Standard runner limit to prevent shutdowns
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
