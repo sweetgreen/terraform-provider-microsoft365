@@ -27,7 +27,7 @@ This process enables a modern, secure authentication flow without the need to ma
 - An OIDC token provider capable of generating valid JWTs with the required claims
 - Permissions to create and configure app registrations in Microsoft Entra ID
 - Ability to configure federated identity credentials
-- Terraform provider deploymenttheory/microsoft365 version >= v0.11.0-alpha
+- Terraform provider sweetgreen/microsoft365 version >= v0.11.0-alpha
 
 ## Common Use Cases
 

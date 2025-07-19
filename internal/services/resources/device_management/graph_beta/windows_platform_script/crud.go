@@ -51,7 +51,8 @@ func (r *WindowsPlatformScriptResource) Create(ctx context.Context, req resource
 
 	object.ID = types.StringValue(*requestResource.GetId())
 
-	if object.Assignments != nil {
+	// Only process assignments if they are explicitly configured and not unknown
+	if object.Assignments != nil && !isAssignmentsUnknown(object.Assignments) {
 		requestAssignment, err := constructAssignment(ctx, &object)
 		if err != nil {
 			resp.Diagnostics.AddError(
@@ -157,7 +158,10 @@ func (r *WindowsPlatformScriptResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	MapRemoteAssignmentStateToTerraform(ctx, &object, respAssignments)
+	// Only map assignments if they were configured in the resource
+	if object.Assignments != nil {
+		MapRemoteAssignmentStateToTerraform(ctx, &object, respAssignments)
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
@@ -320,4 +324,32 @@ func (r *WindowsPlatformScriptResource) Delete(ctx context.Context, req resource
 	resp.State.RemoveResource(ctx)
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Delete Method: %s", ResourceName))
+}
+
+// isAssignmentsUnknown checks if the assignments struct contains unknown values
+func isAssignmentsUnknown(assignments *sharedmodels.DeviceManagementScriptAssignmentResourceModel) bool {
+	if assignments == nil {
+		return true
+	}
+
+	// Check if any of the fields are unknown
+	if assignments.AllDevices.IsUnknown() || assignments.AllUsers.IsUnknown() {
+		return true
+	}
+
+	// Check include groups
+	for _, id := range assignments.IncludeGroupIds {
+		if id.IsUnknown() {
+			return true
+		}
+	}
+
+	// Check exclude groups
+	for _, id := range assignments.ExcludeGroupIds {
+		if id.IsUnknown() {
+			return true
+		}
+	}
+
+	return false
 }

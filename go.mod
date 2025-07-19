@@ -120,4 +120,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/deploymenttheory/go-apfs => ../go-apfs
+replace github.com/sweetgreen/go-apfs => ../go-apfs

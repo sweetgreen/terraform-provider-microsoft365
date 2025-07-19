@@ -31,7 +31,7 @@ The Microsoft 365 provider supports authentication using GitHub Actions' OpenID 
 - Permissions to create and configure app registrations in Microsoft Entra ID
 - Ability to modify GitHub Actions workflows
 - Azure CLI installed (for setup commands)
-- Terraform provider deploymenttheory/microsoft365 version >= v0.11.0-alpha
+- Terraform provider sweetgreen/microsoft365 version >= v0.11.0-alpha
 
 ## How GitHub OIDC Authentication Works
 

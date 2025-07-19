@@ -93,6 +93,9 @@ import (
 	graphBetaWindows365CloudPcProvisioningPolicy "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/windows_365/graph_beta/cloud_pc_provisioning_policy"
 	graphBetaWindows365UserSetting "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/windows_365/graph_beta/user_setting"
 
+	// Graph v1.0 - Device & app management
+	graphV1IOSMobileAppConfiguration "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/device_and_app_management/graph_v1.0/ios_mobile_app_configuration"
+
 	// Graph v1.0 - Intune resources
 	graphDeviceManagementDeviceConfigurationAssignment "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/resources/device_management/graph_v1.0/device_configuration_assignment"
 
@@ -200,6 +203,9 @@ func (p *M365Provider) Resources(ctx context.Context) []func() resource.Resource
 		graphBetaWindows365AzureNetworkConnection.NewCloudPcOnPremisesConnectionResource,
 		graphBetaWindows365CloudPcDeviceImage.NewCloudPcDeviceImageResource,
 		graphBetaWindows365CloudPcAlertRule.NewCloudPcAlertRuleResource,
+
+		// Graph v1.0 - Device & app management
+		graphV1IOSMobileAppConfiguration.NewIosMobileAppConfigurationResource,
 
 		// Graph v1.0 - Intune resources
 		graphDeviceManagementDeviceConfigurationAssignment.NewDeviceConfigurationAssignmentResource,

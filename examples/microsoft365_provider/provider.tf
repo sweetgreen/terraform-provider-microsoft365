@@ -2,7 +2,7 @@
 terraform {
   required_providers {
     microsoft365 = {
-      source  = "deploymenttheory/terraform-provider-microsoft365"
+      source  = "sweetgreen/terraform-provider-microsoft365"
       version = "~> 1.0.0"
     }
   }
