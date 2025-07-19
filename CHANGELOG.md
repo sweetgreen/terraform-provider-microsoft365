@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.2-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.25.1-alpha...v0.25.2-alpha) (2025-07-19)
+
+
+### Bug Fixes
+
+* find replace deploymenttheory to sweetgreen ([70d0651](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/70d06513d6c3905beb7c9cc71ec406198decd085))
+* update imports to sweetgreen ([624290f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/624290ff80a90a42f8a86b542e4f114360068a5f))
+
 ## [0.25.1-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.25.0-alpha...v0.25.1-alpha) (2025-07-19)
 
 
