@@ -3,6 +3,7 @@ package graphBetaMacosCustomAttributeScriptAssignment
 import (
 	"context"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -78,7 +79,20 @@ func (r *MacosCustomAttributeScriptAssignmentResource) Configure(ctx context.Con
 }
 
 func (r *MacosCustomAttributeScriptAssignmentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	// Import ID format: {scriptId}/{assignmentId}
+	importId := req.ID
+	parts := strings.Split(importId, "/")
+
+	if len(parts) != 2 {
+		resp.Diagnostics.AddError(
+			"Invalid import ID",
+			"Import ID must be in the format: {scriptId}/{assignmentId}",
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("macos_custom_attribute_script_id"), parts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
 }
 
 func (r *MacosCustomAttributeScriptAssignmentResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

@@ -1,5 +1,7 @@
 package graphBetaWindowsPlatformScriptAssignment_test
 
+// TODO: Add mocks for this resource to enable unit testing
+/*
 import (
 	"testing"
 
@@ -19,8 +21,6 @@ provider "microsoft365" {
 }
 `
 
-// TODO: Add mocks for this resource to enable unit testing
-/*
 func TestUnitWindowsPlatformScriptAssignmentResource_Basic(t *testing.T) {
 	// Set up test environment
 	t.Setenv("TF_ACC", "0")
