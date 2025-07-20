@@ -511,7 +511,7 @@ rm -f "$TOKEN_FILE"
 
 - [Terraform Cloud with workspace OIDC](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/dynamic-provider-credentials)
 - [OpenID Connect Core 1.0 specification](https://openid.net/specs/openid-connect-core-1_0.html)
-- [HashiCorp Terraform AzureAD Provider documentation](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs)
+- [HashiCorp Terraform AzureAD Provider documentation](https://registry.sweetgreen.engineering/providers/hashicorp/azuread/latest/docs)
 - [HashiCorp Vault as OIDC Provider](https://developer.hashicorp.com/vault/docs/secrets/identity/oidc-provider)
 - [Managing JWT/OIDC tokens with Vault](https://developer.hashicorp.com/vault/docs/secrets/identity/oidc-provider#generate-a-token)
 - [Securing CI/CD pipelines with OIDC](https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust)

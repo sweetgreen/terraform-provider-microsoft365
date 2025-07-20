@@ -31,7 +31,7 @@ func main() {
 	})
 
 	opts := providerserver.ServeOpts{
-		Address: "registry.terraform.io/sweetgreen/microsoft365",
+		Address: "registry.sweetgreen.engineering/sweetgreen/microsoft365",
 		Debug:   debug,
 	}
 
