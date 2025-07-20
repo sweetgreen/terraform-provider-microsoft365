@@ -6,7 +6,7 @@ resource "microsoft365_graph_beta_device_management_macos_platform_script_assign
     device_and_app_management_assignment_filter_id   = "55555555-5555-5555-5555-555555555555"
     device_and_app_management_assignment_filter_type = "include"
   }
-  
+
   timeouts = {
     create = "30m"
     read   = "10m"
