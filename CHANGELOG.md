@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.25.2-alpha...v0.26.0-alpha) (2025-07-20)
+
+
+### Features
+
+* Complete CI workflow optimization and registry migration ([8a79e40](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8a79e409f8eb67e4b4ec928743937e13a3b04dc2))
+
+
+### Bug Fixes
+
+* Add mock implementations for macOS script assignment unit tests ([d73fb8e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d73fb8e633d6bd522de2838a146a0f6689e2b0b3))
+* Add proper provider configuration to windows_platform_script datasource test ([2a67b3b](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2a67b3b94ba6b16de6ef0a176d4737edf76e6f69))
+* migrate all import paths from deploymenttheory to sweetgreen ([9520b1d](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/9520b1dbceda46a1d190235db0c7799f9bc68d4f))
+* Remove t.Parallel() from httpmock-using tests to eliminate race conditions ([ea69354](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ea6935484eb4a7ace28dc1a037a529ec83241708))
+* Remove unsupported Timeout field from TestCase structs and fix function calls ([9444377](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/94443774b6b2f3e014af0e4593537fe43a05d82f))
+* Replace go:embed with function-based file reading to fix CI compilation error ([bbff4aa](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/bbff4aa0869bb8124dc81f6cf574fc824da67d74))
+* Resolve TestUnitWindowsMSIAppMetadataDataSource_FirefoxMSI flakiness ([d8967cb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d8967cbb039c5c6ce528777ee0c8169cc1f4c78b))
+* update remaining imports from deploymenttheory to sweetgreen ([6a733e8](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6a733e815cc5ce6418977d1b369c03b36fee42bf))
+* Update test provider configuration and attribute names ([a84d8ee](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a84d8ee3fb6e568801f5930fa73442e4a979c0e6))
+
 ## [0.25.2-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.25.1-alpha...v0.25.2-alpha) (2025-07-19)
 
 
