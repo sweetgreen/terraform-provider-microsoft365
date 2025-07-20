@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 func TestAccGroupDataSource_Basic(t *testing.T) {

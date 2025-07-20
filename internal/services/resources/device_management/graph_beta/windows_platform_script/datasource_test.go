@@ -3,8 +3,8 @@ package graphBetaWindowsPlatformScript_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/mocks"
 )
 
 func TestAccWindowsPlatformScriptDataSource_FilterByAll(t *testing.T) {
@@ -14,7 +14,7 @@ func TestAccWindowsPlatformScriptDataSource_FilterByAll(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: mocks.TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: configDataSourceWindowsPlatformScriptFilterAll(),
@@ -30,8 +30,6 @@ func TestAccWindowsPlatformScriptDataSource_FilterByAll(t *testing.T) {
 func testAccPreCheck(t *testing.T) {
 	// Pre-check logic would go here
 }
-
-var testAccProtoV6ProviderFactories = make(map[string]func() (tfprotov6.ProviderServer, error))
 
 func configDataSourceWindowsPlatformScriptFilterAll() string {
 	return `

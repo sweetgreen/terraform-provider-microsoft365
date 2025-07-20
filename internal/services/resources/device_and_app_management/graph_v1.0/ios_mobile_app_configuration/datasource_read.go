@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
 )
 
 // Read fetches iOS mobile app configuration data from the Microsoft Graph API

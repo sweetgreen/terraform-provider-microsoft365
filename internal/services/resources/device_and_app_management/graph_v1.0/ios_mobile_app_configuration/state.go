@@ -3,11 +3,11 @@ package graphV1IosMobileAppConfiguration
 import (
 	"context"
 
-	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // MapRemoteResourceToTerraform maps the remote iOS mobile app configuration to Terraform state

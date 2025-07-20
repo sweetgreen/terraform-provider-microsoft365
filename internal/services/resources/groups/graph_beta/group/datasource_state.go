@@ -3,10 +3,10 @@ package graphBetaGroup
 import (
 	"context"
 
-	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // MapRemoteGroupToDataSource maps a Microsoft Graph group to the Terraform data source model

@@ -21,6 +21,14 @@ func MapRemoteStateToTerraform(ctx context.Context, data MacosPlatformScriptAssi
 
 	if target := assignment.GetTarget(); target != nil {
 		data.Target = mapRemoteTargetToTerraform(target)
+	} else {
+		// If target is nil, create a default empty target to avoid null value errors
+		data.Target = AssignmentTargetResourceModel{
+			TargetType:                                 types.StringNull(),
+			DeviceAndAppManagementAssignmentFilterId:   types.StringNull(),
+			DeviceAndAppManagementAssignmentFilterType: types.StringNull(),
+			GroupId: types.StringNull(),
+		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished stating resource %s with id %s", ResourceName, data.ID.ValueString()))

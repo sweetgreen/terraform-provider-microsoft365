@@ -11,6 +11,7 @@ import (
 	"github.com/sweetgreen/terraform-provider-microsoft365/internal/constants"
 	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/crud"
 	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/errors"
+	sharedmodels "github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 // Create handles the Create operation.

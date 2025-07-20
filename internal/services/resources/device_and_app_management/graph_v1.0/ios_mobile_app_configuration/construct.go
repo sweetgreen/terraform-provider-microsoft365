@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/sweetgreen/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // constructResource constructs an iOS mobile app configuration resource from Terraform model
