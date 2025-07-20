@@ -137,7 +137,7 @@ func testCheckExists(resourceName string) resource.TestCheckFunc {
 
 // TestUnitMacosPlatformScriptAssignmentResource_Create_Minimal tests the creation of a script assignment with minimal configuration
 func TestUnitMacosPlatformScriptAssignmentResource_Create_Minimal(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 
 	// Set up mock environment with proper cleanup
 	_, _ = setupMockEnvironment(t)
@@ -165,7 +165,7 @@ func TestUnitMacosPlatformScriptAssignmentResource_Create_Minimal(t *testing.T) 
 
 // TestUnitMacosPlatformScriptAssignmentResource_Create_Maximal tests the creation of a script assignment with maximal configuration
 func TestUnitMacosPlatformScriptAssignmentResource_Create_Maximal(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 
 	// Set up mock environment with proper cleanup
 	_, _ = setupMockEnvironment(t)
@@ -196,7 +196,7 @@ func TestUnitMacosPlatformScriptAssignmentResource_Create_Maximal(t *testing.T) 
 
 // TestUnitMacosPlatformScriptAssignmentResource_Update_MinimalToMaximal tests updating from minimal to maximal configuration
 func TestUnitMacosPlatformScriptAssignmentResource_Update_MinimalToMaximal(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 
 	// Set up mock environment with proper cleanup
 	_, _ = setupMockEnvironment(t)
@@ -285,7 +285,7 @@ func testImportStateId(resourceName string) resource.ImportStateIdFunc {
 // TestUnitMacosPlatformScriptAssignmentResource_Error tests error handling
 func TestUnitMacosPlatformScriptAssignmentResource_Error(t *testing.T) {
 	// Set up mock environment
-	_, scriptAssignmentMock := setupMockEnvironment()
+	_, scriptAssignmentMock := setupMockEnvironment(t)
 	defer httpmock.DeactivateAndReset()
 
 	// Register error mocks
@@ -316,7 +316,7 @@ resource "microsoft365_graph_beta_device_management_macos_platform_script_assign
 // TestUnitMacosPlatformScriptAssignmentResource_NotFoundScript tests handling of not found script
 func TestUnitMacosPlatformScriptAssignmentResource_NotFoundScript(t *testing.T) {
 	// Set up mock environment
-	_, scriptAssignmentMock := setupMockEnvironment()
+	_, scriptAssignmentMock := setupMockEnvironment(t)
 	defer httpmock.DeactivateAndReset()
 
 	// Register error mocks

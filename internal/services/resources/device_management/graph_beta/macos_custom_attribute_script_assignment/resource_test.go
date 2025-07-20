@@ -83,7 +83,7 @@ func setupTestEnvironment(t *testing.T) func() {
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_Create(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
@@ -111,7 +111,7 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_CreateWithGroup(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
@@ -141,7 +141,7 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_CreateWithFilter(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
@@ -175,7 +175,7 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_Update(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
@@ -214,7 +214,7 @@ resource "microsoft365_graph_beta_device_management_macos_custom_attribute_scrip
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_MinimalConfig(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
@@ -235,7 +235,7 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MinimalConfig(t *testi
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_MaximalConfig(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
@@ -266,7 +266,7 @@ func TestUnitMacosCustomAttributeScriptAssignmentResource_MaximalConfig(t *testi
 }
 
 func TestUnitMacosCustomAttributeScriptAssignmentResource_ErrorHandling(t *testing.T) {
-	t.Parallel()
+	// Removed t.Parallel() due to httpmock race conditions
 	cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
