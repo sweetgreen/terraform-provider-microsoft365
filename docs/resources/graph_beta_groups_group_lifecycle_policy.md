@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_groups_group_lifecycle_policy Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_groups_group_lifecycle_policy Resource - microsoft365"
 subcategory: "Groups"
 description: |-
     Manages group lifecycle policies for Microsoft 365 groups using the /groupLifecyclePolicies endpoint. This resource enables administrators to set expiration periods for groups, requiring owners to renew them within specified time intervals. When a group reaches its expiration, it can be renewed to extend the expiration date, or if not renewed, it expires and is deleted with a 30-day restoration window.

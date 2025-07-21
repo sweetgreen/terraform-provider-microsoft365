@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_powershell_microsoft_teams_teams_meeting_policy Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_powershell_microsoft_teams_teams_meeting_policy Resource - microsoft365"
 subcategory: "Microsoft Teams"
 description: |-
   Manages a Microsoft Teams Meeting Policy using PowerShell cmdlets. The CsTeamsMeetingPolicy cmdlets enable administrators to control the type of meetings that users can create or the features that they can access while in a meeting. It also helps determine how meetings deal with anonymous or external users.

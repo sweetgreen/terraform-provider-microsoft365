@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_groups_group_settings Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_groups_group_settings Resource - microsoft365"
 subcategory: "Groups"
 description: |-
     Manages group-specific directory settings for Microsoft 365 groups using the /groups/{group-id}/settings endpoint.This resource enables configuration of group-level settings such as guest access permissions and other group-specific policies that override tenant-wide defaults.Use this resource in conjunction with the datasource 'microsoft365_graph_beta_directory_management_directory_setting_templates' to get the template_id, settings and values.Use this resource in conjection with the resource 'microsoft365_graph_beta_groups_group' to get the group_id.

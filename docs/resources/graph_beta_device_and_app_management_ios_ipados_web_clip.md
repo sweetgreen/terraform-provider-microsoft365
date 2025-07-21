@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_and_app_management_ios_ipados_web_clip Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_device_and_app_management_ios_ipados_web_clip Resource - microsoft365"
 subcategory: "Device and App Management"
 
 description: |-

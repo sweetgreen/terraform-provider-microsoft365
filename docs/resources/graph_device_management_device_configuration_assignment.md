@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_device_management_device_configuration_assignment Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_device_management_device_configuration_assignment Resource - microsoft365"
 subcategory: "Device Management"
 
 description: |-

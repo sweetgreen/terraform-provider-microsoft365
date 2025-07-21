@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_windows_365_cloud_pc_alert_rule Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_windows_365_cloud_pc_alert_rule Resource - microsoft365"
 subcategory: "Windows 365"
 
 description: |-
