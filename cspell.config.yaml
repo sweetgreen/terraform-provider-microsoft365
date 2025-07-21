@@ -1,0 +1,15 @@
+version: "0.2"
+ignorePaths: []
+dictionaryDefinitions: []
+dictionaries: []
+words:
+  - acctest
+  - golangci
+  - Intune
+  - Intune's
+  - Kiota
+  - netdump
+  - terraformfmt
+  - userdocs
+ignoreWords: []
+import: []
