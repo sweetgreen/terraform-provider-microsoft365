@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all deps build install clean userdocs unittest acctest test coverage netdump lint precommit
+.PHONY: all deps build install clean userdocs unittest acctest test coverage netdump lint precommit act-test act-lint act-ci act-dry-run
 
 all: precommit
 
@@ -76,3 +76,20 @@ precommit:
 	$(MAKE) unittest
 	$(MAKE) userdocs
 	$(MAKE) terraformfmt
+
+# Act commands for running GitHub Actions locally
+act-test:
+	@echo "Running unit tests locally with act..."
+	act -W .github/workflows/unit-tests.yml
+
+act-lint:
+	@echo "Running linting locally with act..."
+	act workflow_dispatch -W .github/workflows/go-lint.yml
+
+act-ci:
+	@echo "Running all CI checks locally with act..."
+	act pull_request
+
+act-dry-run:
+	@echo "Dry run - showing what would be executed..."
+	act -l
