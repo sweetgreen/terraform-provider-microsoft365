@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_utility_windows_msi_app_metadata Data Source - microsoft365"
+page_title: "microsoft365_utility_windows_msi_app_metadata Data Source - terraform-provider-microsoft365"
 subcategory: "Utilities"
 description: |-
   Use this data source to query the iTunes App Store API for app metadata.
