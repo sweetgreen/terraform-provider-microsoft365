@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_role_assignment Resource - microsoft365"
+page_title: "microsoft365_graph_beta_device_management_role_assignment Resource - terraform-provider-microsoft365"
 subcategory: "Device Management"
 
 description: |-
