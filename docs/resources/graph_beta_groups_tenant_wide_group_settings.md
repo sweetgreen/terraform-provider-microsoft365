@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_groups_tenant_wide_group_settings Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_groups_tenant_wide_group_settings Resource - microsoft365"
 subcategory: "Groups"
 description: |-
     Manages tenant-wide directory settings for Microsoft 365 groups using the /settings endpoint. This resource enables a collection of configurations that allow admins to manage behaviors for specific Microsoft Entra objects like Microsoft 365 groups.This resource applies settings tenant-wide, enabling admins to control various aspects of group functionality.Use this resource in conjunction with the datasource 'microsoft365_graph_beta_directory_management_directory_setting_templates' to get the template_id, settings and values.

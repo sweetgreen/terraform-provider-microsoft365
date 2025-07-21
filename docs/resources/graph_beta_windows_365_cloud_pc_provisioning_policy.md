@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_windows_365_cloud_pc_provisioning_policy Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_windows_365_cloud_pc_provisioning_policy Resource - microsoft365"
 subcategory: "Windows 365"
 
 description: |-

@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_windows_update_ring Data Source - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_device_management_windows_update_ring Data Source - microsoft365"
 subcategory: "Device Management"
 
 description: |-

@@ -4,7 +4,7 @@ description: |-
   
 ---
 
-# Microsoft 365 Provider
+# microsoft365 Provider
 
 The community Microsoft 365 provider allows managing environments and other resources within [Microsoft 365](https://www.microsoft.com/en-gb/microsoft-365/products-apps-services).
 

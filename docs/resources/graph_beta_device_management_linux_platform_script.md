@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_linux_platform_script Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_device_management_linux_platform_script Resource - microsoft365"
 subcategory: "Device Management"
 
 description: |-

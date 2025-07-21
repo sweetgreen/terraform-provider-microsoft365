@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_windows_autopilot_device_identity Resource - terraform-provider-microsoft365"
+page_title: "microsoft365_graph_beta_device_management_windows_autopilot_device_identity Resource - microsoft365"
 subcategory: "Device Management"
 
 description: |-
