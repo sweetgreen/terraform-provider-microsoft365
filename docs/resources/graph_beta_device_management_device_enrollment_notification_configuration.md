@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_device_enrollment_notification_configuration Resource - microsoft365"
+page_title: "microsoft365_graph_beta_device_management_device_enrollment_notification_configuration Resource - terraform-provider-microsoft365"
 subcategory: "Device Management"
 
 description: |-

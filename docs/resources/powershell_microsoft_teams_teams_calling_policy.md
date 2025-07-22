@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_powershell_microsoft_teams_teams_calling_policy Resource - microsoft365"
+page_title: "microsoft365_powershell_microsoft_teams_teams_calling_policy Resource - terraform-provider-microsoft365"
 subcategory: "Microsoft Teams"
 description: |-
   Manages a Microsoft Teams Calling Policy using PowerShell cmdlets. See Set-CsTeamsCallingPolicy https://learn.microsoft.com/en-us/powershell/module/teams/set-csteamscallingpolicy?view=teams-ps and New-CsTeamsCallingPolicy https://learn.microsoft.com/en-us/powershell/module/teams/new-csteamscallingpolicy?view=teams-ps.

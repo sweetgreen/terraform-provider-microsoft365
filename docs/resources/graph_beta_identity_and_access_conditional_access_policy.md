@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_identity_and_access_conditional_access_policy Resource - microsoft365"
+page_title: "microsoft365_graph_beta_identity_and_access_conditional_access_policy Resource - terraform-provider-microsoft365"
 subcategory: "Identity and Access"
 description: |-
   Manages Microsoft 365 Conditional Access Policies using the /identity/conditionalAccess/policies endpoint. Conditional Access policies define the conditions under which users can access cloud apps.
