@@ -78,19 +78,7 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 			mockState.Unlock()
 
 			if isUpdated {
-				// Check if this is a request with expand=assignments
-				if req.URL.Query().Get("$expand") == "assignments" {
-					// For updated script, we need to ensure assignments match the update config
-					scriptData["assignments"] = []map[string]interface{}{
-						{
-							"id": "00000000-0000-0000-0000-000000000004",
-							"target": map[string]interface{}{
-								"@odata.type": "#microsoft.graph.allDevicesAssignmentTarget",
-							},
-						},
-					}
-				}
-				// Return the updated script data
+				// Return the updated script data with assignments that were set via POST /assign
 				return httpmock.NewJsonResponse(200, scriptData)
 			}
 
