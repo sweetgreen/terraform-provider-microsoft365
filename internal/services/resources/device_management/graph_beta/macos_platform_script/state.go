@@ -6,15 +6,20 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
-	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+
+	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
+	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta/device_management"
 )
 
 // MapRemoteResourceStateToTerraform maps the base properties of a MacOSPlatformScriptResourceModel to a Terraform state.
-func MapRemoteResourceStateToTerraform(ctx context.Context, data *MacOSPlatformScriptResourceModel, remoteResource graphmodels.DeviceShellScriptable) {
+func MapRemoteResourceStateToTerraform(
+	ctx context.Context,
+	data *MacOSPlatformScriptResourceModel,
+	remoteResource graphmodels.DeviceShellScriptable,
+) {
 	if remoteResource == nil {
 		tflog.Debug(ctx, "Remote resource is nil")
 		return
@@ -30,35 +35,38 @@ func MapRemoteResourceStateToTerraform(ctx context.Context, data *MacOSPlatformS
 	data.Description = convert.GraphToFrameworkString(remoteResource.GetDescription())
 	data.RunAsAccount = convert.GraphToFrameworkEnum(remoteResource.GetRunAsAccount())
 	data.FileName = convert.GraphToFrameworkString(remoteResource.GetFileName())
-	data.RoleScopeTagIds = convert.GraphToFrameworkStringSet(ctx, remoteResource.GetRoleScopeTagIds())
-	data.BlockExecutionNotifications = convert.GraphToFrameworkBool(remoteResource.GetBlockExecutionNotifications())
-	data.ExecutionFrequency = convert.GraphToFrameworkISODuration(remoteResource.GetExecutionFrequency())
+	data.RoleScopeTagIds = convert.GraphToFrameworkStringSet(
+		ctx,
+		remoteResource.GetRoleScopeTagIds(),
+	)
+	data.BlockExecutionNotifications = convert.GraphToFrameworkBool(
+		remoteResource.GetBlockExecutionNotifications(),
+	)
+	data.ExecutionFrequency = convert.GraphToFrameworkISODuration(
+		remoteResource.GetExecutionFrequency(),
+	)
 	data.ScriptContent = convert.GraphToFrameworkBytes(remoteResource.GetScriptContent())
 	data.RetryCount = convert.GraphToFrameworkInt32(remoteResource.GetRetryCount())
 
 	assignments := remoteResource.GetAssignments()
 
-	// If there are no assignments, set data.Assignments to nil
-	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments found, setting assignments to nil")
-		data.Assignments = nil
-	} else {
-		MapAssignmentsToTerraform(ctx, data, assignments)
-	}
+	// Always process assignments to preserve the state structure
+	MapAssignmentsToTerraform(ctx, data, assignments)
 
-	tflog.Debug(ctx, fmt.Sprintf("Finished stating resource %s with id %s", ResourceName, data.ID.ValueString()))
+	tflog.Debug(
+		ctx,
+		fmt.Sprintf("Finished stating resource %s with id %s", ResourceName, data.ID.ValueString()),
+	)
 }
 
 // MapAssignmentsToTerraform processes script assignments directly from the slice returned by GetAssignments
 // There appears to be no other way to do this, as the assignments are not returned by any other api call
 // despite all of the docs saying there is.
-func MapAssignmentsToTerraform(ctx context.Context, data *MacOSPlatformScriptResourceModel, assignments []graphmodels.DeviceManagementScriptAssignmentable) {
-	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments to process, setting assignments to nil")
-		data.Assignments = nil
-		return
-	}
-
+func MapAssignmentsToTerraform(
+	ctx context.Context,
+	data *MacOSPlatformScriptResourceModel,
+	assignments []graphmodels.DeviceManagementScriptAssignmentable,
+) {
 	tflog.Debug(ctx, "Processing assignments from resource response")
 
 	processAssignments(ctx, data, assignments)
@@ -66,16 +74,20 @@ func MapAssignmentsToTerraform(ctx context.Context, data *MacOSPlatformScriptRes
 
 // processAssignments handles the direct processing of assignment slices
 // This contains the core logic from MapRemoteAssignmentStateToTerraform but works with the slice type
-func processAssignments(ctx context.Context, data *MacOSPlatformScriptResourceModel, assignments []graphmodels.DeviceManagementScriptAssignmentable) {
+func processAssignments(
+	ctx context.Context,
+	data *MacOSPlatformScriptResourceModel,
+	assignments []graphmodels.DeviceManagementScriptAssignmentable,
+) {
 	tflog.Debug(ctx, "Starting to map assignments directly to Terraform state")
 
-	// If no assignments are provided, set data.Assignments to nil and return
-	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments to process in processAssignments, setting assignments to nil")
-		data.Assignments = nil
+	// If data.Assignments is nil and there are no assignments from API, keep it nil
+	if data.Assignments == nil && len(assignments) == 0 {
+		tflog.Debug(ctx, "No assignments in config or API, keeping assignments as nil")
 		return
 	}
 
+	// Initialize scriptAssignments with false values for all boolean fields
 	scriptAssignments := &sharedmodels.DeviceManagementScriptAssignmentResourceModel{
 		AllDevices: types.BoolValue(false),
 		AllUsers:   types.BoolValue(false),
@@ -147,13 +159,8 @@ func processAssignments(ctx context.Context, data *MacOSPlatformScriptResourceMo
 		scriptAssignments.ExcludeGroupIds = excludeGroupIds
 	}
 
-	// Only set assignments if there are actual assignments
-	if len(allDeviceAssignments) > 0 || len(allUserAssignments) > 0 ||
-		len(includeGroupAssignments) > 0 || len(excludeGroupAssignments) > 0 {
-		data.Assignments = scriptAssignments
-	} else {
-		data.Assignments = nil
-	}
+	// Always set assignments to preserve the state structure when assignments were defined in config
+	data.Assignments = scriptAssignments
 
 	tflog.Debug(ctx, "Finished mapping assignments directly to Terraform state")
 }

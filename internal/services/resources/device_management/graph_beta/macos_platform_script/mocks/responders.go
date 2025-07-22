@@ -8,8 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks/factories"
 	"github.com/jarcoal/httpmock"
+
+	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/mocks/factories"
 )
 
 // mockState tracks the state of resources for consistent responses
@@ -26,7 +27,12 @@ func init() {
 	mockState.scriptData = make(map[string]map[string]interface{})
 
 	// Register a default 404 responder for any unmatched requests
-	httpmock.RegisterNoResponder(httpmock.NewStringResponder(404, `{"error":{"code":"ResourceNotFound","message":"Resource not found"}}`))
+	httpmock.RegisterNoResponder(
+		httpmock.NewStringResponder(
+			404,
+			`{"error":{"code":"ResourceNotFound","message":"Resource not found"}}`,
+		),
+	)
 }
 
 // MacOSPlatformScriptMock provides mock responses for macOS platform script operations
@@ -55,14 +61,7 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 		"blockExecutionNotifications": true,
 		"executionFrequency":          "P1D",
 		"retryCount":                  3,
-		"assignments": []map[string]interface{}{
-			{
-				"id": "00000000-0000-0000-0000-000000000002",
-				"target": map[string]interface{}{
-					"@odata.type": "#microsoft.graph.allLicensedUsersAssignmentTarget",
-				},
-			},
-		},
+		"assignments":                 []map[string]interface{}{}, // Start with empty assignments
 	}
 
 	mockState.Lock()
@@ -70,36 +69,23 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 	mockState.Unlock()
 
 	// Register GET Read - Basic/Default script
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000001",
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000001",
 		func(req *http.Request) (*http.Response, error) {
 			mockState.Lock()
-			isUpdated := mockState.scriptUpdated["00000000-0000-0000-0000-000000000001"]
 			scriptData := mockState.scriptData["00000000-0000-0000-0000-000000000001"]
 			mockState.Unlock()
 
-			if isUpdated {
-				// Check if this is a request with expand=assignments
-				if req.URL.Query().Get("$expand") == "assignments" {
-					// For updated script, we need to ensure assignments match the update config
-					scriptData["assignments"] = []map[string]interface{}{
-						{
-							"id": "00000000-0000-0000-0000-000000000004",
-							"target": map[string]interface{}{
-								"@odata.type": "#microsoft.graph.allDevicesAssignmentTarget",
-							},
-						},
-					}
-				}
-				// Return the updated script data
-				return httpmock.NewJsonResponse(200, scriptData)
-			}
-
-			// Return the original script data
+			// Return the current script data (which includes any updates from assign operations)
 			return httpmock.NewJsonResponse(200, scriptData)
-		})
+		},
+	)
 
 	// Register GET Read - Updated script
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000003",
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000003",
 		func(req *http.Request) (*http.Response, error) {
 			response := map[string]interface{}{
 				"id":                          "00000000-0000-0000-0000-000000000003",
@@ -124,10 +110,13 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				},
 			}
 			return httpmock.NewJsonResponse(200, response)
-		})
+		},
+	)
 
 	// Register GET Read - Minimal script
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000005",
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000005",
 		func(req *http.Request) (*http.Response, error) {
 			response := map[string]interface{}{
 				"id":                   "00000000-0000-0000-0000-000000000005",
@@ -141,10 +130,13 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				"assignments":          []map[string]interface{}{},
 			}
 			return httpmock.NewJsonResponse(200, response)
-		})
+		},
+	)
 
 	// Register GET Read - Maximal script
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000006",
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000006",
 		func(req *http.Request) (*http.Response, error) {
 			response := map[string]interface{}{
 				"id":                          "00000000-0000-0000-0000-000000000006",
@@ -169,10 +161,13 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				},
 			}
 			return httpmock.NewJsonResponse(200, response)
-		})
+		},
+	)
 
 	// Register GET Read - Group Assignment script
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000008",
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000008",
 		func(req *http.Request) (*http.Response, error) {
 			response := map[string]interface{}{
 				"id":                   "00000000-0000-0000-0000-000000000008",
@@ -202,10 +197,13 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				},
 			}
 			return httpmock.NewJsonResponse(200, response)
-		})
+		},
+	)
 
 	// Register POST Create
-	httpmock.RegisterResponder("POST", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
+	httpmock.RegisterResponder(
+		"POST",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
 		func(req *http.Request) (*http.Response, error) {
 			var requestBody map[string]interface{}
 			if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
@@ -217,13 +215,14 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 			displayName := requestBody["displayName"].(string)
 
 			// Assign different IDs based on display name for different test cases
-			if displayName == "Minimal macOS Script" {
+			switch displayName {
+			case "Minimal macOS Script":
 				id = "00000000-0000-0000-0000-000000000005"
-			} else if displayName == "Maximal macOS Script" {
+			case "Maximal macOS Script":
 				id = "00000000-0000-0000-0000-000000000006"
-			} else if displayName == "Group Assignment Script" {
+			case "Group Assignment Script":
 				id = "00000000-0000-0000-0000-000000000008"
-			} else if displayName == "Updated macOS Script" {
+			case "Updated macOS Script":
 				id = "00000000-0000-0000-0000-000000000003"
 			}
 
@@ -240,16 +239,31 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				response["roleScopeTagIds"] = []string{"0"}
 			}
 
-			// Store in our state
+			// Store in our state with empty assignments initially
+			response["assignments"] = []map[string]interface{}{}
+
 			mockState.Lock()
 			mockState.scriptData[id] = response
 			mockState.Unlock()
 
-			return httpmock.NewJsonResponse(201, response)
-		})
+			// Don't include assignments in the create response (API doesn't return them)
+			createResponse := make(map[string]interface{})
+			for k, v := range response {
+				if k != "assignments" {
+					createResponse[k] = v
+				}
+			}
+
+			return httpmock.NewJsonResponse(201, createResponse)
+		},
+	)
 
 	// Register PATCH Update
-	httpmock.RegisterRegexpResponder("PATCH", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`),
+	httpmock.RegisterRegexpResponder(
+		"PATCH",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`,
+		),
 		func(req *http.Request) (*http.Response, error) {
 			// Extract ID from URL
 			urlParts := strings.Split(req.URL.Path, "/")
@@ -281,17 +295,25 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 
 			// For update, return a 204 No Content
 			return httpmock.NewStringResponse(204, ""), nil
-		})
+		},
+	)
 
 	// Register DELETE
-	httpmock.RegisterRegexpResponder("DELETE", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`),
+	httpmock.RegisterRegexpResponder(
+		"DELETE",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`,
+		),
 		func(req *http.Request) (*http.Response, error) {
 			// For delete, return a 204 No Content
 			return httpmock.NewStringResponse(204, ""), nil
-		})
+		},
+	)
 
 	// Register GET List
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
 		func(req *http.Request) (*http.Response, error) {
 			response := map[string]interface{}{
 				"@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/deviceShellScripts",
@@ -319,10 +341,15 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				},
 			}
 			return httpmock.NewJsonResponse(200, response)
-		})
+		},
+	)
 
 	// Register POST Assign for all script IDs
-	httpmock.RegisterRegexpResponder("POST", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assign`),
+	httpmock.RegisterRegexpResponder(
+		"POST",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assign`,
+		),
 		func(req *http.Request) (*http.Response, error) {
 			// Extract ID from URL
 			urlParts := strings.Split(req.URL.Path, "/")
@@ -346,7 +373,11 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 					for _, assignment := range deviceManagementScriptAssignments {
 						if assignmentMap, ok := assignment.(map[string]interface{}); ok {
 							if target, ok := assignmentMap["target"].(map[string]interface{}); ok {
-								assignmentID := fmt.Sprintf("%s_assign_%s", id, target["@odata.type"])
+								assignmentID := fmt.Sprintf(
+									"%s_assign_%s",
+									id,
+									target["@odata.type"],
+								)
 								assignments = append(assignments, map[string]interface{}{
 									"id":     assignmentID,
 									"target": target,
@@ -366,10 +397,15 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 
 			// For assign, return a 204 No Content
 			return httpmock.NewStringResponse(204, ""), nil
-		})
+		},
+	)
 
 	// Register GET Assignments for all script IDs
-	httpmock.RegisterRegexpResponder("GET", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assignments`),
+	httpmock.RegisterRegexpResponder(
+		"GET",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assignments`,
+		),
 		func(req *http.Request) (*http.Response, error) {
 			// Extract ID from URL to determine which assignments to return
 			urlParts := strings.Split(req.URL.Path, "/")
@@ -377,23 +413,11 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 
 			mockState.Lock()
 			scriptData := mockState.scriptData[id]
-			isUpdated := mockState.scriptUpdated[id]
 			mockState.Unlock()
 
 			var assignments []map[string]interface{}
 
-			// Special case for the basic script ID when it's updated
-			if id == "00000000-0000-0000-0000-000000000001" && isUpdated {
-				// For updated script, return the assignments from the update config
-				assignments = []map[string]interface{}{
-					{
-						"id": fmt.Sprintf("%s_adadadad-808e-44e2-905a-0b7873a8a531", id),
-						"target": map[string]interface{}{
-							"@odata.type": "#microsoft.graph.allDevicesAssignmentTarget",
-						},
-					},
-				}
-			} else if scriptData != nil {
+			if scriptData != nil {
 				if scriptAssignments, ok := scriptData["assignments"].([]map[string]interface{}); ok {
 					assignments = scriptAssignments
 				} else if scriptAssignmentsInterface, ok := scriptData["assignments"].([]interface{}); ok {
@@ -406,72 +430,22 @@ func (m *MacOSPlatformScriptMock) RegisterMocks() {
 				}
 			}
 
-			// If no assignments found in state, use defaults based on ID
-			if len(assignments) == 0 {
-				switch id {
-				case "00000000-0000-0000-0000-000000000003":
-					// Updated script - all devices (from the update config)
-					assignments = []map[string]interface{}{
-						{
-							"id": fmt.Sprintf("%s_adadadad-808e-44e2-905a-0b7873a8a531", id),
-							"target": map[string]interface{}{
-								"@odata.type": "#microsoft.graph.allDevicesAssignmentTarget",
-							},
-						},
-					}
-				case "00000000-0000-0000-0000-000000000006":
-					// Maximal script - all devices
-					assignments = []map[string]interface{}{
-						{
-							"id": fmt.Sprintf("%s_adadadad-808e-44e2-905a-0b7873a8a531", id),
-							"target": map[string]interface{}{
-								"@odata.type": "#microsoft.graph.allDevicesAssignmentTarget",
-							},
-						},
-					}
-				case "00000000-0000-0000-0000-000000000008":
-					// Group assignment script
-					assignments = []map[string]interface{}{
-						{
-							"id": fmt.Sprintf("%s_adadadad-808e-44e2-905a-0b7873a8a531", id),
-							"target": map[string]interface{}{
-								"@odata.type": "#microsoft.graph.groupAssignmentTarget",
-								"groupId":     "11111111-1111-1111-1111-111111111111",
-							},
-						},
-						{
-							"id": fmt.Sprintf("%s_bbbbbbbb-808e-44e2-905a-0b7873a8a531", id),
-							"target": map[string]interface{}{
-								"@odata.type": "#microsoft.graph.exclusionGroupAssignmentTarget",
-								"groupId":     "22222222-2222-2222-2222-222222222222",
-							},
-						},
-					}
-				default:
-					// Default for basic script - all users
-					if id == "00000000-0000-0000-0000-000000000001" {
-						assignments = []map[string]interface{}{
-							{
-								"id": fmt.Sprintf("%s_adadadad-808e-44e2-905a-0b7873a8a531", id),
-								"target": map[string]interface{}{
-									"@odata.type": "#microsoft.graph.allLicensedUsersAssignmentTarget",
-								},
-							},
-						}
-					} else {
-						// Empty assignments for other scripts
-						assignments = []map[string]interface{}{}
-					}
-				}
+			// If assignments is nil, make it an empty array
+			if assignments == nil {
+				assignments = []map[string]interface{}{}
 			}
 
 			responseBody := map[string]interface{}{
-				"@odata.context": fmt.Sprintf("https://graph.microsoft.com/beta/$metadata#deviceManagement/deviceShellScripts('%s')/assignments", id),
-				"value":          assignments,
+				"@odata.context": fmt.Sprintf(
+					"https://graph.microsoft.com/beta/$metadata#deviceManagement/deviceShellScripts('%s')/assignments",
+					id,
+				),
+				"value": assignments,
 			}
 
 			return httpmock.NewJsonResponse(200, responseBody)
-		})
+		},
+	)
 }
 
 // RegisterErrorMocks registers HTTP mock responses that return errors
@@ -479,30 +453,59 @@ func (m *MacOSPlatformScriptMock) RegisterErrorMocks() {
 	// Register error responses for each operation
 
 	// GET - Read error
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000001",
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/00000000-0000-0000-0000-000000000001",
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 
 	// POST - Create error
-	httpmock.RegisterResponder("POST", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterResponder(
+		"POST",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 
 	// PATCH - Update error
-	httpmock.RegisterRegexpResponder("PATCH", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`),
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterRegexpResponder(
+		"PATCH",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`,
+		),
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 
 	// DELETE - Delete error
-	httpmock.RegisterRegexpResponder("DELETE", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`),
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterRegexpResponder(
+		"DELETE",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)`,
+		),
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 
 	// GET - List error
-	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterResponder(
+		"GET",
+		"https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts",
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 
 	// POST - Assign error
-	httpmock.RegisterRegexpResponder("POST", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assign`),
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterRegexpResponder(
+		"POST",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assign`,
+		),
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 
 	// GET - Assignments error
-	httpmock.RegisterRegexpResponder("GET", regexp.MustCompile(`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assignments`),
-		factories.ErrorResponse(403, "Forbidden", "Access denied"))
+	httpmock.RegisterRegexpResponder(
+		"GET",
+		regexp.MustCompile(
+			`https://graph\.microsoft\.com/beta/deviceManagement/deviceShellScripts/([0-9a-f-]+)/assignments`,
+		),
+		factories.ErrorResponse(403, "Forbidden", "Access denied"),
+	)
 }
