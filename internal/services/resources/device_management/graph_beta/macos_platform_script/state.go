@@ -38,10 +38,19 @@ func MapRemoteResourceStateToTerraform(ctx context.Context, data *MacOSPlatformS
 
 	assignments := remoteResource.GetAssignments()
 
-	// If there are no assignments, set data.Assignments to nil
+	// If there are no assignments, check if assignments were configured
 	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments found, setting assignments to nil")
-		data.Assignments = nil
+		// If assignments were configured in Terraform (not nil), maintain the structure with defaults
+		if data.Assignments != nil {
+			tflog.Debug(ctx, "No assignments found but assignments were configured, maintaining structure with defaults")
+			data.Assignments = &sharedmodels.DeviceManagementScriptAssignmentResourceModel{
+				AllDevices: types.BoolValue(false),
+				AllUsers:   types.BoolValue(false),
+			}
+		} else {
+			tflog.Debug(ctx, "No assignments found and none were configured, setting assignments to nil")
+			data.Assignments = nil
+		}
 	} else {
 		MapAssignmentsToTerraform(ctx, data, assignments)
 	}
