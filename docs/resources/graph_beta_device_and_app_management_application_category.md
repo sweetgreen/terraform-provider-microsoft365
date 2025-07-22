@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_and_app_management_application_category Resource - microsoft365"
+page_title: "microsoft365_graph_beta_device_and_app_management_application_category Resource - terraform-provider-microsoft365"
 subcategory: "Device and App Management"
 
 description: |-

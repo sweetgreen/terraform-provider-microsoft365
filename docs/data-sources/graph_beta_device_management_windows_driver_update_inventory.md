@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_windows_driver_update_inventory Data Source - microsoft365"
+page_title: "microsoft365_graph_beta_device_management_windows_driver_update_inventory Data Source - terraform-provider-microsoft365"
 subcategory: "Device Management"
 
 description: |-
