@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_windows_feature_update_profile Resource - microsoft365"
+page_title: "microsoft365_graph_beta_device_management_windows_feature_update_profile Resource - terraform-provider-microsoft365"
 subcategory: "Device Management"
 
 description: |-
