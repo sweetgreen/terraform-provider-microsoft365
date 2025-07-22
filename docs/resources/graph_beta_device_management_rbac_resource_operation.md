@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_rbac_resource_operation Resource - microsoft365"
+page_title: "microsoft365_graph_beta_device_management_rbac_resource_operation Resource - terraform-provider-microsoft365"
 subcategory: "Device Management"
 
 description: |-
