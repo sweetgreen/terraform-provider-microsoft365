@@ -38,10 +38,19 @@ func MapRemoteResourceStateToTerraform(ctx context.Context, data *MacOSPlatformS
 
 	assignments := remoteResource.GetAssignments()
 
-	// If there are no assignments, set data.Assignments to nil
+	// If there are no assignments, check if assignments were configured
 	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments found, setting assignments to nil")
-		data.Assignments = nil
+		// If assignments were configured but are empty, maintain the structure with default false values
+		if data.Assignments != nil {
+			tflog.Debug(ctx, "No assignments found but assignments were configured, maintaining structure with default values")
+			data.Assignments = &sharedmodels.DeviceManagementScriptAssignmentResourceModel{
+				AllDevices: types.BoolValue(false),
+				AllUsers:   types.BoolValue(false),
+			}
+		} else {
+			tflog.Debug(ctx, "No assignments found and none were configured, setting assignments to nil")
+			data.Assignments = nil
+		}
 	} else {
 		MapAssignmentsToTerraform(ctx, data, assignments)
 	}
@@ -54,8 +63,17 @@ func MapRemoteResourceStateToTerraform(ctx context.Context, data *MacOSPlatformS
 // despite all of the docs saying there is.
 func MapAssignmentsToTerraform(ctx context.Context, data *MacOSPlatformScriptResourceModel, assignments []graphmodels.DeviceManagementScriptAssignmentable) {
 	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments to process, setting assignments to nil")
-		data.Assignments = nil
+		// If assignments were configured but are empty, maintain the structure with default false values
+		if data.Assignments != nil {
+			tflog.Debug(ctx, "No assignments to process but assignments were configured, maintaining structure with default values")
+			data.Assignments = &sharedmodels.DeviceManagementScriptAssignmentResourceModel{
+				AllDevices: types.BoolValue(false),
+				AllUsers:   types.BoolValue(false),
+			}
+		} else {
+			tflog.Debug(ctx, "No assignments to process and none were configured, setting assignments to nil")
+			data.Assignments = nil
+		}
 		return
 	}
 
@@ -69,10 +87,19 @@ func MapAssignmentsToTerraform(ctx context.Context, data *MacOSPlatformScriptRes
 func processAssignments(ctx context.Context, data *MacOSPlatformScriptResourceModel, assignments []graphmodels.DeviceManagementScriptAssignmentable) {
 	tflog.Debug(ctx, "Starting to map assignments directly to Terraform state")
 
-	// If no assignments are provided, set data.Assignments to nil and return
+	// If no assignments are provided, check if assignments were configured
 	if len(assignments) == 0 {
-		tflog.Debug(ctx, "No assignments to process in processAssignments, setting assignments to nil")
-		data.Assignments = nil
+		// If assignments were configured but are empty, maintain the structure with default false values
+		if data.Assignments != nil {
+			tflog.Debug(ctx, "No assignments to process in processAssignments but assignments were configured, maintaining structure with default values")
+			data.Assignments = &sharedmodels.DeviceManagementScriptAssignmentResourceModel{
+				AllDevices: types.BoolValue(false),
+				AllUsers:   types.BoolValue(false),
+			}
+		} else {
+			tflog.Debug(ctx, "No assignments to process in processAssignments and none were configured, setting assignments to nil")
+			data.Assignments = nil
+		}
 		return
 	}
 
@@ -152,7 +179,15 @@ func processAssignments(ctx context.Context, data *MacOSPlatformScriptResourceMo
 		len(includeGroupAssignments) > 0 || len(excludeGroupAssignments) > 0 {
 		data.Assignments = scriptAssignments
 	} else {
-		data.Assignments = nil
+		// If assignments were configured but are empty, maintain the structure with default false values
+		if data.Assignments != nil {
+			data.Assignments = &sharedmodels.DeviceManagementScriptAssignmentResourceModel{
+				AllDevices: types.BoolValue(false),
+				AllUsers:   types.BoolValue(false),
+			}
+		} else {
+			data.Assignments = nil
+		}
 	}
 
 	tflog.Debug(ctx, "Finished mapping assignments directly to Terraform state")
