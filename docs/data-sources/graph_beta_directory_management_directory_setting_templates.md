@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_directory_management_directory_setting_templates Data Source - microsoft365"
+page_title: "microsoft365_graph_beta_directory_management_directory_setting_templates Data Source - terraform-provider-microsoft365"
 subcategory: "Directory Management"
 description: |-
     Retrieves information about directory setting templates available in Microsoft 365. Directory setting templates represent system-defined settings available to the tenant. Directory settings can be created based on the available templates, and values changed from their preset defaults. These templates are read-only and define the allowed behaviors for specific Microsoft Entra objects like Microsoft 365 groups.

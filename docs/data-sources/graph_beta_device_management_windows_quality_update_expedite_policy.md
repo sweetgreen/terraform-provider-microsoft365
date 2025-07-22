@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_graph_beta_device_management_windows_quality_update_expedite_policy Data Source - microsoft365"
+page_title: "microsoft365_graph_beta_device_management_windows_quality_update_expedite_policy Data Source - terraform-provider-microsoft365"
 subcategory: "Device Management"
 
 description: |-
