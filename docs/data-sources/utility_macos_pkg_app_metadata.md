@@ -1,5 +1,5 @@
 ---
-page_title: "microsoft365_utility_macos_pkg_app_metadata Data Source - microsoft365"
+page_title: "microsoft365_utility_macos_pkg_app_metadata Data Source - terraform-provider-microsoft365"
 subcategory: "Utilities"
 
 description: |-
