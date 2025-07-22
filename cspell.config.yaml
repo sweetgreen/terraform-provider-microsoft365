@@ -10,6 +10,7 @@ words:
   - Kiota
   - netdump
   - terraformfmt
+  - tfplugindocs
   - userdocs
 ignoreWords: []
 import: []
