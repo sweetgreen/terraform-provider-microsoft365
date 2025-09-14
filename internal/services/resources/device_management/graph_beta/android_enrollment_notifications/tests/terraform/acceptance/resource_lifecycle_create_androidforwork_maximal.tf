@@ -11,7 +11,7 @@ resource "azuread_group" "acc_test_group_1" {
 }
 
 resource "azuread_group" "acc_test_group_2" {
-  display_name     = "Test Group 2 - ${random_uuid.group_2.result}" 
+  display_name     = "Test Group 2 - ${random_uuid.group_2.result}"
   security_enabled = true
 }
 

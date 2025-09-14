@@ -104,12 +104,9 @@ resource "microsoft365_graph_beta_device_management_android_enrollment_notificat
 
 ### Read-Only
 
-- `created_date_time` (String) The date and time when the notification configuration was created.
 - `device_enrollment_configuration_type` (String) The type of device enrollment configuration.
 - `id` (String) The unique identifier for the Android Enterprise notification configuration.
-- `last_modified_date_time` (String) The date and time when the notification configuration was last modified.
 - `priority` (Number) The priority of the notification configuration.
-- `version` (Number) The version of the notification configuration.
 
 <a id="nestedatt--assignments"></a>
 ### Nested Schema for `assignments`
