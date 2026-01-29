@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.43.1-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.0-alpha...v0.43.1-alpha) (2026-01-29)
+
+
+### Bug Fixes
+
+* run go mod tidy to sync dependencies ([dc7fefd](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/dc7fefd3213fb2cac4f74bdc2c01439f8d12bd67))
+
 ## [0.43.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.42.0-alpha...v0.43.0-alpha) (2026-01-29)
 
 
