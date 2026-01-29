@@ -1,5 +1,5 @@
-# cloned from hashicorp and modifed to support ubuntu-latest-m , which provides more disk space
-# for go build to complete successfully.
+# Cloned from hashicorp and modified to support larger runners with more disk space
+# Uses ubuntu-22.04-arm-4c-l to match upstream configuration
 name: provider | Terraform Registry with goreleaser
 
 permissions:
@@ -40,7 +40,7 @@ on:
 
 jobs:
   Release:
-    runs-on: ubuntu-xlarge # using sweetgreen self-hosted runner for more disk space
+    runs-on: ubuntu-22.04-arm-4c-l # Upstream GitHub larger runner with more disk space
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

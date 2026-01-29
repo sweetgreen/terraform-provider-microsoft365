@@ -21,7 +21,7 @@ permissions:
 jobs:
   pre-release-checks:
     name: '🚦 Pre-release Validation'
-    runs-on: ubuntu-xlarge
+    runs-on: ubuntu-22.04-arm-4c-l # Upstream GitHub larger runner with more disk space
     timeout-minutes: 120
     steps:
     - name: Harden Runner
