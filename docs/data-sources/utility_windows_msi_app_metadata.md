@@ -3,7 +3,7 @@ page_title: "microsoft365_utility_windows_msi_app_metadata Data Source - terrafo
 subcategory: "Utility"
 
 description: |-
-  Extracts comprehensive metadata from Windows MSI installer files. Supports both local file paths and remote URLs.
+  Extracts metadata from Windows MSI installer files locally or from URLs. This data source is used to retrieve product codes, versions, and installation commands for Win32 app deployment.
 ---
 
 # microsoft365_utility_windows_msi_app_metadata
@@ -11,6 +11,12 @@ description: |-
 Use this data source to extract metadata from a Windows MSI installer file.
 This data source allows you to extract metadata from a Windows MSI installer file,
 returning details like product name, version, and other metadata.
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v0.42.0-alpha | Experimental | Added missing version history |
 
 ## Example Usage
 

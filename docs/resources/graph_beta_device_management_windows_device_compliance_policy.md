@@ -3,12 +3,12 @@ page_title: "microsoft365_graph_beta_device_management_windows_device_compliance
 subcategory: "Device Management"
 
 description: |-
-  Manages Windows device compliance policies in Microsoft Intune using the /deviceManagement/deviceCompliancePolicies endpoint. Device compliance policies define rules and settings that devices must meet to be considered compliant with organizational security requirements. you can find out more here: 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows'.
+  Manages Windows device compliance policies using the /deviceManagement/deviceCompliancePolicies endpoint. This resource is used to device compliance policies define rules and settings that devices must meet to be considered compliant with organizational security requirements. you can find out more here: 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows'..
 ---
 
 # microsoft365_graph_beta_device_management_windows_device_compliance_policy (Resource)
 
-Manages Windows device compliance policies in Microsoft Intune using the `/deviceManagement/deviceCompliancePolicies` endpoint. Device compliance policies define rules and settings that devices must meet to be considered compliant with organizational security requirements. you can find out more here: 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows'.
+Manages Windows device compliance policies using the `/deviceManagement/deviceCompliancePolicies` endpoint. This resource is used to device compliance policies define rules and settings that devices must meet to be considered compliant with organizational security requirements. you can find out more here: 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows'..
 
 ## Microsoft Documentation
 
@@ -17,18 +17,23 @@ Manages Windows device compliance policies in Microsoft Intune using the `/devic
 - [Update windowsDeviceCompliancePolicy](https://learn.microsoft.com/en-us/graph/api/intune-deviceconfig-windows10compliancepolicy-update?view=graph-rest-beta&tabs=http)
 - [Delete windowsDeviceCompliancePolicy](https://learn.microsoft.com/en-us/graph/api/intune-deviceconfig-windows10compliancepolicy-delete?view=graph-rest-beta&tabs=http)
 
-## API Permissions
+## Microsoft Graph API Permissions
 
-The following API permissions are required in order to use this resource.
+The following client `application` permissions are needed in order to use this resource:
 
-### Microsoft Graph
+**Required:**
+- `DeviceManagementConfiguration.ReadWrite.All`
+- `DeviceManagementConfiguration.Read.All`
 
-- **Application**: `DeviceManagementConfiguration.ReadWrite.All` , `DeviceManagementConfiguration.Read.All`
+**Optional:**
+- `None` `[N/A]`
 
 ## Example Usage
 
+### Custom Compliance Policy
+
 ```terraform
-// Example 1: Custom Compliance Policy
+# Example: Custom Compliance Policy
 resource "microsoft365_graph_beta_device_management_windows_device_compliance_policy" "custom_compliance" {
   display_name       = "tf-reg-example-windows-device-compliance-policy-custom-compliance"
   description        = "tf-reg-example-windows-device-compliance-policy-custom-compliance"
@@ -124,8 +129,12 @@ resource "microsoft365_graph_beta_device_management_windows_device_compliance_po
   ]
 
 }
+```
 
-// Example 2: Device Health Policy
+### Device Health Policy
+
+```terraform
+# Example: Device Health Policy
 resource "microsoft365_graph_beta_device_management_windows_device_compliance_policy" "device_health" {
   display_name       = "tf-reg-windows-device-compliance-policy-device-health"
   description        = "tf-reg-windows-device-compliance-policy-device-health"
@@ -160,8 +169,12 @@ resource "microsoft365_graph_beta_device_management_windows_device_compliance_po
   ]
 
 }
+```
 
-// Example 3: Device Properties Policy
+### Device Properties Policy
+
+```terraform
+# Example: Device Properties Policy
 resource "microsoft365_graph_beta_device_management_windows_device_compliance_policy" "device_properties" {
   display_name       = "tf-reg-windows-device-compliance-policy-device-properties"
   description        = "tf-reg-windows-device-compliance-policy-device-properties"
@@ -209,8 +222,12 @@ resource "microsoft365_graph_beta_device_management_windows_device_compliance_po
   ]
 
 }
+```
 
-// Example 4: Microsoft Defender for Endpoint Policy
+### Microsoft Defender for Endpoint Policy
+
+```terraform
+# Example: Microsoft Defender for Endpoint Policy
 resource "microsoft365_graph_beta_device_management_windows_device_compliance_policy" "microsoft_defender_for_endpoint" {
   display_name       = "tf-reg-windows-device-compliance-policy-microsoft-defender-for-endpoint"
   description        = "tf-reg-windows-device-compliance-policy-microsoft-defender-for-endpoint"
@@ -245,8 +262,12 @@ resource "microsoft365_graph_beta_device_management_windows_device_compliance_po
   ]
 
 }
+```
 
-// Example 5: System Security Policy
+### System Security Policy
+
+```terraform
+# Example: System Security Policy
 resource "microsoft365_graph_beta_device_management_windows_device_compliance_policy" "system_security" {
   display_name       = "tf-reg-windows-device-compliance-policy-system-security"
   description        = "tf-reg-windows-device-compliance-policy-system-security"
@@ -295,8 +316,12 @@ resource "microsoft365_graph_beta_device_management_windows_device_compliance_po
   ]
 
 }
+```
 
-// Example 6: WSL Policy with assignments
+### WSL Policy with Assignments
+
+```terraform
+# Example: WSL Policy with Assignments
 resource "microsoft365_graph_beta_device_management_windows_device_compliance_policy" "wsl_assignments" {
   display_name       = "tf-reg-windows-device-compliance-policy-wsl-assignments"
   description        = "tf-reg-windows-device-compliance-policy-wsl-assignments"

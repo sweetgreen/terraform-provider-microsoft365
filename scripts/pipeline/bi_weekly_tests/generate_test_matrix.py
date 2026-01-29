@@ -1,0 +1,497 @@
+#!/usr/bin/env python3
+"""Generate dynamic GitHub Actions matrix with automatic shard calculation.
+
+This script discovers resources/datasources/actions/list-resources/ephemerals
+in each service and automatically determines the optimal number of shards using
+Rendezvous (Highest Random Weight) distribution for stable, deterministic
+assignment.
+
+Usage:
+    ./generate_test_matrix.py <configuration_block_type> [service1] [service2 ...]
+
+Configuration Block Types:
+    resources, datasources, actions, list-resources, ephemerals
+
+Service Discovery:
+    - If no services are specified, all services will be auto-discovered
+    - Services with no tests are automatically skipped
+    - Explicit service names can be provided to limit scope
+
+Examples:
+    # Auto-discover all services
+    ./generate_test_matrix.py resources
+    ./generate_test_matrix.py datasources
+
+    # Explicit service list
+    ./generate_test_matrix.py resources device_management groups users
+    ./generate_test_matrix.py datasources device_management utility
+    ./generate_test_matrix.py list-resources device_management
+    ./generate_test_matrix.py ephemerals multitenant_management
+
+Output:
+    JSON matrix suitable for GitHub Actions matrix strategy
+"""
+
+import os
+import sys
+import json
+import hashlib
+import struct
+from pathlib import Path
+from typing import Dict, List
+
+ITEMS_PER_SHARD = int(os.environ.get('ITEMS_PER_SHARD', '5'))
+RENDEZVOUS_SEED = os.environ.get(
+    'RENDEZVOUS_SEED',
+    'terraform-provider-microsoft365'
+)
+VERBOSE = os.environ.get('VERBOSE', '').lower() in ('true', '1', 'yes')
+
+
+def discover_services(configuration_block_type: str) -> List[str]:
+    """Auto-discover all services that have tests for the given configuration_block_type.
+
+    Args:
+        configuration_block_type: Category type (resources, datasources, actions, etc.)
+
+    Returns:
+        List of service names (e.g., ['device_management', 'identity_and_access'])
+    """
+    base_path = Path(f"./internal/services/{configuration_block_type}")
+
+    if not base_path.exists():
+        return []
+
+    services = []
+    for service_dir in base_path.iterdir():
+        if service_dir.is_dir() and not service_dir.name.startswith('.'):
+            # Check if this service actually has any resources
+            if discover_resources(service_dir.name, configuration_block_type):
+                services.append(service_dir.name)
+
+    return sorted(services)
+
+
+def discover_resources(
+    service: str,
+    configuration_block_type: str,
+    verbose: bool = False
+) -> List[str]:
+    """Discover all packages in a service for the given configuration_block_type.
+
+    Args:
+        service: Service name (e.g., 'device_management')
+        configuration_block_type: Category type (resources, datasources, actions, etc.)
+        verbose: If True, log packages skipped due to missing tests
+
+    Returns:
+        List of package paths relative to the service directory
+    """
+    base_path = Path(f"./internal/services/{configuration_block_type}/{service}")
+
+    if not base_path.exists():
+        return []
+
+    packages = []
+    skipped_packages = []
+
+    # Implementation file markers (to detect what exists)
+    impl_file_markers = {
+        'resources': ['resource.go'],
+        'datasources': ['datasource.go'],
+        'actions': ['action.go'],
+        'list-resources': ['list_resource.go'],
+        'ephemerals': ['ephemeral_resource.go']
+    }
+
+    # Only discover packages that have test files
+    # This ensures we don't include incomplete implementations
+    test_file_markers = {
+        'resources': ['resource_test.go'],
+        'datasources': ['datasource_test.go'],
+        'actions': ['action_test.go'],
+        'list-resources': ['list_resource_test.go'],
+        'ephemerals': ['ephemeral_resource_test.go']
+    }
+
+    impl_markers = impl_file_markers.get(
+        configuration_block_type,
+        ['resource.go', 'datasource.go', 'action.go']
+    )
+
+    test_markers = test_file_markers.get(
+        configuration_block_type,
+        ['resource_test.go', 'datasource_test.go', 'action_test.go']
+    )
+
+    for graph_version_dir in base_path.iterdir():
+        if not graph_version_dir.is_dir():
+            continue
+
+        # checking for graph_? as Ephemerals can exist at service/name
+        # or service/graph_beta/name unlike other types
+        is_graph_version = graph_version_dir.name.startswith('graph_')
+
+        if is_graph_version:
+            for resource_dir in graph_version_dir.iterdir():
+                if not resource_dir.is_dir():
+                    continue
+
+                # Actions can selectively have category grouping:
+                # actions/{service}/{graph_version}/{category}/{action_name}/
+                # Example: actions/device_management/graph_beta/managed_device/wipe/
+                if configuration_block_type == 'actions':
+                    # Iterate through category directories
+                    for action_dir in resource_dir.iterdir():
+                        if not action_dir.is_dir():
+                            continue
+
+                        has_impl = any(
+                            (action_dir / marker).exists()
+                            for marker in impl_markers
+                        )
+
+                        has_test = any(
+                            (action_dir / marker).exists()
+                            for marker in test_markers
+                        )
+
+                        rel_path = str(action_dir.relative_to(base_path))
+
+                        if has_test:
+                            packages.append(rel_path)
+                        elif has_impl and verbose:
+                            skipped_packages.append(rel_path)
+                else:
+                    has_impl = any(
+                        (resource_dir / marker).exists()
+                        for marker in impl_markers
+                    )
+
+                    has_test = any(
+                        (resource_dir / marker).exists()
+                        for marker in test_markers
+                    )
+
+                    rel_path = str(resource_dir.relative_to(base_path))
+
+                    if has_test:
+                        packages.append(rel_path)
+                    elif has_impl and verbose:
+                        skipped_packages.append(rel_path)
+        else:
+            has_impl = any(
+                (graph_version_dir / marker).exists()
+                for marker in impl_markers
+            )
+
+            has_test = any(
+                (graph_version_dir / marker).exists()
+                for marker in test_markers
+            )
+
+            rel_path = str(graph_version_dir.relative_to(base_path))
+
+            if has_test:
+                packages.append(rel_path)
+            elif has_impl and verbose:
+                skipped_packages.append(rel_path)
+
+    if verbose and skipped_packages:
+        print(
+            f"⚠️  [DISCOVERY] Skipped {len(skipped_packages)} "
+            f"package(s) in {service} (no tests):",
+            file=sys.stderr
+        )
+        for pkg in sorted(skipped_packages):
+            print(f"    - {pkg}", file=sys.stderr)
+
+    return sorted(packages)
+
+
+def rendezvous_hash(item: str, shard_index: int, seed: str) -> int:
+    """Compute Rendezvous (HRW) hash for item-shard pair.
+
+    Uses SHA-256 for deterministic weight calculation.
+    Higher weight = higher priority for assignment.
+
+    Args:
+        item: Item to hash (resource package path)
+        shard_index: Shard index (0-based)
+        seed: Seed string for deterministic hashing
+
+    Returns:
+        64-bit unsigned integer weight
+    """
+    # Why this format? Matches Go implementation for consistency
+    input_str = f"{item}:shard_{shard_index}:{seed}"
+    hash_bytes = hashlib.sha256(input_str.encode('utf-8')).digest()
+
+    # Why big-endian? Matches Go's binary.BigEndian.Uint64
+    weight = struct.unpack('>Q', hash_bytes[:8])[0]
+    return weight
+
+
+def distribute_rendezvous(
+    items: List[str],
+    shard_count: int,
+    seed: str
+) -> Dict[int, List[str]]:
+    """Distribute items using Rendezvous (HRW) algorithm.
+
+    Why Rendezvous? It minimizes item reassignment when shard count
+    changes. Only ~1/n items move when adding a new shard, unlike
+    modulo-based methods which can reassign most items.
+
+    Args:
+        items: List of items to distribute (resource paths)
+        shard_count: Number of shards to distribute across
+        seed: Seed for deterministic distribution
+
+    Returns:
+        Dictionary mapping shard_index -> list of items
+    """
+    if shard_count <= 0:
+        shard_count = 1
+
+    shards = {i: [] for i in range(shard_count)}
+
+    for item in items:
+        highest_weight = 0
+        selected_shard = 0
+
+        for shard_idx in range(shard_count):
+            weight = rendezvous_hash(item, shard_idx, seed)
+            if weight > highest_weight:
+                highest_weight = weight
+                selected_shard = shard_idx
+
+        shards[selected_shard].append(item)
+
+    return shards
+
+
+def calculate_shard_count(item_count: int) -> int:
+    """Calculate shard count based on items per shard.
+
+    Always shard consistently - every ITEMS_PER_SHARD items = 1 shard.
+    The final shard may contain fewer items, which is expected and acceptable.
+
+    Args:
+        item_count: Number of test packages/items in the service
+                   (resources, datasources, actions, list-resources, or ephemerals)
+
+    Returns:
+        Number of shards (minimum 1)
+
+    Examples:
+        - 1 item with 5/shard = 1 shard (1 item)
+        - 5 items with 5/shard = 1 shard (5 items)
+        - 6 items with 5/shard = 2 shards (5+1 items)
+        - 9 items with 5/shard = 2 shards (5+4 items)
+        - 11 items with 5/shard = 3 shards (5+5+1 items)
+    """
+    # Why ceiling division? Ensures all items are included
+    # and last shard can have fewer items
+    shard_count = (item_count + ITEMS_PER_SHARD - 1) // ITEMS_PER_SHARD
+    return max(1, shard_count)
+
+
+def generate_matrix_for_service(
+    service: str,
+    configuration_block_type: str,
+    runner: str = "ubuntu-24.04-arm"
+) -> List[Dict]:
+    """Generate matrix entries for a single service.
+
+    Args:
+        service: Service name
+        configuration_block_type: Category type
+        runner: GitHub Actions runner type
+
+    Returns:
+        List of matrix entry dictionaries
+    """
+    items = discover_resources(service, configuration_block_type, verbose=VERBOSE)
+    item_count = len(items)
+
+    if item_count == 0:
+        # Avoids creating empty jobs in GitHub Actions
+        return []
+
+    shard_count = calculate_shard_count(item_count)
+    shards = distribute_rendezvous(items, shard_count, RENDEZVOUS_SEED)
+
+    matrix_entries = []
+    for shard_idx in range(shard_count):
+        shard_items = shards[shard_idx]
+
+        entry = {
+            "service": service,
+            "runner": runner,
+            "shard_index": shard_idx,
+            "total_shards": shard_count,
+            "item_count": len(shard_items),
+            # comma-separating allows easy parsing in bash
+            "resources": ",".join(shard_items)
+        }
+
+        # shard_label for GitHub Actions UI to show job names clearly
+        if shard_count == 1:
+            entry["shard_label"] = ""
+        else:
+            entry["shard_label"] = f" ({shard_idx + 1}/{shard_count})"
+
+        matrix_entries.append(entry)
+
+    return matrix_entries
+
+
+def generate_matrix(configuration_block_type: str, services: List[str]) -> Dict:
+    """Generate complete matrix for all services.
+
+    Args:
+        configuration_block_type: Category type
+        services: List of service names to process
+
+    Returns:
+        Matrix dictionary suitable for fromJSON() in GitHub Actions
+    """
+    all_entries = []
+
+    for service in services:
+        entries = generate_matrix_for_service(service, configuration_block_type)
+        all_entries.extend(entries)
+
+    return {"include": all_entries}
+
+
+def main():
+    """Main entry point."""
+    if len(sys.argv) < 2:
+        print(
+            "Usage: generate_test_matrix.py <configuration_block_type> "
+            "[service1] [service2 ...]",
+            file=sys.stderr
+        )
+        print(
+            "\nConfiguration Block Types: resources, datasources, actions, "
+            "list-resources, ephemerals",
+            file=sys.stderr
+        )
+        print(
+            "\nService Discovery: If no services specified, "
+            "all services will be auto-discovered",
+            file=sys.stderr
+        )
+        print("\nEnvironment variables:", file=sys.stderr)
+        print(
+            f"  ITEMS_PER_SHARD             "
+            f"Items per shard (default: {ITEMS_PER_SHARD})",
+            file=sys.stderr
+        )
+        print(
+            f"  RENDEZVOUS_SEED             "
+            f"Seed for distribution (default: {RENDEZVOUS_SEED})",
+            file=sys.stderr
+        )
+        print(
+            f"  VERBOSE                     "
+            f"Show packages skipped (no tests) (default: false)",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    configuration_block_type = sys.argv[1]
+    services = sys.argv[2:]
+
+    valid_configuration_block_types = [
+        'resources',
+        'datasources',
+        'actions',
+        'list-resources',
+        'ephemerals'
+    ]
+    if configuration_block_type not in valid_configuration_block_types:
+        print(
+            f"Error: Invalid configuration_block_type "
+            f"'{configuration_block_type}'",
+            file=sys.stderr
+        )
+        print(
+            f"Valid configuration block types: "
+            f"{', '.join(valid_configuration_block_types)}",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
+    # Auto-discover services if none specified
+    if not services:
+        print(
+            f"[generate_test_matrix] No services specified, "
+            f"auto-discovering services for {configuration_block_type}...",
+            file=sys.stderr
+        )
+        services = discover_services(configuration_block_type)
+        if not services:
+            print(
+                f"[generate_test_matrix] No services found for "
+                f"{configuration_block_type}",
+                file=sys.stderr
+            )
+            # Return empty matrix
+            print(json.dumps({"include": []}))
+            sys.exit(0)
+        print(
+            f"[generate_test_matrix] Discovered {len(services)} "
+            f"service(s): {', '.join(services)}",
+            file=sys.stderr
+        )
+
+    # Keeps diagnostic output separate from JSON stdout
+    print(
+        f"[generate_test_matrix] Configuration block type: "
+        f"{configuration_block_type}",
+        file=sys.stderr
+    )
+    print(
+        f"[generate_test_matrix] Services: {', '.join(services)}",
+        file=sys.stderr
+    )
+    print(
+        f"[generate_test_matrix] Items per shard: "
+        f"{ITEMS_PER_SHARD}",
+        file=sys.stderr
+    )
+    print(
+        f"[generate_test_matrix] Rendezvous seed: {RENDEZVOUS_SEED}",
+        file=sys.stderr
+    )
+
+    matrix = generate_matrix(configuration_block_type, services)
+
+    print(
+        f"\n[generate_test_matrix] Generated {len(matrix['include'])} "
+        f"matrix entries:",
+        file=sys.stderr
+    )
+    for entry in matrix['include']:
+        if entry['total_shards'] > 1:
+            shard_info = (
+                f"shard {entry['shard_index'] + 1}/{entry['total_shards']}"
+            )
+        else:
+            shard_info = "no sharding"
+
+        print(
+            f"  - {entry['service']}: {entry['item_count']} "
+            f"items ({shard_info})",
+            file=sys.stderr
+        )
+
+    # GitHub Actions reads matrix from stdout
+    print(json.dumps(matrix))
+
+
+if __name__ == "__main__":
+    main()

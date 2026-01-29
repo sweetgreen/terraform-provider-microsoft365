@@ -3,12 +3,12 @@
 page_title: "microsoft365_graph_beta_device_and_app_management_targeted_managed_app_configuration Resource - Microsoft 365"
 subcategory: ""
 description: |-
-  Manages targeted managed app configurations in Microsoft Intune using the /deviceAppManagement/targetedManagedAppConfigurations endpoint. Configuration used to deliver a set of custom settings as-is to all users in the targeted security group.
+  Manages targeted managed app configurations using the /deviceAppManagement/targetedManagedAppConfigurations endpoint. This resource is used to configuration used to deliver a set of custom settings as-is to all users in the targeted security group.
 ---
 
 # microsoft365_graph_beta_device_and_app_management_targeted_managed_app_configuration (Resource)
 
-Manages targeted managed app configurations in Microsoft Intune using the `/deviceAppManagement/targetedManagedAppConfigurations` endpoint. Configuration used to deliver a set of custom settings as-is to all users in the targeted security group.
+Manages targeted managed app configurations using the `/deviceAppManagement/targetedManagedAppConfigurations` endpoint. This resource is used to configuration used to deliver a set of custom settings as-is to all users in the targeted security group.
 
 
 

@@ -3,13 +3,19 @@ page_title: "microsoft365_graph_beta_device_management_windows_remediation_scrip
 subcategory: "Device Management"
 
 description: |-
-  Retrieves Windows Remediation Scripts from Microsoft Intune with explicit filtering options. Windows Remediation Scripts are PowerShell scripts that can be deployed to devices to help remediate issues.
+  Retrieves Windows remediation scripts from Microsoft Intune using the /deviceManagement/deviceHealthScripts endpoint. This data source is used to query proactive remediation scripts with detection and remediation PowerShell logic.
 ---
 
 # microsoft365_graph_beta_device_management_windows_remediation_script (Data Source)
 
 The Microsoft 365 Intune windows update catalog item data source provides information about a windows updates. Can be filtered by
 id, display_name , end_of_support_date and release_date_time.
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v0.42.0-alpha | Experimental | Added missing version history |
 
 ## Example Usage
 

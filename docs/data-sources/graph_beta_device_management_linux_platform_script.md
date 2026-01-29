@@ -3,12 +3,18 @@ page_title: "microsoft365_graph_beta_device_management_linux_platform_script Dat
 subcategory: "Device Management"
 
 description: |-
-  Retrieves Linux Platform Scripts from Microsoft Intune with explicit filtering options.
+  Retrieves Linux platform scripts from Microsoft Intune using the /deviceManagement/deviceShellScripts endpoint. This data source is used to query shell scripts deployed to Linux devices.
 ---
 
 # microsoft365_graph_beta_device_management_linux_platform_script (Data Source)
 
 The Microsoft 365 Intune device category data source provides information about a specific device category.
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v0.42.0-alpha | Experimental | Added missing version history |
 
 ## Example Usage
 

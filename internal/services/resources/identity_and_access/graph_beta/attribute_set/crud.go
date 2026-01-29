@@ -14,16 +14,11 @@ import (
 
 // Create handles the Create operation for Attribute Set resources.
 //
-//   - Retrieves the planned configuration from the create request
-//   - Constructs the resource request body from the plan
-//   - Sends POST request to create the attribute set
-//   - Captures the new resource ID from the response
-//   - Sets initial state with planned values
-//   - Calls Read operation to fetch the latest state from the API
-//   - Updates the final state with the fresh data from the API
+// Operation: Creates a new attribute set in the directory
+// API Calls:
+//   - POST /directory/attributeSets
 //
-// The function ensures the attribute set is created with all specified
-// properties properly configured.
+// Reference: https://learn.microsoft.com/en-us/graph/api/directory-post-attributesets?view=graph-rest-beta
 func (r *AttributeSetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var object AttributeSetResourceModel
 
@@ -86,6 +81,12 @@ func (r *AttributeSetResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 // Read handles the Read operation for Attribute Set resources.
+//
+// Operation: Retrieves an attribute set by ID
+// API Calls:
+//   - GET /directory/attributeSets/{attributeSetId}
+//
+// Reference: https://learn.microsoft.com/en-us/graph/api/attributeset-get?view=graph-rest-beta
 func (r *AttributeSetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var object AttributeSetResourceModel
 
@@ -133,6 +134,12 @@ func (r *AttributeSetResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 // Update handles the Update operation for Attribute Set resources.
+//
+// Operation: Updates an existing attribute set
+// API Calls:
+//   - PATCH /directory/attributeSets/{attributeSetId}
+//
+// Reference: https://learn.microsoft.com/en-us/graph/api/attributeset-update?view=graph-rest-beta
 func (r *AttributeSetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan AttributeSetResourceModel
 	var state AttributeSetResourceModel
@@ -196,9 +203,13 @@ func (r *AttributeSetResource) Update(ctx context.Context, req resource.UpdateRe
 }
 
 // Delete handles the Delete operation for Attribute Set resources.
-// Note: According to Microsoft Graph API documentation, attributeSet objects cannot be deleted.
-// This function only removes the resource from Terraform state.
-// https://learn.microsoft.com/en-us/graph/api/resources/attributeset?view=graph-rest-beta
+//
+// Operation: Removes from Terraform state only (attribute sets cannot be deleted)
+// API Calls:
+//   - None (attribute sets cannot be deleted)
+//
+// Reference: https://learn.microsoft.com/en-us/graph/api/resources/attributeset?view=graph-rest-beta
+// Note: Attribute sets cannot be deleted via API; this operation only removes from Terraform state
 func (r *AttributeSetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var object AttributeSetResourceModel
 

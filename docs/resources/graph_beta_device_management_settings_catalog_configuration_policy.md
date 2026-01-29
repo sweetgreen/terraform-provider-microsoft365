@@ -3,25 +3,27 @@ page_title: "microsoft365_graph_beta_device_management_settings_catalog_configur
 subcategory: "Device Management"
 
 description: |-
-  Manages Intune Settings Catalog policies using the /deviceManagement/configurationPolicies endpoint. Settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, simplified interface that replaces traditional device configuration profiles and legacy Intune configuration templates. You can simplify the hcl creation process by using the Export-IntuneSettingsCatalogConfigurationToHCL.ps1 [https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/powershell/device_management/Export-IntuneSettingsCatalogConfigurationToHCL.ps1] script to export the settings catalog and settings catalog templates. You can export by a singular resource ID or by exporting all policies. This will build the hcl representation of the settings catalog configuration programmatically.
+  Manages Intune Settings Catalog policies using the /deviceManagement/configurationPolicies endpoint. This resource is used to settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, simplified interface that replaces traditional device configuration profiles and legacy Intune configuration templates. You can simplify the hcl creation process by using the Export-IntuneSettingsCatalogConfigurationToHCL.ps1 [https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/powershell/device_management/Export-IntuneSettingsCatalogConfigurationToHCL.ps1] script to export the settings catalog and settings catalog templates.
 ---
 
 # microsoft365_graph_beta_device_management_settings_catalog_configuration_policy (Resource)
 
-Manages Intune Settings Catalog policies using the `/deviceManagement/configurationPolicies` endpoint. Settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, simplified interface that replaces traditional device configuration profiles and legacy Intune configuration templates. You can simplify the hcl creation process by using the `Export-IntuneSettingsCatalogConfigurationToHCL.ps1` [https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/powershell/device_management/Export-IntuneSettingsCatalogConfigurationToHCL.ps1] script to export the settings catalog and settings catalog templates. You can export by a singular resource ID or by exporting all policies. This will build the hcl representation of the settings catalog configuration programmatically.
+Manages Intune Settings Catalog policies using the `/deviceManagement/configurationPolicies` endpoint. This resource is used to settings Catalog provides a unified configuration experience for Windows, macOS, iOS/iPadOS, and Android devices through a modern, simplified interface that replaces traditional device configuration profiles and legacy Intune configuration templates. You can simplify the hcl creation process by using the `Export-IntuneSettingsCatalogConfigurationToHCL.ps1` [https://github.com/deploymenttheory/terraform-provider-microsoft365/blob/main/scripts/powershell/device_management/Export-IntuneSettingsCatalogConfigurationToHCL.ps1] script to export the settings catalog and settings catalog templates.
 
 ## Microsoft Documentation
 
 - [deviceManagementConfigurationPolicy resource type](https://learn.microsoft.com/en-us/graph/api/resources/intune-deviceconfigv2-devicemanagementconfigurationpolicy?view=graph-rest-beta)
 - [Create deviceManagementConfigurationPolicy](https://learn.microsoft.com/en-us/graph/api/intune-deviceconfigv2-devicemanagementconfigurationpolicy-create?view=graph-rest-beta)
 
-## API Permissions
+## Microsoft Graph API Permissions
 
-The following API permissions are required in order to use this resource.
+The following client `application` permissions are needed in order to use this resource:
 
-### Microsoft Graph
+**Required:**
+- `DeviceManagementConfiguration.ReadWrite.All`
 
-- **Application**: `DeviceManagementConfiguration.ReadWrite.All`
+**Optional:**
+- `None` `[N/A]`
 
 ## Version History
 

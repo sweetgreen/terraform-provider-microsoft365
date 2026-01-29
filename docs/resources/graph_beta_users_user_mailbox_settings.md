@@ -2,12 +2,12 @@
 page_title: "microsoft365_graph_beta_users_user_mailbox_settings Resource - terraform-provider-microsoft365"
 subcategory: "Users"
 description: |-
-  Manages Microsoft 365 user mailbox settings using the /users/{id}/mailboxSettings endpoint. This resource allows you to configure automatic replies, date/time formats, locale, time zone, working hours, and other mailbox preferences for a user. Note: This resource manages settings that may also be modified by users through Outlook clients. The mailbox settings always exist for a user, so 'create' and 'update' operations both use the PATCH method, and 'delete' only removes the resource from Terraform state without affecting the actual mailbox settings.
+  Manages Microsoft 365 user mailbox settings using the /users/{id}/mailboxSettings endpoint. This resource is used to allows you to configure automatic replies, date/time formats, locale, time zone, working hours, and other mailbox preferences for a user. Note: This resource manages settings that may also be modified by users through Outlook clients.
 ---
 
 # microsoft365_graph_beta_users_user_mailbox_settings (Resource)
 
-Manages Microsoft 365 user mailbox settings using the `/users/{id}/mailboxSettings` endpoint. This resource allows you to configure automatic replies, date/time formats, locale, time zone, working hours, and other mailbox preferences for a user. Note: This resource manages settings that may also be modified by users through Outlook clients. The mailbox settings always exist for a user, so 'create' and 'update' operations both use the PATCH method, and 'delete' only removes the resource from Terraform state without affecting the actual mailbox settings.
+Manages Microsoft 365 user mailbox settings using the `/users/{id}/mailboxSettings` endpoint. This resource is used to allows you to configure automatic replies, date/time formats, locale, time zone, working hours, and other mailbox preferences for a user. Note: This resource manages settings that may also be modified by users through Outlook clients.
 
 ## Microsoft Documentation
 
@@ -15,13 +15,15 @@ Manages Microsoft 365 user mailbox settings using the `/users/{id}/mailboxSettin
 - [Get mailboxSettings](https://learn.microsoft.com/en-us/graph/api/user-get-mailboxsettings?view=graph-rest-beta)
 - [Update mailboxSettings](https://learn.microsoft.com/en-us/graph/api/user-update-mailboxsettings?view=graph-rest-beta)
 
-## API Permissions
+## Microsoft Graph API Permissions
 
-The following API permissions are required in order to use this resource.
+The following client `application` permissions are needed in order to use this resource:
 
-### Microsoft Graph
+**Required:**
+- `MailboxSettings.ReadWrite`
 
-- **Application**: `MailboxSettings.ReadWrite`, `User.ReadWrite.All`
+**Optional:**
+- `None` `[N/A]`, `User.ReadWrite.All`
 
 ## Version History
 
@@ -289,7 +291,7 @@ Optional:
 
 - **Exchange Online Requirement**: Mailbox settings can only be configured for users with an active Exchange Online mailbox. Users must have a license that includes Exchange Online (e.g., Microsoft 365 E3/E5, Exchange Online Plan 1/2).
 - **Mailbox Provisioning**: After assigning an Exchange Online license to a user, allow 1-2 minutes for the mailbox to provision before configuring settings.
-- **Resource Behavior**: This resource uses PATCH operations for both create and update. The mailbox settings always exist for a user with an Exchange Online mailbox, so constants.TfOperationCreate effectively updates the existing settings.
+- **Resource Behavior**: This resource uses PATCH operations for both create and update. The mailbox settings always exist for a user with an Exchange Online mailbox, so create effectively updates the existing settings.
 - **Delete Behavior**: Deleting this resource only removes it from Terraform state without affecting the actual mailbox settings. Mailbox settings cannot be deleted, only reset to defaults manually.
 - **Time Zones**: Use IANA time zone identifiers or Windows time zone names. Common examples: `UTC`, `Pacific Standard Time`, `Eastern Standard Time`.
 - **Date/Time Formats**: Use standard format strings compatible with Outlook. Refer to [.NET standard date and time format strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings) for valid formats.

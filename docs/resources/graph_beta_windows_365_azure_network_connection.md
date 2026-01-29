@@ -1,8 +1,8 @@
 ---
-page_title: "microsoft365_graph_beta_windows_365_azure_network_connection Resource - Microsoft365 Provider"
+page_title: "microsoft365_graph_beta_windows_365_azure_network_connection Resource - terraform-provider-microsoft365"
 subcategory: "Windows 365"
 description: |-
-  Manages a Windows 365 Azure Network Connection (Cloud PC On-Premises Connection) in Microsoft 365 via the Microsoft Graph Beta API.
+  
 ---
 
 # microsoft365_graph_beta_windows_365_azure_network_connection (Resource)
@@ -13,13 +13,15 @@ Manages a Windows 365 Azure Network Connection (Cloud PC On-Premises Connection)
 
 - [List onPremisesConnections (beta)](https://learn.microsoft.com/en-us/graph/api/virtualendpoint-list-onpremisesconnections?view=graph-rest-beta)
 
-## API Permissions
+## Microsoft Graph API Permissions
 
-The following API permissions are required in order to use this resource.
+The following client `application` permissions are needed in order to use this resource:
 
-### Microsoft Graph
+**Required:**
+- `CloudPC.ReadWrite.All`
 
-- **Application**: `CloudPC.ReadWrite.All`
+**Optional:**
+- `None` `[N/A]`
 
 ## Version History
 

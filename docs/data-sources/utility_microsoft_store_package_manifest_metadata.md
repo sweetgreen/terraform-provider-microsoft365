@@ -3,7 +3,7 @@ page_title: "microsoft365_utility_microsoft_store_package_manifest_metadata Data
 subcategory: "Utility"
 
 description: |-
-  Retrieves Microsoft Store package manifests by package identifier or search term. Used for winget packages.
+  Queries winget package manifests from the Microsoft Store API using package identifiers or search terms. This data source is used to discover installation metadata for Windows Package Manager applications.
 ---
 
 # microsoft365_utility_microsoft_store_package_manifest_metadata (Data Source)
@@ -11,6 +11,12 @@ description: |-
 Use this data source to retrieve Microsoft Store package manifests by package identifier or search term. Used for winget packages.
 
 This data source is particularly useful when creating winget app resources in Intune, as it automatically extracts critical information such as bundle identifier, version, package IDs, and other metadata required for proper app configuration and management.
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v0.42.0-alpha | Experimental | Added missing version history |
 
 ## Example Usage
 

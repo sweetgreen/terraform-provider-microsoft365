@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Maps service-specific credentials to standard M365 environment variables.
+
+This script maps service-specific credential environment variables to the standard
+M365_CLIENT_ID and M365_CLIENT_SECRET variables used by the provider tests.
+
+Usage:
+    ./map_credentials.py <service>
+
+Services:
+    agents, applications, backup_storage, device_and_app_management, device_management,
+    groups, identity_and_access, m365_admin, multitenant_management, users,
+    utility, windows_365
+"""
+
+import os
+import sys
+from typing import Tuple, Optional
+
+
+# Each service uses a different service principal
+# with least-privilege permissions for security isolation
+CREDENTIAL_MAP = {
+    "agents": (
+        "M365_CLIENT_ID_AGENTS",
+        "M365_CLIENT_SECRET_AGENTS"
+    ),
+    "applications": (
+        "M365_CLIENT_ID_APPLICATIONS",
+        "M365_CLIENT_SECRET_APPLICATIONS"
+    ),
+    "backup_storage": (
+        "M365_CLIENT_ID_BACKUP_STORAGE",
+        "M365_CLIENT_SECRET_BACKUP_STORAGE"
+    ),
+    "device_and_app_management": (
+        "M365_CLIENT_ID_DEVICE_AND_APP_MGMT",
+        "M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT"
+    ),
+    "device_management": (
+        "M365_CLIENT_ID_DEVICE_MGMT",
+        "M365_CLIENT_SECRET_DEVICE_MGMT"
+    ),
+    "groups": (
+        "M365_CLIENT_ID_GROUPS",
+        "M365_CLIENT_SECRET_GROUPS"
+    ),
+    "identity_and_access": (
+        "M365_CLIENT_ID_IDENTITY_ACCESS",
+        "M365_CLIENT_SECRET_IDENTITY_ACCESS"
+    ),
+    "m365_admin": (
+        "M365_CLIENT_ID_M365_ADMIN",
+        "M365_CLIENT_SECRET_M365_ADMIN"
+    ),
+    "multitenant_management": (
+        "M365_CLIENT_ID_MULTITENANT_MGMT",
+        "M365_CLIENT_SECRET_MULTITENANT_MGMT"
+    ),
+    "users": (
+        "M365_CLIENT_ID_USERS",
+        "M365_CLIENT_SECRET_USERS"
+    ),
+    "utility": (
+        "M365_CLIENT_ID_UTILITY",
+        "M365_CLIENT_SECRET_UTILITY"
+    ),
+    "windows_365": (
+        "M365_CLIENT_ID_WINDOWS_365",
+        "M365_CLIENT_SECRET_WINDOWS_365"
+    ),
+}
+
+
+def get_credentials(service: str) -> Tuple[Optional[str], Optional[str]]:
+    """Get credentials for a service from environment variables.
+
+    Args:
+        service: Service name to get credentials for.
+
+    Returns:
+        Tuple of (client_id, client_secret) from environment variables.
+
+    Raises:
+        SystemExit: If service name is not recognized.
+    """
+    if service not in CREDENTIAL_MAP:
+        print(f"Error: unknown service: {service}", file=sys.stderr)
+        sys.exit(1)
+    
+    client_id_var, client_secret_var = CREDENTIAL_MAP[service]
+    client_id = os.environ.get(client_id_var, "")
+    client_secret = os.environ.get(client_secret_var, "")
+    
+    return client_id, client_secret
+
+
+def export_to_github_env(key: str, value: str) -> None:
+    """Export variable to GITHUB_ENV file if running in GitHub Actions.
+
+    Args:
+        key: Environment variable name.
+        value: Environment variable value.
+    """
+    github_env = os.environ.get("GITHUB_ENV")
+    if github_env:
+        with open(github_env, 'a', encoding='utf-8') as f:
+            f.write(f"{key}={value}\n")
+
+
+def map_credentials(service: str) -> None:
+    """Map service-specific credentials to standard environment variables.
+
+    Why map to standard names? Test runner expects M365_CLIENT_ID and
+    M365_CLIENT_SECRET regardless of which service is being tested.
+
+    Args:
+        service: Service name to map credentials for.
+    """
+    client_id, client_secret = get_credentials(service)
+
+    if not client_id or not client_secret:
+        # Prevents test runner from failing when
+        # credentials aren't configured for optional services
+        print(
+            f"⚠️  No credentials found for {service} - "
+            f"tests will be skipped"
+        )
+        export_to_github_env("SKIP_TESTS", "true")
+        return
+
+    github_env = os.environ.get("GITHUB_ENV")
+    if github_env:
+        export_to_github_env("M365_CLIENT_ID", client_id)
+        export_to_github_env("M365_CLIENT_SECRET", client_secret)
+        export_to_github_env("SKIP_TESTS", "false")
+
+    print(f"✅ Credentials configured for {service}")
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: map_credentials.py <service>", file=sys.stderr)
+        sys.exit(1)
+    
+    service = sys.argv[1]
+    map_credentials(service)
+
+
+if __name__ == "__main__":
+    main()
+

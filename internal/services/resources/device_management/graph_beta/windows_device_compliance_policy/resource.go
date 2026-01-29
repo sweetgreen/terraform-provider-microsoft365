@@ -83,9 +83,7 @@ func (r *WindowsDeviceCompliancePolicyResource) ImportState(ctx context.Context,
 // Schema returns the schema for the resource.
 func (r *WindowsDeviceCompliancePolicyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages Windows device compliance policies in Microsoft Intune using the `/deviceManagement/deviceCompliancePolicies` " +
-			"endpoint. Device compliance policies define rules and settings that devices must meet to be considered compliant with organizational security " +
-			"requirements. you can find out more here: 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows'.",
+		MarkdownDescription: "Manages Windows device compliance policies using the `/deviceManagement/deviceCompliancePolicies` endpoint. This resource is used to device compliance policies define rules and settings that devices must meet to be considered compliant with organizational security requirements. you can find out more here: 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows'..",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
@@ -158,6 +156,7 @@ func (r *WindowsDeviceCompliancePolicyResource) Schema(ctx context.Context, req 
 			// },
 			"device_properties": schema.SingleNestedAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Device operating system version requirements and build ranges for compliance evaluation",
 				Attributes: map[string]schema.Attribute{
 					"os_minimum_version": schema.StringAttribute{
@@ -248,6 +247,7 @@ func (r *WindowsDeviceCompliancePolicyResource) Schema(ctx context.Context, req 
 			},
 			"system_security": schema.SingleNestedAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "System security settings for device compliance including firewall, antivirus, TPM, and encryption requirements",
 				Attributes: map[string]schema.Attribute{
 					"active_firewall_required": schema.BoolAttribute{
@@ -351,6 +351,7 @@ func (r *WindowsDeviceCompliancePolicyResource) Schema(ctx context.Context, req 
 			},
 			"microsoft_defender_for_endpoint": schema.SingleNestedAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Microsoft Defender for Endpoint device threat protection settings",
 				Attributes: map[string]schema.Attribute{
 					"device_threat_protection_enabled": schema.BoolAttribute{
@@ -375,6 +376,7 @@ func (r *WindowsDeviceCompliancePolicyResource) Schema(ctx context.Context, req 
 			// Device health settings (moved to device_health block)
 			"device_health": schema.SingleNestedAttribute{
 				Optional: true,
+				Computed: true,
 				MarkdownDescription: "Microsoft Attestation Service evaluation settings. Use these settings to confirm that a device has protective measures enabled at boot time." +
 					"Learn more here 'https://learn.microsoft.com/en-us/intune/intune-service/protect/compliance-policy-create-windows?WT.mc_id=Portal-Microsoft_Intune_DeviceSettings#device-health'",
 				Attributes: map[string]schema.Attribute{
