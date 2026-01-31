@@ -49,5 +49,7 @@ release:
   extra_files:
     - glob: 'terraform-registry-manifest.json'
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+    - glob: 'gpg-public-key.asc'
+      name_template: '{{ .ProjectName }}_{{ .Version }}_gpg-public-key.asc'
 changelog:
   disable: true

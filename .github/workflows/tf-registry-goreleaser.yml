@@ -68,6 +68,16 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.gpg-private-key }}
           passphrase: ${{ secrets.gpg-private-key-passphrase }}
+      - name: Export GPG public key for registry verification
+        run: |
+          gpg --armor --export "${{ steps.import_gpg.outputs.fingerprint }}" > gpg-public-key.asc
+          echo "GPG Key ID: ${{ steps.import_gpg.outputs.keyid }}"
+          echo "GPG Fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+          echo "GPG public key exported to gpg-public-key.asc"
+          echo ""
+          echo "To update the Terraform registry proxy SSM parameters, run:"
+          echo "  aws ssm put-parameter --name /terraform-registry-api-github-proxy/gpg-key-id --value '${{ steps.import_gpg.outputs.keyid }}' --type String --overwrite"
+          echo "  aws ssm put-parameter --name /terraform-registry-api-github-proxy/gpg-public-key --value \"\$(cat gpg-public-key.asc)\" --type SecureString --overwrite"
       - if: inputs.release-notes != true
         name: goreleaser release (without release notes)
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
