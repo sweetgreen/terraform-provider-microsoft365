@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.43.3-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.2-alpha...v0.43.3-alpha) (2026-01-31)
+
+
+### Bug Fixes
+
+* export GPG public key as release asset for registry verification ([47bde62](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/47bde62e4091e0a1909b26f4a5092d31f3c3fbde))
+
 ## [0.43.2-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.1-alpha...v0.43.2-alpha) (2026-01-30)
 
 
