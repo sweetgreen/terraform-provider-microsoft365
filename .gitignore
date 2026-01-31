@@ -40,6 +40,9 @@ coverage.html
 *.log
 *.bak
 
+# GPG public key exported during release workflow
+gpg-public-key.asc
+
 # Windows-specific 
 *.winfile eol=crlf
 
