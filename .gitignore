@@ -57,3 +57,6 @@ __pycache__/
 # AI instructions
 .claude
 .cursor
+
+# GPG public key exported during release workflow
+gpg-public-key.asc
