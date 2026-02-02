@@ -4,7 +4,6 @@ name: provider | Terraform Registry with goreleaser
 
 permissions:
   contents: write
-  id-token: write # Required for OIDC authentication to AWS
   packages: read
   statuses: write
 
@@ -31,22 +30,17 @@ on:
         description: 'branch, tag or SHA to checkout'
         required: false
         type: string
-      aws-role-arn:
-        description: 'AWS IAM Role ARN for OIDC authentication to fetch GPG signing keys from SSM'
+      use-ssm-signing-keys:
+        description: 'Fetch GPG signing keys from AWS SSM Parameter Store instead of GitHub Secrets. Requires the runner to have SSM read access.'
         required: false
-        type: string
-        default: ''
-      aws-region:
-        description: 'AWS region for SSM parameter lookup'
-        required: false
-        type: string
-        default: 'us-east-1'
+        type: boolean
+        default: false
     secrets:
       gpg-private-key:
-        description: 'GPG Private Key (legacy: use aws-role-arn to fetch from SSM instead)'
+        description: 'GPG Private Key (legacy: use use-ssm-signing-keys instead)'
         required: false
       gpg-private-key-passphrase:
-        description: 'GPG Private Key Passphrase (legacy: use aws-role-arn to fetch from SSM instead)'
+        description: 'GPG Private Key Passphrase (legacy: use use-ssm-signing-keys instead)'
         required: false
 
 jobs:
@@ -72,16 +66,9 @@ jobs:
           go-version-file: ${{ inputs.setup-go-version-file }}
           cache: false  # Disable caching to skip the post-cleanup step. saves circa 15 minutes
 
-      # --- Path A: Fetch GPG signing keys from AWS SSM via OIDC ---
-      - name: Configure AWS credentials via OIDC
-        if: inputs.aws-role-arn != ''
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
-        with:
-          role-to-assume: ${{ inputs.aws-role-arn }}
-          aws-region: ${{ inputs.aws-region }}
-
+      # --- Path A: Fetch GPG signing keys from AWS SSM (runner instance credentials) ---
       - name: Fetch and import GPG signing key from SSM
-        if: inputs.aws-role-arn != ''
+        if: inputs.use-ssm-signing-keys
         id: ssm_gpg_import
         run: |
           GPG_PRIVATE_KEY=$(aws ssm get-parameter \
@@ -111,7 +98,7 @@ jobs:
 
       # --- Path B: Legacy - Import GPG key from GitHub Secrets ---
       - name: Import GPG key from secrets
-        if: inputs.aws-role-arn == ''
+        if: ${{ !inputs.use-ssm-signing-keys }}
         id: import_gpg_legacy
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
         with:
@@ -119,7 +106,7 @@ jobs:
           passphrase: ${{ secrets.gpg-private-key-passphrase }}
 
       - name: Export GPG public key for registry verification (legacy)
-        if: inputs.aws-role-arn == ''
+        if: ${{ !inputs.use-ssm-signing-keys }}
         run: |
           gpg --armor --export "${{ steps.import_gpg_legacy.outputs.fingerprint }}" > gpg-public-key.asc
           echo "GPG Key ID: ${{ steps.import_gpg_legacy.outputs.keyid }}"
@@ -134,7 +121,7 @@ jobs:
       - name: Set GPG fingerprint
         id: gpg_fingerprint
         run: |
-          if [ -n "${{ inputs.aws-role-arn }}" ]; then
+          if [ "${{ inputs.use-ssm-signing-keys }}" = "true" ]; then
             echo "fingerprint=${{ steps.ssm_gpg_import.outputs.fingerprint }}" >> "$GITHUB_OUTPUT"
           else
             echo "fingerprint=${{ steps.import_gpg_legacy.outputs.fingerprint }}" >> "$GITHUB_OUTPUT"

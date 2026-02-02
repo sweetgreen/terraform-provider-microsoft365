@@ -77,8 +77,7 @@ jobs:
       release-notes: false
       setup-go-version-file: 'go.mod'
       git-ref: ${{ github.event.inputs.release_version || github.ref }}
-      aws-role-arn: arn:aws:iam::224746450967:role/terraform-provider-signing-role
-      aws-region: us-east-1
+      use-ssm-signing-keys: true
 
   release-notes:
     runs-on: ubuntu-latest
