@@ -81,11 +81,19 @@ jobs:
             --name "/terraform-registry-api-github-proxy/gpg-key-id" \
             --query "Parameter.Value" --output text)
 
+          # Mask sensitive values to prevent leaking in logs
+          echo "::add-mask::${GPG_PRIVATE_KEY}"
           echo "::add-mask::${GPG_PASSPHRASE}"
 
-          echo "${GPG_PRIVATE_KEY}" | gpg --batch --import --passphrase "${GPG_PASSPHRASE}"
+          # Import the GPG key
+          echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
 
           FINGERPRINT=$(gpg --list-keys --with-colons "${GPG_KEY_ID}" | awk -F: '/^fpr:/{print $10; exit}')
+
+          # Preset passphrase in GPG agent for batch signing (required for goreleaser)
+          KEYGRIP=$(gpg --batch --with-colons --with-keygrip --list-secret-keys "${GPG_KEY_ID}" | awk -F: '/^grp:/{print $10; exit}')
+          HEX_PASSPHRASE=$(echo -n "${GPG_PASSPHRASE}" | xxd -p -c 256 | tr -d '\n' | tr 'a-f' 'A-F')
+          gpg-connect-agent "PRESET_PASSPHRASE ${KEYGRIP} -1 ${HEX_PASSPHRASE}" /bye
 
           echo "fingerprint=${FINGERPRINT}" >> "$GITHUB_OUTPUT"
           echo "keyid=${GPG_KEY_ID}" >> "$GITHUB_OUTPUT"
