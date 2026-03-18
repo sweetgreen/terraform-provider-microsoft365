@@ -7,12 +7,17 @@ import (
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
 	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
 )
@@ -34,17 +39,28 @@ var (
 
 	// Enables import functionality
 	_ resource.ResourceWithImportState = &AgentIdentityBlueprintServicePrincipalResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &AgentIdentityBlueprintServicePrincipalResource{}
 )
 
 func NewAgentIdentityBlueprintServicePrincipalResource() resource.Resource {
 	return &AgentIdentityBlueprintServicePrincipalResource{
 		ReadPermissions: []string{
+			"AgentIdentity.Read.All",
 			"AgentIdentityBlueprintPrincipal.Read.All",
+			"Application.Read.All",
+			"Directory.Read.All",
 		},
 		WritePermissions: []string{
-			"AgentIdentityBlueprintPrincipal.ReadWrite.All",
+			"AgentIdentity.Create.All",
+			"AgentIdentity.DeleteRestore.All",
+			"AgentIdentity.EnableDisable.All",
+			"AgentIdentity.ReadWrite.All",
+			"AgentIdentityBlueprintPrincipal.DeleteRestore.All",
+			"AgentIdentityBlueprintPrincipal.EnableDisable.All",
+			"Application.ReadWrite.All",
 			"Directory.ReadWrite.All",
-			"AgentIdentity.DeleteRestore.All", // Needed for hard deletion
 		},
 		ResourcePath: "/servicePrincipals",
 	}
@@ -107,6 +123,17 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) ImportState(ctx context
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hard_delete"), hardDelete)...)
 }
 
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *AgentIdentityBlueprintServicePrincipalResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 // Schema returns the schema for the resource.
 func (r *AgentIdentityBlueprintServicePrincipalResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -124,6 +151,18 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) Schema(ctx context.Cont
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"tags": schema.SetAttribute{
+				MarkdownDescription: "Custom strings that can be used to categorize and identify the agent identity blueprint service principal. These tags are inherited by all agent identities created from this blueprint.",
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
 			"hard_delete": schema.BoolAttribute{

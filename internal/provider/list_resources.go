@@ -4,6 +4,9 @@ import (
 	"context"
 
 	graphBetaSettingsCatalogConfigurationPolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/list-resources/device_management/graph_beta/settings_catalog_configuration_policy"
+	graphBetaWindowsPlatformScript "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/list-resources/device_management/graph_beta/windows_platform_script"
+	graphBetaConditionalAccessPolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/list-resources/identity_and_access/graph_beta/conditional_access_policy"
+	graphBetaUsersUser "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/list-resources/users/graph_beta/user"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 )
@@ -21,6 +24,13 @@ func (p *M365Provider) ListResources(_ context.Context) []func() list.ListResour
 	return []func() list.ListResource{
 		// Graph Beta - Device Management list resources
 		graphBetaSettingsCatalogConfigurationPolicy.NewSettingsCatalogListResource,
+		graphBetaWindowsPlatformScript.NewWindowsPlatformScriptListResource,
+
+		// Graph Beta - Identity and Access list resources
+		graphBetaConditionalAccessPolicy.NewConditionalAccessPolicyListResource,
+
+		// Graph Beta - Users list resources
+		graphBetaUsersUser.NewUserListResource,
 
 		// Add microsoft 365 provider list resources here
 	}

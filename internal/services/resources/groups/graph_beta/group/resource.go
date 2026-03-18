@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -44,19 +45,23 @@ var (
 
 	// Enables plan modification/diff suppression
 	_ resource.ResourceWithModifyPlan = &GroupResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &GroupResource{}
 )
 
 func NewGroupResource() resource.Resource {
 	return &GroupResource{
 		ReadPermissions: []string{
-			"Group.Read.All",
 			"Directory.Read.All",
+			"Group.ManageProtection.All",
+			"Group.Read.All",
+			"GroupMember.Read.All",
 		},
 		WritePermissions: []string{
-			"Group.Create",
-			"Group.ReadWrite.All",
 			"Directory.ReadWrite.All",
-			"RoleManagement.ReadWrite.Directory",
+			"Group.ManageProtection.All",
+			"Group.ReadWrite.All",
 		},
 		ResourcePath: "/groups",
 	}
@@ -119,6 +124,17 @@ func (r *GroupResource) ImportState(ctx context.Context, req resource.ImportStat
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hard_delete"), hardDelete)...)
 }
 
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *GroupResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 // Schema defines the schema for the resource.
 func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -166,8 +182,10 @@ func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 			"group_types": schema.SetAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Specifies the group type and its membership. If the collection contains 'Unified', the group is a Microsoft 365 group; otherwise, it's either a security group or a distribution group. If the collection includes 'DynamicMembership', the group has dynamic membership; otherwise, membership is static.",
 				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 					setvalidator.ValueStringsAre(
 						stringvalidator.OneOf("Unified", "DynamicMembership"),
 					),

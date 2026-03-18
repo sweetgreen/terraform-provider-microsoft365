@@ -8,6 +8,7 @@ import (
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
 	errors "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors/kiota"
+	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -102,6 +103,7 @@ func (r *NamedLocationResource) Create(ctx context.Context, req resource.CreateR
 // Reference: https://learn.microsoft.com/en-us/graph/api/namedlocation-get?view=graph-rest-beta
 func (r *NamedLocationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var object NamedLocationResourceModel
+	var identity sharedmodels.ResourceIdentity
 
 	tflog.Debug(ctx, fmt.Sprintf("Starting Read method for: %s", ResourceName))
 
@@ -144,6 +146,15 @@ func (r *NamedLocationResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
@@ -278,10 +289,11 @@ func (r *NamedLocationResource) Delete(ctx context.Context, req resource.DeleteR
 			errorInfo := errors.GraphError(ctx, deleteErr)
 			tflog.Debug(ctx, fmt.Sprintf("DELETE call returned error: status=%d, category=%s, message=%s",
 				errorInfo.StatusCode, errorInfo.Category, errorInfo.ErrorMessage))
+			return fmt.Errorf("failed to delete named location %s: %w", state.ID.ValueString(), deleteErr)
 		} else {
 			tflog.Debug(ctx, fmt.Sprintf("DELETE call succeeded for named location %s", state.ID.ValueString()))
 		}
-		return deleteErr
+		return nil
 	}, deleteOptions)
 
 	if err != nil {

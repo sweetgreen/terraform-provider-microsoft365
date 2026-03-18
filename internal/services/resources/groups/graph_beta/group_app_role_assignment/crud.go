@@ -8,7 +8,9 @@ import (
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
 	errors "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors/kiota"
+	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -59,10 +61,27 @@ func (r *GroupAppRoleAssignmentResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	MapRemoteStateToTerraform(ctx, &object, appRoleAssignment)
+	object.ID = types.StringValue(*appRoleAssignment.GetId())
+	object.TargetGroupID = types.StringValue(groupId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	readReq := resource.ReadRequest{State: resp.State, ProviderMeta: req.ProviderMeta}
+	stateContainer := &crud.CreateResponseContainer{CreateResponse: resp}
+
+	opts := crud.DefaultReadWithRetryOptions()
+	opts.Operation = constants.TfOperationCreate
+	opts.ResourceTypeName = ResourceName
+
+	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading resource state after create",
+			fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error()),
+		)
 		return
 	}
 
@@ -78,6 +97,7 @@ func (r *GroupAppRoleAssignmentResource) Create(ctx context.Context, req resourc
 // Reference: https://learn.microsoft.com/en-us/graph/api/approleassignment-get?view=graph-rest-beta
 func (r *GroupAppRoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var object GroupAppRoleAssignmentResourceModel
+	var identity sharedmodels.ResourceIdentity
 
 	tflog.Debug(ctx, fmt.Sprintf("Starting Read method for: %s", ResourceName))
 
@@ -117,6 +137,18 @@ func (r *GroupAppRoleAssignmentResource) Read(ctx context.Context, req resource.
 	MapRemoteStateToTerraform(ctx, &object, appRoleAssignment)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
 }
@@ -186,7 +218,7 @@ func (r *GroupAppRoleAssignmentResource) Update(ctx context.Context, req resourc
 			return
 		}
 
-		MapRemoteStateToTerraform(ctx, &plan, appRoleAssignment)
+		plan.ID = types.StringValue(*appRoleAssignment.GetId())
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)

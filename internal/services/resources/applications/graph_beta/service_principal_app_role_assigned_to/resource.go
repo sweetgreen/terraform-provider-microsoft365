@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -36,18 +37,19 @@ var (
 
 	// Enables import functionality
 	_ resource.ResourceWithImportState = &ServicePrincipalAppRoleAssignedToResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &ServicePrincipalAppRoleAssignedToResource{}
 )
 
 func NewServicePrincipalAppRoleAssignedToResource() resource.Resource {
 	return &ServicePrincipalAppRoleAssignedToResource{
 		ReadPermissions: []string{
-			"Application.ReadWrite.All",
+			"Application.Read.All",
 			"Directory.Read.All",
 		},
 		WritePermissions: []string{
-			"Application.ReadWrite.All",
 			"AppRoleAssignment.ReadWrite.All",
-			"Directory.ReadWrite.All",
 		},
 		ResourcePath: "/servicePrincipals/{servicePrincipal-id}/appRoleAssignedTo",
 	}
@@ -89,10 +91,27 @@ func (r *ServicePrincipalAppRoleAssignedToResource) ImportState(ctx context.Cont
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), assignmentID)...)
 }
 
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *ServicePrincipalAppRoleAssignedToResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 // Schema defines the schema for the resource.
 func (r *ServicePrincipalAppRoleAssignedToResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages app role assignments granted for a service principal using the `/servicePrincipals/{id}/appRoleAssignedTo` endpoint. This resource is used to enables assigning app roles defined by a resource service principal to users, groups, or client service principals.\n\nApp roles assigned to service principals are also known as **application permissions**. These can be granted directly with app role assignments or through a consent experience.\n\nTo grant an app role assignment, you need three identifiers:\n- `target_service_principal_object_id`: The Object ID of the user, group, or client service principal to which you are assigning the app role\n- `resource_object_id`: The Object ID of the resource service principal which has defined the app role\n- `app_role_id`: The ID of the appRole (defined on the resource service principal) to assign\n\nFor more information, see the [Microsoft Graph API documentation](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignedto?view=graph-rest-beta)..",
+		MarkdownDescription: "Manages app role assignments granted for a service principal using the `/servicePrincipals/{id}/appRoleAssignedTo` endpoint. " +
+			"This resource is used to enables assigning app roles defined by a resource service principal to users, groups, or client service principals. " +
+			"App roles assigned to service principals are also known as **application permissions**. These can be granted directly with app role assignments " +
+			"or through a consent experience.\n\nTo grant an app role assignment, you need three identifiers:\n- `target_service_principal_object_id`: " +
+			"The Object ID of the user, group, or client service principal to which you are assigning the app role\n- `resource_object_id`: The Object ID of " +
+			"the resource service principal which has defined the app role\n- `app_role_id`: The ID of the appRole (defined on the resource service principal) to " +
+			"assign\n\nFor more information, see the [Microsoft Graph API documentation](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-approleassignedto?view=graph-rest-beta)..",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,

@@ -7,9 +7,11 @@ import (
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/client"
 	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -37,22 +39,29 @@ var (
 
 	// Enables import functionality
 	_ resource.ResourceWithImportState = &AgentIdentityBlueprintResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &AgentIdentityBlueprintResource{}
 )
 
 func NewAgentIdentityBlueprintResource() resource.Resource {
 	return &AgentIdentityBlueprintResource{
 		ReadPermissions: []string{
+			"AgentIdUser.ReadWrite.All",
 			"AgentIdentityBlueprint.Read.All",
 			"Application.Read.All",
 			"Directory.Read.All",
+			"User.Read.All",
+			"User.ReadBasic.All",
 		},
 		WritePermissions: []string{
-			"AgentIdentityBlueprint.Create",
-			"AgentIdentityBlueprint.ReadWrite.All",
-			"Directory.ReadWrite.All",
 			"AgentIdentityBlueprint.AddRemoveCreds.All",
+			"AgentIdentityBlueprint.DeleteRestore.All",
+			"AgentIdentityBlueprint.ReadWrite.All",
+			"AgentIdentityBlueprint.UpdateAuthProperties.All",
 			"AgentIdentityBlueprint.UpdateBranding.All",
-			"AgentIdentity.DeleteRestore.All", // Needed for hard deletion
+			"AgentIdentityBlueprintPrincipal.ReadWrite.All",
+			"Application.ReadWrite.All",
 		},
 		ResourcePath: "/applications",
 	}
@@ -115,6 +124,17 @@ func (r *AgentIdentityBlueprintResource) ImportState(ctx context.Context, req re
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hard_delete"), hardDelete)...)
 }
 
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *AgentIdentityBlueprintResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 // Schema returns the schema for the resource.
 func (r *AgentIdentityBlueprintResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -145,6 +165,9 @@ func (r *AgentIdentityBlueprintResource) Schema(ctx context.Context, req resourc
 				MarkdownDescription: "Free text field to provide a description of the agent identity blueprint to end users. Maximum length is 1,024 characters.",
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(1024),
 				},
@@ -154,9 +177,12 @@ func (r *AgentIdentityBlueprintResource) Schema(ctx context.Context, req resourc
 					" the following values from testing don't work: `AzureADMultipleOrgs` (Multi-tenant), `AzureADandPersonalMicrosoftAccount` (Multi-tenant and personal accounts), `PersonalMicrosoftAccount` (Personal accounts only).",
 				Optional: true,
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 				Validators: []validator.String{
 					stringvalidator.OneOf(
-						"AzureADMyOrg", // appears to always be this value ?
+						"AzureADMyOrg", // appears to always be this value unlike resource 'application'.
 						// "AzureADMultipleOrgs",
 						// "AzureADandPersonalMicrosoftAccount",
 						// "PersonalMicrosoftAccount",
@@ -168,6 +194,9 @@ func (r *AgentIdentityBlueprintResource) Schema(ctx context.Context, req resourc
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+				},
 			},
 			"sponsor_user_ids": schema.SetAttribute{
 				MarkdownDescription: "The user IDs of the sponsors for the agent identity blueprint. At least one sponsor is " +

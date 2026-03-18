@@ -5,15 +5,20 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/helpers"
-	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/microsoftgraph/msgraph-beta-sdk-go/models"
+
+	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/helpers"
+	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
 )
 
 // mapResourceToState maps the resource data to the state model
-func mapResourceToState(ctx context.Context, stateModel *WindowsAutopilotDevicePreparationPolicyResourceModel, resource models.DeviceManagementConfigurationPolicyable) {
+func mapResourceToState(
+	ctx context.Context,
+	stateModel *WindowsAutopilotDevicePreparationPolicyResourceModel,
+	resource models.DeviceManagementConfigurationPolicyable,
+) {
 	if resource == nil {
 		tflog.Debug(ctx, "Remote resource is nil")
 		return
@@ -32,7 +37,6 @@ func mapResourceToState(ctx context.Context, stateModel *WindowsAutopilotDeviceP
 	stateModel.SettingsCount = convert.GraphToFrameworkInt32(resource.GetSettingCount())
 	stateModel.RoleScopeTagIds = convert.GraphToFrameworkStringSet(ctx, resource.GetRoleScopeTagIds())
 
-	// Map platform and technologies
 	if platforms := resource.GetPlatforms(); platforms != nil {
 		stateModel.Platforms = types.StringValue(platforms.String())
 	}
@@ -41,9 +45,12 @@ func mapResourceToState(ctx context.Context, stateModel *WindowsAutopilotDeviceP
 		stateModel.Technologies = types.StringValue(technologies.String())
 	}
 
+	// Determine if this is user-driven mode based on template ID
+	isUserDriven := false
 	if templateRef := resource.GetTemplateReference(); templateRef != nil {
 		if templateId := templateRef.GetTemplateId(); templateId != nil {
 			stateModel.TemplateId = convert.GraphToFrameworkString(templateRef.GetTemplateId())
+			isUserDriven = *templateId == TemplateIDUserDriven
 		}
 
 		if templateFamily := templateRef.GetTemplateFamily(); templateFamily != nil {
@@ -51,19 +58,27 @@ func mapResourceToState(ctx context.Context, stateModel *WindowsAutopilotDeviceP
 		}
 	}
 
-	// Initialize nested objects
+	// Initialize deployment_settings for all modes (needed for deployment_type)
 	if stateModel.DeploymentSettings == nil {
 		stateModel.DeploymentSettings = &DeploymentSettingsModel{}
 	}
-	if stateModel.OOBESettings == nil {
-		stateModel.OOBESettings = &OOBESettingsModel{}
+
+	// Initialize OOBE settings only for user-driven policies
+	if isUserDriven {
+		if stateModel.OOBESettings == nil {
+			stateModel.OOBESettings = &OOBESettingsModel{}
+		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished mapping resource state with id %s", stateModel.ID.ValueString()))
 }
 
 // mapSettingsToState extracts settings from the response and maps them to the state model
-func mapSettingsToState(ctx context.Context, stateModel *WindowsAutopilotDevicePreparationPolicyResourceModel, settingsResponse models.DeviceManagementConfigurationSettingCollectionResponseable) error {
+func mapSettingsToState(
+	ctx context.Context,
+	stateModel *WindowsAutopilotDevicePreparationPolicyResourceModel,
+	settingsResponse models.DeviceManagementConfigurationSettingCollectionResponseable,
+) error {
 	if settingsResponse == nil {
 		tflog.Debug(ctx, "Settings response is nil")
 		return nil
@@ -75,12 +90,22 @@ func mapSettingsToState(ctx context.Context, stateModel *WindowsAutopilotDeviceP
 		return nil
 	}
 
-	// Initialize the nested objects if needed
+	// Determine if this is user-driven mode based on template ID from state
+	isUserDriven := false
+	if !stateModel.TemplateId.IsNull() && !stateModel.TemplateId.IsUnknown() {
+		isUserDriven = stateModel.TemplateId.ValueString() == TemplateIDUserDriven
+	}
+
+	// Initialize deployment_settings for all modes (needed for deployment_type)
 	if stateModel.DeploymentSettings == nil {
 		stateModel.DeploymentSettings = &DeploymentSettingsModel{}
 	}
-	if stateModel.OOBESettings == nil {
-		stateModel.OOBESettings = &OOBESettingsModel{}
+
+	// Initialize OOBE settings only for user-driven policies
+	if isUserDriven {
+		if stateModel.OOBESettings == nil {
+			stateModel.OOBESettings = &OOBESettingsModel{}
+		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Processing %d settings", len(settings)))
@@ -107,35 +132,58 @@ func mapSettingsToState(ctx context.Context, stateModel *WindowsAutopilotDeviceP
 			odataType = *settingInstance.GetOdataType()
 		}
 
-		tflog.Debug(ctx, fmt.Sprintf("Processing setting: %s, type: %s", *settingDefinitionId, odataType))
+		tflog.Debug(
+			ctx,
+			fmt.Sprintf("Processing setting: %s, type: %s", *settingDefinitionId, odataType),
+		)
 
 		// Process the setting based on its definition ID
 		switch *settingDefinitionId {
-		// Device Security Group
+		// Device Security Group (user-driven only)
 		case "enrollment_autopilot_dpp_devicegroup":
-			extractStringValue(ctx, settingInstance, &stateModel.DeviceSecurityGroup)
+			if isUserDriven {
+				extractStringValue(ctx, settingInstance, &stateModel.DeviceSecurityGroup)
+			}
 
 		// Deployment Settings
-		case "enrollment_autopilot_dpp_deploymentmode":
-			extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.DeploymentMode)
 		case "enrollment_autopilot_dpp_deploymenttype":
+			// deployment_type is always mapped for both modes
 			extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.DeploymentType)
+		case "enrollment_autopilot_dpp_deploymentmode":
+			// deployment_mode only for user-driven
+			if isUserDriven {
+				extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.DeploymentMode)
+			}
 		case "enrollment_autopilot_dpp_jointype":
-			extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.JoinType)
+			// join_type only for user-driven
+			if isUserDriven {
+				extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.JoinType)
+			}
 		case "enrollment_autopilot_dpp_accountype":
-			extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.AccountType)
+			// account_type only for user-driven
+			if isUserDriven {
+				extractChoiceValue(ctx, settingInstance, &stateModel.DeploymentSettings.AccountType)
+			}
 
-		// OOBE Settings
+		// OOBE Settings (user-driven only)
 		case "enrollment_autopilot_dpp_timeout":
-			extractIntValue(ctx, settingInstance, &stateModel.OOBESettings.TimeoutInMinutes)
+			if isUserDriven {
+				extractIntValue(ctx, settingInstance, &stateModel.OOBESettings.TimeoutInMinutes)
+			}
 		case "enrollment_autopilot_dpp_custonerror":
-			extractStringValue(ctx, settingInstance, &stateModel.OOBESettings.CustomErrorMessage)
+			if isUserDriven {
+				extractStringValue(ctx, settingInstance, &stateModel.OOBESettings.CustomErrorMessage)
+			}
 		case "enrollment_autopilot_dpp_allowskip":
-			extractBoolValue(ctx, settingInstance, &stateModel.OOBESettings.AllowSkip)
+			if isUserDriven {
+				extractBoolValue(ctx, settingInstance, &stateModel.OOBESettings.AllowSkip)
+			}
 		case "enrollment_autopilot_dpp_allowdiagnostics":
-			extractBoolValue(ctx, settingInstance, &stateModel.OOBESettings.AllowDiagnostics)
+			if isUserDriven {
+				extractBoolValue(ctx, settingInstance, &stateModel.OOBESettings.AllowDiagnostics)
+			}
 
-		// Allowed Apps and Scripts
+		// Allowed Apps and Scripts (both policy types)
 		case "enrollment_autopilot_dpp_allowedappids", "enrollment_autopilot_dpp_allowedapps":
 			extractCollectionValue(ctx, settingInstance, &stateModel.AllowedApps)
 		case "enrollment_autopilot_dpp_allowedscriptids", "enrollment_autopilot_dpp_allowedscripts":
@@ -145,11 +193,20 @@ func mapSettingsToState(ctx context.Context, stateModel *WindowsAutopilotDeviceP
 		}
 	}
 
+	// For automatic/self-deploying mode, ensure computed fields that don't exist are set to null
+	if !isUserDriven && stateModel.DeploymentSettings != nil {
+		stateModel.DeploymentSettings.JoinType = types.StringNull()
+	}
+
 	return nil
 }
 
 // extractStringValue extracts a string value using the additional data property
-func extractStringValue(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target *types.String) {
+func extractStringValue(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target *types.String,
+) {
 	if settingInstance == nil {
 		tflog.Warn(ctx, "Setting instance is nil when extracting string value")
 		return
@@ -190,7 +247,11 @@ func extractStringValue(ctx context.Context, settingInstance models.DeviceManage
 }
 
 // extractIntValue extracts an integer value using the additional data property
-func extractIntValue(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target *types.Int64) {
+func extractIntValue(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target *types.Int64,
+) {
 	if settingInstance == nil {
 		tflog.Warn(ctx, "Setting instance is nil when extracting int value")
 		return
@@ -231,7 +292,11 @@ func extractIntValue(ctx context.Context, settingInstance models.DeviceManagemen
 }
 
 // extractBoolValue extracts a boolean value using the additional data property
-func extractBoolValue(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target *types.Bool) {
+func extractBoolValue(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target *types.Bool,
+) {
 	if settingInstance == nil {
 		tflog.Warn(ctx, "Setting instance is nil when extracting bool value")
 		return
@@ -261,7 +326,11 @@ func extractBoolValue(ctx context.Context, settingInstance models.DeviceManageme
 }
 
 // extractChoiceValue extracts a choice value using the additional data property
-func extractChoiceValue(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target *types.String) {
+func extractChoiceValue(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target *types.String,
+) {
 	if settingInstance == nil {
 		tflog.Warn(ctx, "Setting instance is nil when extracting choice value")
 		return
@@ -299,7 +368,11 @@ func extractChoiceValue(ctx context.Context, settingInstance models.DeviceManage
 }
 
 // extractCollectionValue extracts collection values using the additional data property
-func extractCollectionValue(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target any) {
+func extractCollectionValue(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target any,
+) {
 	if settingInstance == nil {
 		tflog.Warn(ctx, "Setting instance is nil when extracting collection value")
 		return
@@ -319,7 +392,11 @@ func extractCollectionValue(ctx context.Context, settingInstance models.DeviceMa
 }
 
 // extractAllowedAppsCollection extracts app collections with ID and type
-func extractAllowedAppsCollection(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target *[]AllowedAppModel) {
+func extractAllowedAppsCollection(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target *[]AllowedAppModel,
+) {
 	if settingInstance == nil || target == nil {
 		tflog.Warn(ctx, "Setting instance or target is nil when extracting app collection")
 		return
@@ -422,7 +499,11 @@ func parseAppJson(ctx context.Context, jsonStr string) AllowedAppModel {
 }
 
 // extractSimpleStringCollection extracts simple string collections
-func extractSimpleStringCollection(ctx context.Context, settingInstance models.DeviceManagementConfigurationSettingInstanceable, target *[]types.String) {
+func extractSimpleStringCollection(
+	ctx context.Context,
+	settingInstance models.DeviceManagementConfigurationSettingInstanceable,
+	target *[]types.String,
+) {
 	if settingInstance == nil || target == nil {
 		tflog.Warn(ctx, "Setting instance or target is nil when extracting string collection")
 		return

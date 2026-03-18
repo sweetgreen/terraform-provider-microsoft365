@@ -9,20 +9,33 @@ resource "random_string" "suffix" {
 }
 
 # ==============================================================================
-# Service Principal Dependencies
+# Test Application and Service Principal
 # ==============================================================================
 
-# Use a built-in Microsoft service principal for testing
-data "microsoft365_graph_beta_applications_service_principal" "windows_azure_service_management_api" {
-  filter_type  = "display_name"
-  filter_value = "Windows Azure Service Management API"
+# Create a test application
+resource "microsoft365_graph_beta_applications_application" "test" {
+  display_name = "acc-test-cau014-sp-${random_string.suffix.result}"
+  description  = "Test application for CAU014 conditional access policy"
+  hard_delete  = true
 }
 
-# Wait for service principal to propagate
-resource "time_sleep" "wait_for_sp" {
-  depends_on = [data.microsoft365_graph_beta_applications_service_principal.windows_azure_service_management_api]
+# Wait for application to be fully created
+resource "time_sleep" "wait_for_app" {
+  depends_on      = [microsoft365_graph_beta_applications_application.test]
+  create_duration = "15s"
+}
 
-  create_duration = "10s"
+# Create service principal from the test application
+resource "microsoft365_graph_beta_applications_service_principal" "test" {
+  app_id = microsoft365_graph_beta_applications_application.test.app_id
+
+  depends_on = [time_sleep.wait_for_app]
+}
+
+# Wait for service principal to be fully created
+resource "time_sleep" "wait_for_sp" {
+  depends_on      = [microsoft365_graph_beta_applications_service_principal.test]
+  create_duration = "15s"
 }
 
 # ==============================================================================
@@ -38,6 +51,8 @@ resource "microsoft365_graph_beta_identity_and_access_conditional_access_policy"
   state        = "enabledForReportingButNotEnforced"
 
   conditions = {
+    user_risk_levels              = []
+    sign_in_risk_levels           = []
     client_app_types              = ["all"]
     service_principal_risk_levels = ["high", "medium"]
 
@@ -59,18 +74,20 @@ resource "microsoft365_graph_beta_identity_and_access_conditional_access_policy"
 
     client_applications = {
       include_service_principals = [
-        data.microsoft365_graph_beta_applications_service_principal.windows_azure_service_management_api.items[0].id
+        microsoft365_graph_beta_applications_service_principal.test.id
       ]
       exclude_service_principals = []
     }
 
-    sign_in_risk_levels = []
+
   }
 
   grant_controls = {
     operator                      = "OR"
     built_in_controls             = ["block"]
     custom_authentication_factors = []
+    terms_of_use                  = []
+    authentication_strength       = null
   }
 
   timeouts = {

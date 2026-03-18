@@ -4,10 +4,12 @@ import (
 	"regexp"
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
+	customValidator "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/validate/attribute"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // DeviceConfigurationWithAllGroupAssignmentsAndFilterSchema is a schema for device configuration
@@ -44,13 +46,17 @@ func DeviceConfigurationWithAllGroupAssignmentsAndFilterSchema() schema.SetNeste
 				"filter_id": schema.StringAttribute{
 					Optional:            true,
 					Computed:            true,
-					MarkdownDescription: "ID of the filter to apply to the assignment.",
-					Default:             stringdefault.StaticString("00000000-0000-0000-0000-000000000000"),
+					MarkdownDescription: "ID of the filter to apply to the assignment. Required when filter_type is 'include' or 'exclude'. Should be omitted when filter_type is 'none'.",
+					// Have to set a default value here to satify the set hash calculation behaviour.
+					Default: stringdefault.StaticString("00000000-0000-0000-0000-000000000000"),
 					Validators: []validator.String{
 						stringvalidator.RegexMatches(
 							regexp.MustCompile(constants.GuidRegex),
 							"must be a valid GUID in the format 00000000-0000-0000-0000-000000000000",
 						),
+						customValidator.RequiredWhenEquals("filter_type", types.StringValue("include")),
+						customValidator.RequiredWhenEquals("filter_type", types.StringValue("exclude")),
+						stringvalidator.NoneOf("00000000-0000-0000-0000-000000000000"),
 					},
 				},
 				"filter_type": schema.StringAttribute{
@@ -129,6 +135,62 @@ func DeviceConfigurationWithAllLicensedUsersAllDevicesInclusionGroupAssignmentsS
 							regexp.MustCompile(constants.GuidRegex),
 							"must be a valid GUID in the format 00000000-0000-0000-0000-000000000000",
 						),
+					},
+				},
+			},
+		},
+	}
+}
+
+// DeviceConfigurationWithAllLicensedUsersInclusionGroupAssignmentsAndFilterSchema is a schema for device configuration
+// assignments that supports 'allLicensedUsersAssignmentTarget' and 'groupAssignmentTarget' types with group filters.
+func DeviceConfigurationWithAllLicensedUsersInclusionGroupAssignmentsAndFilterSchema() schema.SetNestedAttribute {
+	return schema.SetNestedAttribute{
+		MarkdownDescription: "Assignments for the device configuration. Each assignment specifies the target group and schedule for script execution. Supports group filters.",
+		Optional:            true,
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				"type": schema.StringAttribute{
+					Required:            true,
+					MarkdownDescription: "Type of assignment target. Must be one of: 'allLicensedUsersAssignmentTarget', 'groupAssignmentTarget'.",
+					Validators: []validator.String{
+						stringvalidator.OneOf(
+							"allLicensedUsersAssignmentTarget",
+							"groupAssignmentTarget",
+						),
+					},
+				},
+				"group_id": schema.StringAttribute{
+					Optional:            true,
+					MarkdownDescription: "The Entra ID group ID to include in the assignment. Required when type is 'groupAssignmentTarget'.",
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(constants.GuidRegex),
+							"must be a valid GUID in the format 00000000-0000-0000-0000-000000000000",
+						),
+					},
+				},
+				// Assignment filter fields
+				"filter_id": schema.StringAttribute{
+					Optional:            true,
+					MarkdownDescription: "ID of the filter to apply to the assignment. Required when filter_type is 'include' or 'exclude'. Should be omitted when filter_type is 'none'.",
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(constants.GuidRegex),
+							"must be a valid GUID in the format 00000000-0000-0000-0000-000000000000",
+						),
+						customValidator.RequiredWhenEquals("filter_type", types.StringValue("include")),
+						customValidator.RequiredWhenEquals("filter_type", types.StringValue("exclude")),
+						stringvalidator.NoneOf("00000000-0000-0000-0000-000000000000"),
+					},
+				},
+				"filter_type": schema.StringAttribute{
+					Optional:            true,
+					MarkdownDescription: "Type of filter to apply. Must be one of: 'include', 'exclude', or 'none'.",
+					Computed:            true,
+					Default:             stringdefault.StaticString("none"),
+					Validators: []validator.String{
+						stringvalidator.OneOf("include", "exclude", "none"),
 					},
 				},
 			},
