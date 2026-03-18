@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors/sentinels"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	msgraphbetasdk "github.com/microsoftgraph/msgraph-beta-sdk-go"
@@ -73,28 +74,24 @@ func validateRequest(ctx context.Context, client *msgraphbetasdk.GraphServiceCli
 		}
 	}
 
-	// Validate user inclusion assignment requirements
 	if data.Conditions != nil && data.Conditions.Users != nil {
 		if err := validateUserInclusionAssignments(ctx, data.Conditions.Users); err != nil {
 			return fmt.Errorf("validation failed for 'include_users': %w", err)
 		}
 	}
 
-	// Validate application inclusion assignment requirements
 	if data.Conditions != nil && data.Conditions.Applications != nil {
 		if err := validateApplicationInclusionAssignments(ctx, data.Conditions.Applications); err != nil {
 			return fmt.Errorf("validation failed for 'include_applications': %w", err)
 		}
 	}
 
-	// Validate trusted locations
 	if data.Conditions != nil && data.Conditions.Locations != nil {
 		if err := validateTrustedLocations(ctx, client, data.Conditions.Locations); err != nil {
 			return fmt.Errorf("validation failed for 'include_locations' or 'exclude_locations': %w", err)
 		}
 	}
 
-	// Validate session controls
 	if data.SessionControls != nil {
 		if err := validateSessionControls(ctx, data.SessionControls); err != nil {
 			return fmt.Errorf("validation failed for 'session_controls': %w", err)
@@ -148,13 +145,11 @@ func validateRoles(ctx context.Context, client *msgraphbetasdk.GraphServiceClien
 		return nil
 	}
 
-	// Fetch role definitions from Microsoft Graph API using SDK
 	roleDefinitions, err := getRoleDefinitions(ctx, client)
 	if err != nil {
 		return fmt.Errorf("failed to fetch role definitions from Microsoft Graph: %w", err)
 	}
 
-	// Create a map of valid role GUIDs for quick lookup
 	validRoleGUIDs := make(map[string]graphmodels.UnifiedRoleDefinitionable)
 	for _, role := range roleDefinitions {
 		if role.GetId() != nil {
@@ -173,9 +168,8 @@ func validateRoles(ctx context.Context, client *msgraphbetasdk.GraphServiceClien
 		}
 	}
 
-	// Return error if any invalid roles found
 	if len(invalidRoles) > 0 {
-		return fmt.Errorf("invalid role GUIDs found in %s: %v. Please verify these built in roles exist in your Microsoft Entra ID tenant", fieldName, invalidRoles)
+		return fmt.Errorf("%w in %s: %v. Please verify these built in roles exist in your Microsoft Entra ID tenant", sentinels.ErrInvalidRoleGUIDs, fieldName, invalidRoles)
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("All %d role GUIDs in %s are valid", len(roleGUIDs), fieldName))
@@ -222,9 +216,8 @@ func validateUsers(ctx context.Context, client *msgraphbetasdk.GraphServiceClien
 		}
 	}
 
-	// Return error if any invalid users found
 	if len(invalidUsers) > 0 {
-		return fmt.Errorf("invalid user GUIDs found in %s: %v. Please verify these users exist in your Microsoft Entra ID tenant", fieldName, invalidUsers)
+		return fmt.Errorf("%w in %s: %v. Please verify these users exist in your Microsoft Entra ID tenant", sentinels.ErrInvalidUserGUIDs, fieldName, invalidUsers)
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("All %d user GUIDs in %s are valid", len(userGUIDs), fieldName))
@@ -240,6 +233,7 @@ func getRoleDefinitions(ctx context.Context, client *msgraphbetasdk.GraphService
 		Directory().
 		RoleDefinitions().
 		Get(ctx, nil)
+
 	if err != nil {
 		return nil, fmt.Errorf("error fetching role definitions: %w", err)
 	}
@@ -273,7 +267,6 @@ func validateMicrosoftEntraOrganization(ctx context.Context, client *msgraphbeta
 		return nil
 	}
 
-	// Validate each tenant ID
 	var invalidTenantIDs []string
 	var tenantDetails []string
 
@@ -300,16 +293,14 @@ func validateMicrosoftEntraOrganization(ctx context.Context, client *msgraphbeta
 			tenantID, displayName, domainName))
 	}
 
-	// Log validated tenant details
 	if len(tenantDetails) > 0 {
 		tflog.Debug(ctx, "Validated tenant information:", map[string]any{
 			"tenants": tenantDetails,
 		})
 	}
 
-	// Return error if any invalid tenant IDs found
 	if len(invalidTenantIDs) > 0 {
-		return fmt.Errorf("invalid Microsoft Entra organization tenant ID found: %v. Please verify these tenant IDs are valid", invalidTenantIDs)
+		return fmt.Errorf("%w found: %v. Please verify these tenant IDs are valid", sentinels.ErrInvalidTenantID, invalidTenantIDs)
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("All %d tenant IDs are valid", len(tenantIDsList)))
@@ -320,8 +311,11 @@ func validateMicrosoftEntraOrganization(ctx context.Context, client *msgraphbeta
 func getTenantInformationByTenantID(ctx context.Context, client *msgraphbetasdk.GraphServiceClient, tenantID string) (graphmodels.TenantInformationable, error) {
 	tflog.Debug(ctx, fmt.Sprintf("Validating tenant ID: %s", tenantID))
 
-	// Use the SDK to find tenant information by tenant ID
-	tenantInfo, err := client.TenantRelationships().FindTenantInformationByTenantIdWithTenantId(&tenantID).Get(ctx, nil)
+	tenantInfo, err := client.
+		TenantRelationships().
+		FindTenantInformationByTenantIdWithTenantId(&tenantID).
+		Get(ctx, nil)
+
 	if err != nil {
 		return nil, fmt.Errorf("tenant ID validation failed: %w", err)
 	}
@@ -333,16 +327,14 @@ func getTenantInformationByTenantID(ctx context.Context, client *msgraphbetasdk.
 func validateUserExists(ctx context.Context, client *msgraphbetasdk.GraphServiceClient, userGUID string) error {
 	tflog.Debug(ctx, fmt.Sprintf("Validating user GUID: %s", userGUID))
 
-	// Use SDK to fetch user - the SDK automatically handles the request
 	user, err := client.
 		Users().
 		ByUserId(userGUID).
 		Get(ctx, nil)
 
 	if err != nil {
-		// Check if it's a not found error
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "not found") {
-			return fmt.Errorf("user not found")
+			return sentinels.ErrUserNotFound
 		}
 		return fmt.Errorf("user validation failed: %w", err)
 	}
@@ -367,7 +359,6 @@ func validateUserExists(ctx context.Context, client *msgraphbetasdk.GraphService
 func validateUserInclusionAssignments(ctx context.Context, users *ConditionalAccessUsers) error {
 	tflog.Debug(ctx, "Starting conditional access policy user inclusion assignment validation")
 
-	// Helper function to check if a set has non-empty values
 	hasNonEmptyValues := func(set types.Set) bool {
 		if set.IsNull() || set.IsUnknown() {
 			return false
@@ -419,7 +410,7 @@ func validateUserInclusionAssignments(ctx context.Context, users *ConditionalAcc
 	// If no user targeting, validate include_users has "All" or "None"
 	if !hasUserTargeting {
 		if users.IncludeUsers.IsNull() || users.IncludeUsers.IsUnknown() || len(users.IncludeUsers.Elements()) == 0 {
-			return fmt.Errorf("when conditional access policy user inclusion assignments are empty for 'include_users', 'include_groups', 'include_roles', and 'include_guests_or_external_users', then 'include_users' must be either 'All' or 'None'")
+			return sentinels.ErrEmptyUserInclusions
 		}
 
 		// Verify include_users contains only "All" or "None"
@@ -427,19 +418,17 @@ func validateUserInclusionAssignments(ctx context.Context, users *ConditionalAcc
 			if stringVal, ok := element.(types.String); ok && !stringVal.IsNull() {
 				value := stringVal.ValueString()
 				if value != "All" && value != "None" {
-					return fmt.Errorf("when conditional access policy user inclusion assignments are empty for 'include_users', 'include_groups', 'include_roles', and 'include_guests_or_external_users', then 'include_users' must contain only 'All' or 'None'")
+					return sentinels.ErrInvalidUserInclusionValue
 				}
 			}
 		}
-	} else {
+	} else if !users.IncludeUsers.IsNull() && !users.IncludeUsers.IsUnknown() {
 		// If specific user targeting exists, validate include_users cannot be "All" or "None"
-		if !users.IncludeUsers.IsNull() && !users.IncludeUsers.IsUnknown() {
-			for _, element := range users.IncludeUsers.Elements() {
-				if stringVal, ok := element.(types.String); ok && !stringVal.IsNull() {
-					value := stringVal.ValueString()
-					if value == "All" || value == "None" {
-						return fmt.Errorf("when conditional access policy has specific user inclusion assignments configured for 'include_groups', 'include_roles', or 'include_guests_or_external_users', then 'include_users' cannot contain 'All' or 'None'")
-					}
+		for _, element := range users.IncludeUsers.Elements() {
+			if stringVal, ok := element.(types.String); ok && !stringVal.IsNull() {
+				value := stringVal.ValueString()
+				if value == "All" || value == "None" {
+					return sentinels.ErrUserInclusionWithSpecificAssignments
 				}
 			}
 		}
@@ -453,14 +442,12 @@ func validateUserInclusionAssignments(ctx context.Context, users *ConditionalAcc
 func validateTrustedLocations(ctx context.Context, client *msgraphbetasdk.GraphServiceClient, locations *ConditionalAccessLocations) error {
 	tflog.Debug(ctx, "Starting trusted locations validation")
 
-	// Validate include_locations
 	if !locations.IncludeLocations.IsNull() && !locations.IncludeLocations.IsUnknown() {
 		if err := validateLocationSet(ctx, client, locations.IncludeLocations, "include_locations"); err != nil {
 			return fmt.Errorf("validation failed for include_locations: %w", err)
 		}
 	}
 
-	// Validate exclude_locations
 	if !locations.ExcludeLocations.IsNull() && !locations.ExcludeLocations.IsUnknown() {
 		if err := validateLocationSet(ctx, client, locations.ExcludeLocations, "exclude_locations"); err != nil {
 			return fmt.Errorf("validation failed for exclude_locations: %w", err)
@@ -503,7 +490,7 @@ func validateLocationSet(ctx context.Context, client *msgraphbetasdk.GraphServic
 	}
 
 	// Fetch named locations from Microsoft Graph API using SDK
-	namedLocations, err := fetchNamedLocations(ctx, client)
+	namedLocations, err := getNamedLocations(ctx, client)
 	if err != nil {
 		return fmt.Errorf("failed to fetch named locations from Microsoft Graph: %w", err)
 	}
@@ -533,21 +520,24 @@ func validateLocationSet(ctx context.Context, client *msgraphbetasdk.GraphServic
 		}
 	}
 
-	// Return error if any invalid locations found
 	if len(invalidLocations) > 0 {
-		return fmt.Errorf("invalid location GUIDs found in %s: %v. Please verify these named locations exist in your Microsoft Entra ID tenant", fieldName, invalidLocations)
+		return fmt.Errorf("%w in %s: %v. Please verify these named locations exist in your Microsoft Entra ID tenant", sentinels.ErrInvalidLocationGUIDs, fieldName, invalidLocations)
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("All %d location GUIDs in %s are valid", len(locationGUIDs), fieldName))
 	return nil
 }
 
-// fetchNamedLocations retrieves named locations from Microsoft Graph API using SDK
-func fetchNamedLocations(ctx context.Context, client *msgraphbetasdk.GraphServiceClient) ([]graphmodels.NamedLocationable, error) {
+// getNamedLocations retrieves named locations from Microsoft Graph API using SDK
+func getNamedLocations(ctx context.Context, client *msgraphbetasdk.GraphServiceClient) ([]graphmodels.NamedLocationable, error) {
 	tflog.Debug(ctx, "Fetching named locations from Microsoft Graph API")
 
-	// Use SDK to fetch named locations
-	result, err := client.Identity().ConditionalAccess().NamedLocations().Get(ctx, nil)
+	result, err := client.
+		Identity().
+		ConditionalAccess().
+		NamedLocations().
+		Get(ctx, nil)
+
 	if err != nil {
 		return nil, fmt.Errorf("error fetching named locations: %w", err)
 	}
@@ -610,23 +600,23 @@ func validateApplicationInclusionAssignments(ctx context.Context, applications *
 
 	// Rule 1: If all fields are empty, include_applications must be "None"
 	if includeApplicationsEmpty && excludeApplicationsEmpty && includeUserActionsEmpty && includeAuthContextEmpty {
-		return fmt.Errorf("when conditional access policy application fields 'include_applications', 'exclude_applications', 'include_user_actions', and 'include_authentication_context_class_references' are all empty, then 'include_applications' must be set to 'None'")
+		return sentinels.ErrEmptyApplicationFields
 	}
 
 	// Rule 2: application_filter can only be set if include_applications has GUID or "Office365" values (not "All", "None", or "AllAgentIdResources")
 	if applications.ApplicationFilter != nil && !applications.ApplicationFilter.Mode.IsNull() && !applications.ApplicationFilter.Rule.IsNull() {
 		if !allowsApplicationFilter() {
-			return fmt.Errorf("conditional access policy 'application_filter' cannot be used when 'include_applications' contains 'All', 'None', or 'AllAgentIdResources' values. It can be used with GUID values or 'Office365'")
+			return sentinels.ErrApplicationFilterWithSpecialValues
 		}
 	}
 
 	// Rule 4: If include_applications is set, then include_user_actions and include_authentication_context_class_references cannot be set
 	if !includeApplicationsEmpty {
 		if !includeUserActionsEmpty {
-			return fmt.Errorf("conditional access policy cannot have both 'include_applications' and 'include_user_actions' configured at the same time")
+			return sentinels.ErrApplicationsAndUserActions
 		}
 		if !includeAuthContextEmpty {
-			return fmt.Errorf("conditional access policy cannot have both 'include_applications' and 'include_authentication_context_class_references' configured at the same time")
+			return sentinels.ErrApplicationsAndAuthContext
 		}
 	}
 
@@ -648,11 +638,11 @@ func validateSessionControls(ctx context.Context, sessionControls *ConditionalAc
 			if frequencyInterval == "everyTime" {
 				// Check if type is set
 				if !signInFreq.Type.IsNull() && !signInFreq.Type.IsUnknown() {
-					return fmt.Errorf("when 'frequency_interval' is set to 'everyTime', the 'type' field must not be set in the configuration")
+					return sentinels.ErrFrequencyIntervalEveryTimeWithType
 				}
 				// Check if value is set
 				if !signInFreq.Value.IsNull() && !signInFreq.Value.IsUnknown() {
-					return fmt.Errorf("when 'frequency_interval' is set to 'everyTime', the 'value' field must not be set in the configuration")
+					return sentinels.ErrFrequencyIntervalEveryTimeWithValue
 				}
 			}
 		}

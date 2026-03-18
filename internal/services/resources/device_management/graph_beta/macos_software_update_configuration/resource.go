@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -30,10 +31,20 @@ const (
 )
 
 var (
-	_ resource.Resource                = &MacOSSoftwareUpdateConfigurationResource{}
-	_ resource.ResourceWithConfigure   = &MacOSSoftwareUpdateConfigurationResource{}
+	// Basic resource interface (CRUD operations)
+	_ resource.Resource = &MacOSSoftwareUpdateConfigurationResource{}
+
+	// Allows the resource to be configured with the provider client
+	_ resource.ResourceWithConfigure = &MacOSSoftwareUpdateConfigurationResource{}
+
+	// Enables import functionality
 	_ resource.ResourceWithImportState = &MacOSSoftwareUpdateConfigurationResource{}
-	_ resource.ResourceWithModifyPlan  = &MacOSSoftwareUpdateConfigurationResource{}
+
+	// Enables plan modification/diff suppression
+	_ resource.ResourceWithModifyPlan = &MacOSSoftwareUpdateConfigurationResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &MacOSSoftwareUpdateConfigurationResource{}
 )
 
 func NewMacOSSoftwareUpdateConfigurationResource() resource.Resource {
@@ -67,9 +78,23 @@ func (r *MacOSSoftwareUpdateConfigurationResource) ImportState(ctx context.Conte
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *MacOSSoftwareUpdateConfigurationResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 func (r *MacOSSoftwareUpdateConfigurationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages macOS software update configurations using the `/deviceManagement/deviceConfigurations` endpoint. This resource is used to see [macOSSoftwareUpdateConfiguration resource type](https://learn.microsoft.com/en-us/graph/api/resources/intune-deviceconfig-macossoftwareupdateconfiguration?view=graph-rest-beta) for details.",
+		MarkdownDescription: "Manages macOS software update configurations using the `/deviceManagement/deviceConfigurations` endpoint. " +
+			"This resource is used to manage the macOS software update configuration, this resource is now deprecated, since Apple have deprecated MDM-based " +
+			"software update workloads. Microsoft recommends you use DDM to install updates instead and can be implemented via the settings catalog. " +
+			"See [Manage macOS software updates using MDM-based policies in Microsoft Intune](https://learn.microsoft.com/en-us/intune/device-updates/apple/software-updates-macos) for details.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
@@ -178,13 +203,10 @@ func (r *MacOSSoftwareUpdateConfigurationResource) Schema(ctx context.Context, r
 					},
 				},
 			},
-			"update_time_window_utc_offset_in_minutes": schema.Int32Attribute{
-				MarkdownDescription: "Minutes indicating UTC offset for each update time window.",
-				Required:            true,
-			},
 			"max_user_deferrals_count": schema.Int32Attribute{
 				MarkdownDescription: "The maximum number of times the system allows the user to postpone an update before it's installed. Supported values: 0 - 365.",
 				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Int32{
 					int32validator.Between(0, 365),
 				},

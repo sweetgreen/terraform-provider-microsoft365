@@ -10,6 +10,7 @@ import (
 	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -30,15 +31,18 @@ var (
 	_ resource.ResourceWithConfigure   = &IOSManagedMobileAppResource{}
 	_ resource.ResourceWithImportState = &IOSManagedMobileAppResource{}
 	_ resource.ResourceWithModifyPlan  = &IOSManagedMobileAppResource{}
+	_ resource.ResourceWithIdentity    = &IOSManagedMobileAppResource{}
 )
 
 func NewIOSManagedMobileAppResource() resource.Resource {
 	return &IOSManagedMobileAppResource{
 		ReadPermissions: []string{
 			"DeviceManagementApps.Read.All",
+			"DeviceManagementConfiguration.Read.All",
 		},
 		WritePermissions: []string{
 			"DeviceManagementApps.ReadWrite.All",
+			"DeviceManagementConfiguration.ReadWrite.All",
 		},
 		ResourcePath: "/deviceAppManagement/iosManagedAppProtections/{id}/apps",
 	}
@@ -75,6 +79,17 @@ func (r *IOSManagedMobileAppResource) ImportState(ctx context.Context, req resou
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("managed_app_protection_id"), managedAppProtectionId)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), appId)...)
+}
+
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *IOSManagedMobileAppResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
 }
 
 func (r *IOSManagedMobileAppResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

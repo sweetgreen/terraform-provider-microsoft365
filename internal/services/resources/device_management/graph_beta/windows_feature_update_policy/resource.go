@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -39,6 +40,9 @@ var (
 
 	// Enables plan modification/diff suppression
 	_ resource.ResourceWithModifyPlan = &WindowsFeatureUpdatePolicyResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &WindowsFeatureUpdatePolicyResource{}
 )
 
 func NewWindowsFeatureUpdatePolicyResource() resource.Resource {
@@ -72,6 +76,17 @@ func (r *WindowsFeatureUpdatePolicyResource) Configure(ctx context.Context, req 
 // ImportState imports the resource state.
 func (r *WindowsFeatureUpdatePolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *WindowsFeatureUpdatePolicyResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
 }
 
 // Schema defines the schema for the resource.
@@ -163,19 +178,19 @@ func (r *WindowsFeatureUpdatePolicyResource) Schema(ctx context.Context, req res
 					"offer_start_date_time_in_utc": schema.StringAttribute{
 						Optional:            true,
 						Computed:            true,
-						MarkdownDescription: "The UTC offer start date time of the rollout. Must be in RFC3339 format (e.g., '2025-05-01T00:00:00Z').",
+						MarkdownDescription: "The first group availability of the windows feature update. Must be in RFC3339 format (e.g., '2030-01-13T00:00:00Z').",
 					},
 					"offer_end_date_time_in_utc": schema.StringAttribute{
 						Optional:            true,
 						Computed:            true,
-						MarkdownDescription: "The UTC offer end date time of the rollout.",
+						MarkdownDescription: "The last group availability of the windows feature update. Must be in RFC3339 format (e.g., '2030-01-13T00:00:00Z').",
 					},
 					"offer_interval_in_days": schema.Int32Attribute{
 						Optional:            true,
 						Computed:            true,
-						MarkdownDescription: "The number of days between each set of offers. The value must be between 1 and 14.",
+						MarkdownDescription: "The number of days between each set of group offers. The value must be between 1 and 30 and must be equal to or less than the number of days between the 'offer_start_date_time_in_utc' and 'offer_end_date_time_in_utc'.",
 						Validators: []validator.Int32{
-							int32validator.Between(1, 14),
+							int32validator.Between(1, 30),
 						},
 					},
 				},

@@ -20,6 +20,7 @@ Manages Endpoint Privilege Management policies using the `/deviceManagement/conf
 The following client `application` permissions are needed in order to use this resource:
 
 **Required:**
+- `DeviceManagementConfiguration.Read.All`
 - `DeviceManagementConfiguration.ReadWrite.All`
 
 **Optional:**
@@ -447,7 +448,7 @@ Required:
 
 Optional:
 
-- `filter_id` (String) ID of the filter to apply to the assignment.
+- `filter_id` (String) ID of the filter to apply to the assignment. Required when filter_type is 'include' or 'exclude'. Should be omitted when filter_type is 'none'.
 - `filter_type` (String) Type of filter to apply. Must be one of: 'include', 'exclude', or 'none'.
 - `group_id` (String) The Entra ID group ID to include or exclude in the assignment. Required when type is 'groupAssignmentTarget' or 'exclusionGroupAssignmentTarget'.
 

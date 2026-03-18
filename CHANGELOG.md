@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bug Fixes
 
+* fix: add gpg-public-key.asc to .gitignore for goreleaser clean build ([dc04e8e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/dc04e8e9))
 * export GPG public key as release asset for registry verification ([47bde62](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/47bde62e4091e0a1909b26f4a5092d31f3c3fbde))
 
 ## [0.43.2-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.1-alpha...v0.43.2-alpha) (2026-01-30)
@@ -26,216 +27,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * run go mod tidy to sync dependencies ([dc7fefd](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/dc7fefd3213fb2cac4f74bdc2c01439f8d12bd67))
 
-## [0.43.0-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.42.0-alpha...v0.43.0-alpha) (2026-01-29)
-
-
-### Features
-
-* add comprehensive AST analysis tests for SDK usage tracking ([c7b67dd](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/c7b67dd78797bcac7c90d7c9ad222ba71efe7d64))
-* add datasource Entra ID SID regex and update data source templates for consistency ([e166a4d](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e166a4d179b96f7947b0dc4afc3b96505542e38e))
-* add datasource Entra ID SID regex and update data source templates for consistency ([#864](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/864)) ([55f8a36](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/55f8a36dd48fd363064a0ec39d4be137c5c228a9))
-* add enum change analysis and reporting ([d75351c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d75351cea988793a136c6768714f700c1104d763))
-* add enum change analysis and reporting ([#2028](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2028)) ([d53d820](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d53d820c01d613473f0cc3b08de53e890e2905ee))
-* add label management for test failures in create-test-issues.py ([5bf33c5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5bf33c57c31dcf04a45a5563511eb9fa2cd98983))
-* add list_resource microsoft365_graph_beta_device_management_settings_catalog_configuration_policy ([aa4f6c2](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/aa4f6c2fbfd0ea9d6125355d6fcc43abfc0a085d))
-* add list_resource microsoft365_graph_beta_device_management_settings_catalog_configuration_policy ([#1625](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1625)) ([0c94be7](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0c94be74d778aa33702989c18e11000c562b381c))
-* added data source /group_policy_value_reference ([5aaa539](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5aaa5390f2edf59179d0c34c100db57d9bfdf659))
-* added data-source group_policy_value_reference ([#1476](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1476)) ([a143543](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a143543c0899ca1509fbfb511344d4ab58ce7983))
-* added datasource microsoft365_graph_beta_groups_group ([a62fad5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a62fad51b6e1f81245ecb34e4ec0eecff932a01e))
-* added datasource microsoft365_graph_beta_groups_group ([#2012](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2012)) ([197db2c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/197db2cfe114738b394b38fcf3c17a3f27b32573))
-* added datasource microsoft365_graph_beta_identity_and_access_tenant_information ([#1364](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1364)) ([236d177](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/236d1770ef7b706a68fc8a4d826fafc949c72e3e))
-* added datasource microsoft365_graph_beta_identity_and_access_tenant_information ([#1365](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1365)) ([0d8b53c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0d8b53c83cf27f6aca5eefd5b3032cc67e11f0aa))
-* added datasource microsoft365_utility_deployment_scheduler ([9ac25d2](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/9ac25d211acb26e0f75232f3c936a4a3cc4e124a))
-* added datasource microsoft365_utility_deployment_scheduler ([#1977](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1977)) ([75f1f36](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/75f1f3633f18a3efd9addd7eda08e4941133a8cb))
-* added datasource microsoft365_utility_guid_list_sharder ([#2032](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2032)) ([cd7b2e9](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/cd7b2e9bf167207b8a2e9e88b8cee0be643eb7f0))
-* added datasource microsoft365_utility_licensing_service_plan_reference ([3c9b30a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/3c9b30ac577922a3a5507a9cf2b54aca5ea536c9))
-* added datasource microsoft365_utility_licensing_service_plan_reference ([#1262](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1262)) ([fba52df](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/fba52dfbd9d6f39b5cbab476a3bb2f2af0c0c200))
-* added full unit test harness for resource microsoft365_graph_beta_identity_and_access_conditional_access_policy ([092323a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/092323ae006a66bd7718bcbd7adf4fcd92892200))
-* added full unit test harness for resource microsoft365_graph_beta_identity_and_access_conditional_access_policy ([#1077](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1077)) ([32039a7](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/32039a72f75d5f951a67fa45f289663c2258d6b5))
-* added new datasource utility_microsoft_365_endpoints ([75737db](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/75737dbf90f72e23844d8fc0e5d64494d9f9901d))
-* added new datasource utility_microsoft_365_endpoints ([#894](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/894)) ([e7bc9d2](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e7bc9d267de3457cc955bfe00444b68f842b5dfd))
-* added new resources and refactored test harness ([#1183](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1183)) ([2b46754](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2b46754f9f2922b59112c545b72105ba8fc09e78))
-* added new utility datasources entra_id_sid_converter and windows_remediation_script_registry_key_generator ([#865](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/865)) ([9e16617](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/9e166177fa14fe32382d036aa22cf4cbc09e3209))
-* added resource agent_identity_blueprint_certificate_credential ([#1294](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1294)) ([f587282](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/f5872824e9a72f80dbd03b0ed13cb60efc7d2abb))
-* added resource agent_identity_blueprint_certificate_credential ([#1295](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1295)) ([be4a92c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/be4a92c1c8a18c8a8354c6cb4b7781920f643e98))
-* added resource agent_user and added soft and hard delete options for directory objects ([091519c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/091519c62237b7aef7d97d8a48d66c160467030b))
-* added resource agent_user, service_principal_app_role_assigned_to, agents_agent_identity and added soft and hard delete options for directory objects ([#1344](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1344)) ([091519c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/091519c62237b7aef7d97d8a48d66c160467030b))
-* added resource android_managed_device_app_configuration_policy ([0da497e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0da497ecc62aefe75f7db01c527ad71355738ea6))
-* added resource device_management_group_policy_definition with test harness and removed old group policy resource for specific field types. ([01ceb81](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/01ceb8197cea64f1378e7112711c537abde58ea4))
-* added resource device_management_group_policy_definition with test harness and removed old group policy resource for specific field types. ([#1496](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1496)) ([7604d2e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7604d2eb98e6c07532586050d2e79cdf0488bb3b))
-* added resource microsoft365_graph_beta_agents_agent_collection ([#1347](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1347)) ([746cb8e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/746cb8e21114d8ce5f35d30271e3de1f4544a727))
-* added resource microsoft365_graph_beta_agents_agent_collection_assignment ([#1348](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1348)) ([ad38e14](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ad38e1439cc11755e9f8ad1c501f7d1573ea86bf))
-* added resource microsoft365_graph_beta_agents_agent_identity and resource service_principal_app_role_assigned_to ([#1326](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1326)) ([2c6cc14](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2c6cc14af9524607766b7159cdbd81b83eeaa2eb))
-* added resource microsoft365_graph_beta_agents_agent_identity_blueprint , microsoft365_graph_beta_agents_agent_identity_blueprint_federated_identity_credential , microsoft365_graph_beta_agents_agent_identity_blueprint_identifier_uri , microsoft365_graph_beta_agents_agent_identity_blueprint_password_credential and microsoft365_graph_beta_agents_agent_identity_blueprint_service_principal ([#1291](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1291)) ([0fa5ca2](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0fa5ca23e8836315448b1986cee9f0996a6bb039))
-* added resource microsoft365_graph_beta_agents_agent_instance ([#1346](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1346)) ([04606ac](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/04606acbf0e9fccceedc067fa38c9b28f1d87d1f))
-* added resource microsoft365_graph_beta_users_user_manager with test harness ([#1345](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1345)) ([7ad12fe](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7ad12fecc8daf276f349f108cdc2c32546b42571))
-* added resource service_principal_app_role_assigned_to ([#1314](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1314)) ([e9a85a9](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e9a85a93d80780206cbff106fb908b0913702133))
-* added resource user mailbox settings with unit test harness ([63b3c09](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/63b3c09d094f41918b6bc3521d78aafa22d6276a))
-* added resource user mailbox settings with unit test harness ([#1277](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1277)) ([f5f5bd9](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/f5f5bd9982453e57e5a0422046f001457f753dd1))
-* added retry logic for generic http client and numerous bug fixes for conditional access policies ([ad07337](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ad07337285367d919ea99048b7c0ba1eb8c8cf43))
-* added retry logic for generic http client and numerous bug fixes for conditional access policies ([#849](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/849)) ([38206f1](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/38206f1aac2d9e536e13388b204238ed0443b041))
-* enhance acceptance tests for authentication context resource ([f166680](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/f1666809c49a7e1d4020a45026f8574af9e7d193))
-* enhance data sources with timeouts and new utility functions ([63e1f4c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/63e1f4c0ae241ed804f136d7b1645792c1476a90))
-* enhance mapping of authentication strength IDs to user-friendly values in conditional access policy ([9900a49](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/9900a4934abd45d2639ddacbde5d01890a3db9a1))
-* enhance nightly tests workflow with job-level failure detection and management ([323929a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/323929abfc323319e2f6a97709cbe7744587b21a))
-* enhance resource validation and logging in acceptance tests ([cba1f19](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/cba1f19527d79efbfd94beeffb3e03120be5c43f))
-* enhance resource validation and logging in acceptance tests ([#1057](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1057)) ([69cde2b](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/69cde2bad57fec799adefb11c034abf301e3ba60))
-* enhance run-tests.py for improved memory management and sequential test execution ([70d20e1](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/70d20e109139bef763965d91d641a558947bb21b))
-* enhance run-tests.py for improved memory management and sequential test execution ([#1231](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1231)) ([39bc074](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/39bc0748c78eb0040142a97dab8a26ce70fb4d40))
-* enhance run-tests.py with configurable parallelism and improved test enumeration control ([e52e53e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e52e53e49b18adde1c9d0fee889ac020d56cb5af))
-* enhance run-tests.py with detailed logging and timing for test discovery and execution ([883fd22](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/883fd220ed79bada9e7de8c509344174675351ec))
-* implement issue management for test failures with manage-test-issues.py and remove merge-test-failures.py ([64a9d0d](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/64a9d0db903ead416d0d5041c143027725083f7a))
-* improve error context extraction in test results parsing for better failure diagnostics ([e85b6e5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e85b6e5bf12879d08e0a37649ceaeb865ded2617))
-* improve error context extraction in test results parsing for better failure diagnostics ([#956](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/956)) ([f5b74ea](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/f5b74ead684fccb781b785136d8c3bc264927122))
-* multiple fixes for resource user, with correctly handling of first set of passwords. Also added full test harness ([676e860](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/676e860bee14614dc7277239f28e31685b4569de))
-* multiple fixes for resource user, with correctly handling of first set of passwords. Also added full test harness ([#1099](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1099)) ([d0ff5d1](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d0ff5d1ea2397591aa75d36de68b0be99aa7c556))
-* new resources and refactors ([#1384](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1384)) ([ef79681](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ef796819819b8f554580bca0a96d286338b68250))
-* refactor nightly test acceptance test pipeline ([91a92ab](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/91a92abd2a7548022d5d452de19536a037aadf6c))
-* refactor nightly test acceptance test pipeline ([#870](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/870)) ([6388d61](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6388d6151feb5b50c1b7632b31c9307b5d0f8560))
-* refactor of resource microsoft365_graph_beta_identity_and_access_authentication_strength_policy with fully functiioning test harness ([9ae5c6b](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/9ae5c6b6303bcd601a5f05d6158a76b240d836ca))
-* refactor of resource microsoft365_graph_beta_identity_and_access_authentication_strength_policy with fully functiioning test harness ([#1065](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1065)) ([cf252a6](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/cf252a6eb24541907bc14d68450f052232d7c88e))
-* refactored all actions with correct examples, common syncprogress handling and support for timeout over rides ([74cde98](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/74cde98787ae745aeba861abc2ca0fa2f13fcb77))
-* refactored all actions with correct examples, common syncprogress handling and support for timeout over rides ([#1609](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1609)) ([54dbe59](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/54dbe5922a1cf003a3e8ef0006b81bc5be050191))
-* refactored conditional_access_policy to use kiota sdk and acc tests and default values for [] ([#1361](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1361)) ([d37b8b3](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d37b8b351af454e24f13690fd4164535db316065))
-* refactored graphBetaGroupLifecycleExpirationPolicy and added full test harness, added resource graphBetaGroupLifecycleExpirationPolicyAssignment and full test harness ([8abef15](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8abef1561c6c021910c7993e7306472331171201))
-* refactored microsoft365_graph_identity_and_access_conditional_access_terms_of_use and added full test harness ([efdded8](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/efdded8a3c1906019231d2dbbd252d8ac95c7068))
-* refactored test harness for resource windows_remediation_script and fixed issue with schedule interval default values ([#1386](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1386)) ([b93bb03](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b93bb03c05adfc38da4eb8a185930562cd441ecf))
-* refactored utility datasource unit tests to follow new test harness pattern ([e7de954](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e7de9542953f7f067da0ccfaa12b9952979995c3))
-* restructured validators by resource and att types ([2335fac](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2335fac0443ebbf451f484f65d0ebd8e52d9430a))
-* support filtering policy of network access ([#851](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/851)) ([a51820f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a51820fe4effd2edf556f3c837823ba93709c018))
-* update issue title format in manage-test-issues.py to include 'Bug:' prefix for better clarity ([e07a38b](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e07a38b23f55d52d7c72fe54dbdc7c2b7c8e79ca))
-* Update msgraph-beta-sdk-go to v0.157.0 and add conditional access template datasource ([#2011](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2011)) ([5a75ca0](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5a75ca0a717f97a4abc42b6962fbc150a84ec634))
-* various additons to test harness ([#1363](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1363)) ([6be4931](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6be4931147687d8186d66076f34f836e8f85ed56))
+## [0.49.1-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.49.0-alpha...v0.49.1-alpha) (2026-03-13)
 
 
 ### Bug Fixes
 
-* Add a runRemediationScript attribute of microsoft365_graph_beta_device_management_windows_remediation_script resource assignment ([#1385](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1385)) ([49e871f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/49e871fd8bc452b1c97da9b072c6962a67e1e8d9))
-* added docs for location-based conditional access policies ([c7342da](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/c7342dac15779956e129586fe7d02374c888cd5d))
-* added group deletion handling when licenses are assigned. standardised version constraint for time provider ([c4c1f04](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/c4c1f04a5984532d7af075f36c0395816e64307e))
-* added group deletion handling when licenses are assigned. standardised version constraint for time provider ([#1792](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1792)) ([3de4d69](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/3de4d69560af1ddaf5e2de5241e4986f3105efc4))
-* added helpers for stating and more unit tests ([#1261](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1261)) ([d67836f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d67836f60cfce6078be54fe8266eb041d071e643))
-* added MEM to datasource utilityMicrosoft365EndpointReference ([#1279](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1279)) ([8b6c206](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8b6c20663ba33fcd1c5c6b6088c7d775a0d46840))
-* added pipeline debug log option when bi weekly tests run in workflow dispatch ([#1215](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1215)) ([552d45f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/552d45f697974757ba55e08bd3e188532e094043))
-* added test harness to microsoft365_utility_macos_pkg_app_metadata ([9a8b16a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/9a8b16ab876d03fc3ecd4670e4e7c1c1877ccbce))
-* assertion assignment order ([633dbce](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/633dbce570ca3b5d18950a21c944d14ca124638a))
-* **autopilot:** preserve hybrid_azure_ad_join_skip_connectivity_check for azure ad joined profiles ([#888](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/888)) ([1141f5c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1141f5caf7d5d57f3e15e7f9fd40a59914ee2a8c))
-* **azure:** enforce camelCase for azure api resource ids ([1c09ee0](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1c09ee05064edb907407c01552abaa1dcf836533))
-* **azure:** enforce camelCase for azure api resource ids ([#848](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/848)) ([7373ebe](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7373ebe87e97f3255419b07b97f6398416521449))
-* better field extraction ([566fff1](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/566fff1bead77702139ca24f301783f67f029415))
-* better field extraction ([#1786](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1786)) ([120b647](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/120b64725fcb459f4cad4f8c601c24050fe85e37))
-* changed applications_ip_application_segment field application_id to application_object_id in prep for full fix ([0672f8a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0672f8af7ac2f39e99ada8aa50819b86bfe7e80d))
-* changed applications_ip_application_segment field application_id to application_object_id in prep for full fix and updated docs ([#2009](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2009)) ([c1b6cdc](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/c1b6cdcfe6b921b4d23fb4a3738d97430fd0e8a8))
-* changed resource named_locations to use dowithretry for reqs and updated docs ([#857](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/857)) ([b5ee323](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b5ee3239a47f6ca2f2c446c4685d7ce64365aaf0))
-* changed resource to use dowithretry for reqs ([6dffc15](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6dffc150d30f6ef4d712e5cdb34d3ce656f6ccce))
-* conditional access control set logic ([#1184](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1184)) ([1b507a5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1b507a519aa89ccf44587f7ff13ad55196506512))
-* datasource rename to microsoft365_utility_microsoft_365_endpoint_reference ([1cac047](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1cac0472f035b480558c3897157eb0e7dca49740))
-* datasource rename to microsoft365_utility_microsoft_365_endpoint_reference ([#1278](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1278)) ([b469e69](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b469e6911d37f40161c1fbb7c98b29a873885b83))
-* description field removal of default value set to "" and standardisation of valid max string length ([#1644](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1644)) ([042592e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/042592e3cfecf587b50af7b15eff07ff9011b22c))
-* doc chores, refactored microsoft365_graph_identity_and_access_conditional_access_terms_of_use and added full test harness ([#855](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/855)) ([59f6c9e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/59f6c9edd7a25ad5a39f5826d719b947ee0f3e97))
-* enhance nightly tests workflow by adding disk space cleanup step and updating runner configuration ([#1124](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1124)) ([0ada782](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0ada7823339ea526785a4f95798d0a5e7e96aee5))
-* enhance nightly tests workflow with job-level failure detection and management ([#902](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/902)) ([2271882](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2271882e567f3961cdd6c095432a5d08d33b4ff9))
-* enhance test coverage reporting by sanitizing package filenames in CI workflow ([48b42bf](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/48b42bf8200af134383a10071f7a283a741e835d))
-* enhance unit tests for identity and access resources ([dd0d82a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/dd0d82af9dba86a765cb51edfb55365db673baa1))
-* enhance unit tests for identity and access resources ([#1078](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1078)) ([f430901](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/f430901be5c06cdad9ab0a77d7ff2e651cf1b231))
-* extended bi weekly test pipeline to 180m and fixed an issue in python script where failed_step was only initialized inside the else block ([#1404](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1404)) ([5d7a473](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5d7a47302ad37f4e92b18c131ca719694b7a41b8))
-* extended bi-weekly tests to support actions ([73f30e4](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/73f30e4d8896d918e75665b97beb90c8e3598248))
-* extended bi-weekly tests to support actions ([#1610](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1610)) ([8f620a3](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8f620a331ab4db2b10883011e2cd553287006125))
-* extended pipeline timeout to 240mins ([#1463](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1463)) ([9558169](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/955816919a3b1a2f6b8a7ba00dc6eec1b3ff17cc))
-* for actions timeouts to use terraform-plugin-framework-timeouts v0.7.0 ([b9cbbb2](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b9cbbb2788a65819ec27907a7db9108d4d1a539a))
-* for actions timeouts to use terraform-plugin-framework-timeouts v0.7.0 ([#1591](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1591)) ([0e903d4](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0e903d433bd5755cbfa23dec583803aa0d9d823d))
-* for conditional access acceptance tests ([8485bea](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8485beaea2d5ccad5557792c4250543028347d26))
-* for datasource mobile_app_catalog_package test harness ([8c1071f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8c1071f5c392109560bf83d1ebc44b68fc521ae7))
-* for datasource mobile_app_catalog_package test harness ([#885](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/885)) ([6f759db](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6f759db9399259ab2ae5fea52b0f0153ad301c9a))
-* for device_management_windows_update_ring schema ([55219c1](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/55219c1d88983adc46ac69a6be3b9b53e989d2f9))
-* for failing conditional access acceptance tests ([#1503](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1503)) ([d5c3c69](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d5c3c69dd09799d193eada584d7f8c42f902892c))
-* for group license assignments and added full test harness ([2980d32](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2980d325d9454ee6411de63f56849f6ba34d42fa))
-* for group license assignments and added full test harness ([#1194](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1194)) ([40dc331](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/40dc331ae3f1db3917171939ea9361ba27aea764))
-* for import path ([526715e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/526715eafc977db612dc0e81c9e25f2ce85986c9))
-* for import path ([#1642](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1642)) ([7a3cdd5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7a3cdd5f41aeddf15b0d53c90068fab62dc939bf))
-* for jq: parse error: Invalid string: control characters ([5be22bb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5be22bb4c1cb0c842932cd93b24fb6418e335c46))
-* for jq: parse error: Invalid string: control characters ([#896](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/896)) ([ce5a66d](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ce5a66db4d2672001e1aeb38b061fbcffaf02d16))
-* for multiple failing unit and acc tests ([#892](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/892)) ([26aeefb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/26aeefb365cd3ac20efc2399179bf84b60e35c8c))
-* for resource device_management_windows_update_ring schema ([#1641](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1641)) ([1defcd1](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1defcd14bfe397481c79475bc7b6566040ad40b3))
-* for resource macos_device_configuration_templates test harness ([8a9352c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8a9352c757722cdd622b3bfa695fd50218a577ef))
-* for resource macos_device_configuration_templates test harness ([#1793](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1793)) ([41603d3](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/41603d3a3bf731805664f5b807776743489618d7))
-* for resource user schema and refactored test harness ([3ba9c25](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/3ba9c25ae956ee2a98119586376d01f0c92659ad))
-* for resource user schema and refactored test harness ([#1079](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1079)) ([bf5ffb7](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/bf5ffb7b78fecaf6c8dd09950025667d42abdedb))
-* for sku id's in acc tests for resource UserLicenseAssignmentResource ([#1670](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1670)) ([60fd5f3](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/60fd5f3d976e97ebebd8306180f866d83ca77a44))
-* for test harness for WindowsQualityUpdateExpeditePolicy, WindowsFeatureUpdatePolicy and WindowsEnrollmentStatusPage ([e7c2ca8](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e7c2ca8e51e963255df49e43656e868f815148f7))
-* for test harness for WindowsQualityUpdateExpeditePolicy, WindowsFeatureUpdatePolicy and WindowsEnrollmentStatusPage ([#1796](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1796)) ([1ce72e4](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1ce72e48d2dd0821c3d76102bb6a6ed6a0b3b687))
-* for unit and acc tests for device_management_group_policy_uploaded_definition_files ([#1648](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1648)) ([bdd1807](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/bdd18075597f3738200674fbb624786727b208dc))
-* go mod ([7de8336](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7de8336f02aabc8c2f5b11265285af5bd734efee))
-* go mod ([#1100](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1100)) ([19fb8a6](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/19fb8a6dd84e3c3f4e07a0cdfae5880581959215))
-* implement retry logic for HTTP requests in authentication strength CRUD operations ([39921d3](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/39921d3f156cdc25d315050d1519311cee27e8dd))
-* improved test coverage ([6fa7600](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6fa76001cf896940bdfba3a1b1d140a111aa4a4a))
-* increase retry attempts for HTTP requests in conditional access policy CRUD operations ([ffe8a54](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ffe8a543f6a1a0e1a80c5dc2bc3b05baa4e53710))
-* increase retry attempts for HTTP requests in conditional access terms of use CRUD operations ([c99cdeb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/c99cdebd507446ecc6b49da547cf1b3d8f697c2c))
-* issue management for acc test handling for nightly builds ([#901](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/901)) ([d8f7af4](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d8f7af46ce6dd1f6f647fcca9395382aa3f41f3f))
-* microsoft docs for conditional access. ([#1066](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1066)) ([20c6403](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/20c64033d173c98e50d22e0a2cf9a4455ad49377))
-* moved to kiota sdk. ([58d1347](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/58d1347d992e54dbb92348602d75d9a69e727e9e))
-* multiple fixes for unit and acc test failures and updated TestHTTPClient to accept context in resource tests  ([#1669](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1669)) ([2c8c00c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/2c8c00cb75ff033bc92e28419c2b90405cb26ae3))
-* named_location delete workflow logic refactor ([f125ed5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/f125ed525a5c7f0fbf01efffc4e3c304c909544f))
-* named_location delete workflow logic refactor ([#2007](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2007)) ([d86845a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d86845ac8d8223eb7775a8462777c94a6fa3f434))
-* naming pattern ([af54568](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/af54568132e0ca6367e056daf3bb3249431c80d3))
-* nightly test pipeline to raise issues on gh when tests fail ([#895](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/895)) ([a7feb15](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a7feb150489a9c4df20d7abcdd1e19cb34ddbcd7))
-* numerous fixes ([b61c193](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b61c19323728aa4737fc307f11fae451ee442d0e))
-* numerous fixes for test harness for resources microsoft365_graph_beta_device_management_windows_quality_update_policy and microsoft365_graph_beta_device_management_windows_quality_update_policy ([#1397](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1397)) ([05b7adc](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/05b7adc7c570185a36db196eddfa26ee6291ccd4))
-* path typos ([6886208](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/68862088c591969d0b4d2c60e8e7fe735b664502))
-* path typos ([#1474](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1474)) ([835cadd](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/835cadd5b1ce59cf546d4eb65007edf953ab6ba7))
-* pr bodies ([870d26f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/870d26f36b19aad597b98d955504d01d8164cb28))
-* pr bodies ([#1708](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1708)) ([0ff9ede](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0ff9edefe49413e9dc26c184027105b62739f0f2))
-* refactor and added docs ([71664eb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/71664ebe8507bfd368f5ee1b056812c111b2e725))
-* refactor of resource group_policy_configuration test harness , standardised ExternalProviders Random with const usage and changed operation strings for HandleKiotaGraphError to consts ([3039b56](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/3039b56377caedc66c26b8c0038a659670afa7aa))
-* refactor of resource group_policy_configuration test harness , standardised ExternalProviders Random with const usage and changed operation strings for HandleKiotaGraphError to consts ([#1788](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1788)) ([d087094](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/d087094f1cb41d467e8d9592acf7ad0131807d97))
-* refactor of sdk_schema_change_detection ([cae2753](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/cae2753f20d35fcdf08c7898418e87a19f489b3b))
-* refactor of sdk_schema_change_detection ([#1704](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1704)) ([185496e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/185496ef8f34452c9ee2c93b909215bb1c5c4737))
-* refactor pipeline scripts to python ([#898](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/898)) ([de2ea6e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/de2ea6eefc978756b08ae9119a14bf52cb82fbc0))
-* refactor windows_feature_update_policy test harness ([#1402](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1402)) ([5d258f9](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5d258f9c63f0af995281a63f59f88345e7c0316d))
-* refactored resource device_management_app_control_for_business_built_in_controls test harness ([4d1bf5c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/4d1bf5cec98ff01a4d2b62fff6f400fa3479f852))
-* refactored resource device_management_app_control_for_business_built_in_controls test harness ([#1787](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1787)) ([867566a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/867566ae50bc4a01e6c4f675c274b8785a273bdf))
-* refactored test harness for windows_quality_update_expedite_policy ([#1398](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1398)) ([3c7507a](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/3c7507ab2db7fc6ee2f906fd6a0b92eecd46b113))
-* refactored unit and acc tests for resource device_management_macos_platform_script ([#1667](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1667)) ([5a7596e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5a7596ebd38777b5474cd5d4ab2d555d85e756d6))
-* refactored windows_platform_script test harness ([#1401](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1401)) ([4e11255](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/4e11255e2de00fdc10bf7bb657582c30649c6650))
-* refinements for overly broad codecov ignore pattens ([3042fa8](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/3042fa80ef70ef9e17278ea037b997faafbca37e))
-* refinements for overly broad codecov ignore pattens ([#1789](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1789)) ([70d75a9](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/70d75a99dd16ab27c4d32994a00269db630802ae))
-* remove global_secure_access attribute in applications of conditional access policy ([#1182](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1182)) ([0dbbbe7](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0dbbbe719433a6fb2df4ac8b421168dd988c3b25))
-* removed debugging ([13b72fb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/13b72fb3fa7b2b8deac5e0ba22d69ef567e448af))
-* replace direct HTTP request calls with retry logic in conditional access policy validation functions ([5832bd5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/5832bd57a038ea7e1f3c72ce467fa91dcb549662))
-* resource  user license assignment tests ([eae4e70](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/eae4e701542d1a87e475bce12e176843249ecb16))
-* resource  user license assignment tests ([#1106](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1106)) ([8b816fb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8b816fb8e5ab51caa46d6f759322d613804bc91b))
-* retry logic for standard http client ([#858](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/858)) ([e513257](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e51325700b07eaffa01123e8dfe7f156e52637ba))
-* reverted license assignment test validation destruction helpers due to export field issues ([4797bc6](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/4797bc6c77c2ae525058a79c2e5423e52486d6f4))
-* reverted license assignment test validation destruction helpers due to export field issues ([#1791](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1791)) ([0902ebb](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/0902ebbdfdd40d79d018698b2db3bcea3fabf55d))
-* script permissions ([#897](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/897)) ([cda6a41](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/cda6a41a32b570c31a8034b48f9fdd8b7299530f))
-* sec ([ff2edbe](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ff2edbe6098891235e7d5768b71eda4bc29f62fb))
-* sec ([#1712](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1712)) ([342ebb5](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/342ebb5cf55bc790964bf0c69828a0a7ab31c3d6))
-* standardised schema description field logic, with default values and optional/computed atts ([db6b47f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/db6b47ffc338807622d0ee19e8be39614f73c63a))
-* standardised schema description field logic, with default values and optional/computed atts ([#1627](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1627)) ([7fe73d0](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7fe73d00c259f555f6c21cd359ea05106c03ab04))
-* trialling run-test.py in sequential mode ([aa92be8](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/aa92be81688ff346bfb6fb71c864e266ecbd3e0a))
-* unit and acc tests for resource microsoft365_graph_beta_device_management_settings_catalog_configuration_policy_json ([ef6b30c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/ef6b30c04e3c7e7660060b0213b7eb3cedefde72))
-* unit and acc tests for resource microsoft365_graph_beta_device_management_settings_catalog_configuration_policy_json ([#2024](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2024)) ([818a01c](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/818a01c427ade4ac56faa55ad46ac15a06d0f574))
-* unit test naming convention and docs ver ([74c78bf](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/74c78bfe829f429bd919977e9563d72bb6c579d9))
-* unit test refactor for datasource utilities ([#1220](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1220)) ([7c1faaf](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7c1faaf1f8442f6ed4d4ca7f58ecc2467a56373c))
-* update conditional access policies to include additional policies and improve timeout settings ([fd39d92](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/fd39d920dd0e83ccefc77f0db58cb1991640b21f))
-* update error message formatting for invalid tenant ID validation in conditional access policy ([99413c4](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/99413c4883c353fa790e9510be5448a5b489d988))
-* update HTTP method in Delete request for Conditional Access Terms of Use ([#2238](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/2238)) ([82caa60](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/82caa60370243cab63ca1809bcc9f331276e1c27))
-* update M365 credentials in nightly tests workflow for improved authentication ([8242ea7](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/8242ea737903e0b38aa1212519ebfe1b2df162ec))
-* update nightly tests workflow to bi-weekly schedule and changed to larger runners for memory intensive workflows ([#1213](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1213)) ([a39faae](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a39faae1b25cc0fcbe7e1bc4bccf7bd894d0655a))
-* update run-tests.py to improve test enumeration and memory management ([1c7212f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1c7212f9ba6ad3d5395b0ff13df4d0cf9d4dca3e))
-* update run-tests.py to improve test enumeration and memory management ([#1232](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1232)) ([e8b8985](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/e8b8985ecc56b20d99ccbb6161d026dfec63ee83))
-* update runner tags to use sweetgreen self-hosted runners ([6f2f93e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6f2f93efbc90224bbb9607c4491091796cdbba9e))
-* update test directory path handling in run-tests.py for improved error messages ([087d4ed](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/087d4ed368a31d483234bf611d440b2cc48c41b3))
-* update test requirement check to exclude schema directory ([b38e1ba](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/b38e1ba21235d37f58c3f1706e0eb34554614bd4))
-* updated CA policy examples ([53144ef](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/53144efed1786aa3f7180c946f67cf78fad320b4))
-* updated resource group test harness to follow new pattern ([4347f6f](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/4347f6f7b29d19d28389265f9dfac2593d626795))
-* updated resource group test harness to follow new pattern ([#1123](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1123)) ([6f0b0d0](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/6f0b0d06c724945d7f98638d37c0a95fed161409))
-* updated various docs inc. batch import, tf ops best practice and tf workspaces ([#1694](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1694)) ([430f8e4](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/430f8e451ae9345c0244bbe0a3e282be88aa228c))
-* **windows_enrollment_status_page:** enforce false for reset/use/technician flags when blocking is enabled ([414c91b](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/414c91bd862e6f17c74630b10ea2563521ec91aa))
-* **windows_esp:** correct validation logic ([#854](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/854)) ([7a43f42](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/7a43f427ae9088ca844cbd8fc8b2159dee0e0189))
-* **windows_esp:** resolve app validation pagination limit by querying apps individually ([#889](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/889)) ([04eda94](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/04eda94f838bfd073b61ec37255ae26667d4eb31))
-* **windows_update_ring:** set all deadline_settings attributes as computed and optional ([fa4e6c2](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/fa4e6c2fa637a3f48d98f4492a51eb8ac39aa5ac))
-* **windows_update_ring:** set all deadline_settings attributes as computed and optional ([#1976](https://github.com/sweetgreen/terraform-provider-microsoft365/issues/1976)) ([1aa1cc3](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/1aa1cc301b46a2aec464b1cc44f9dbc3317b7dd6))
+* migrated all dynamic errors in validate.go implementations to use sentinel errors. ([#2545](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2545)) ([32f4cf1](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/32f4cf101a8404c242bca0f8cb808487ba95ff95))
+
+## [0.49.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.48.0-alpha...v0.49.0-alpha) (2026-03-13)
+
+
+### Features
+
+* add added resource microsoft365_graph_beta_identity_and_access_cross_tenant_access_policy ([9f9b7b2](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/9f9b7b2664aa3d2e8b1f67feb0dcfde883203765))
+* add added resource microsoft365_graph_beta_identity_and_access_cross_tenant_access_policy ([#2539](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2539)) ([22b68c0](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/22b68c080c30709a375afee50538e60a116ade63))
+* added resource graph_beta_identity_and_access_cross_tenant_access_default_settings ([#2540](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2540)) ([0edaa28](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/0edaa285c0dc19b0d24a2e55c8015174b85a5d96))
+* added resource graph_beta_identity_and_access_cross_tenant_access_default_settings.md ([5f63cd4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/5f63cd44c65d6056af05f9148a6e4e32fa6fbd7b))
+* added resource graph_beta_identity_and_access_cross_tenant_access_partner_settings ([#2544](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2544)) ([8ee428e](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/8ee428e6c2dea3155756420511a1f1c37204f837))
+* added resource graph_beta_identity_and_access_cross_tenant_access_partner_user_sync_settings ([#2542](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2542)) ([4b44750](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/4b44750ecf607bb2d5b98965f05c0a873768615f))
+* enhance CrossTenantAccessDefaultSettingsMock with additional user and group mock registrations ([aeace3b](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/aeace3b3d0cb2f09fddb8cb4c6bebfc3a962185d))
+* implement validation for CrossTenantAccessPartnerUserSyncSettings resource ([#2543](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2543)) ([b6a1ff4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/b6a1ff450513e7a3ad727c093f1a869d9f1b558c))
+
+
+### Bug Fixes
+
+* for schema validation for device config assignments ([19d4a90](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/19d4a90d08d8ef31fda8fb6e10eb141198de07c0))
+* for schema validation for resources using DeviceConfigurationWithAllGroupAssignmentsAndFilterSchema ([#2537](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2537)) ([122dc46](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/122dc4666811ed662685e7d3c92e95b42760f24a))
+
+## [0.48.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.47.0-alpha...v0.48.0-alpha) (2026-03-06)
+
+
+### Features
+
+* Support username and password authentication for client ([2bd0e46](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/2bd0e463c69f5e4e786d3338dbc07f652ced692e))
+* Support username and password authentication for client ([#2517](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2517)) ([e695d69](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/e695d698e5724fd1e9c34ac44553422b4fea77f2))
+
+
+### Bug Fixes
+
+* update Entra ID client tests and middleware to prevent gzip compression on OAuth requests ([852d9f2](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/852d9f2f970a6917ca76979b0e59e4036b3c6c34))
+* update Entra ID client tests and middleware to prevent gzip compression on OAuth requests ([#2519](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2519)) ([e3feb22](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/e3feb22594d8aad4b0940996115658543a2baa1b))
+
+## [0.47.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.46.0-alpha...v0.47.0-alpha) (2026-03-05)
+
+
+### Features
+
+* Support az cli for API Client ([#2493](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2493)) ([d8a50c1](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/d8a50c10e00f5497a59bd933012771bdef9c88e5))
+* Support az cli for client ([5be2715](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/5be2715fdc555e17156332c9a94464790b18a0ff))
+
+
+### Bug Fixes
+
+* added scripts to automate the definition of permissions for all tf block types so that 403 errors and tf doc templates describe the correct permissions  ([#2513](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2513)) ([540999e](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/540999e5f1437f0f493cdc60abb9d4b581e144bd))
+* fixed args for pipeline permissions generation ([13ac8ec](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/13ac8ec8945bc3cdf7ea11ee5c4bac644704c390))
+* fixed args for pipeline permissions generation ([#2515](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2515)) ([190d0e4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/190d0e4be69a478a4ca31c166af3e5599c81c4af))
+* split GO_ARGS and TEMPLATE_ARGS in update-graph-permissions workflow ([41f1c02](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/41f1c0287f37b629e0575c5098685649f7b0e1ac))
+* standardised crud logic flow ([9b31864](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/9b31864237850b165e010344bf99416e5f77c6ec))
+* standardised crud logic flow for resource group_app_role_assignment ([#2491](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2491)) ([110fc92](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/110fc9259fe2f6afa1809e630860fbf22d4a305f))
+* Update Group resource CRUD methods to utilize new types package ([a369d2b](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/a369d2be5ed3e318518307258302d585b6083ed1))
+* Update Group resource CRUD methods to utilize new types package ([#2494](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2494)) ([d06b976](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/d06b9766bb03aaa788e4d9ea510f20a6d58deed9))
+
+## [0.46.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.45.0-alpha...v0.46.0-alpha) (2026-03-03)
+
+
+### Features
+
+* Windows Autopilot Device Preparation Policy assignments to use standard shared model schema with type/group_id fields ([8349f59](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/8349f590643b16b0aefdf1457039d7ba022e3e3b))
+
+
+### Bug Fixes
+
+* resolve err113 by centralizing construct errors in sentinels and reduce Autopilot settings builder complexity to satisfy gocyclo ([6cb2d9a](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/6cb2d9ab650c4ec0a025b17ec1a9e55040147ad1))
+* Standardize assignments schema for Windows Autopilot Device Preparation Policy ([#2474](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2474)) ([01a84f6](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/01a84f6890aaaaed7f577a54a1b086d8cfc2a911))
+* Use PUT instead of PATCH for windows_autopilot_device_preparation_policy updates to handle settings navigation property ([567a8b4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/567a8b4a071ac4a5b358fe011bfa8fd040dd54ce))
+* Use PUT instead of PATCH for windows_autopilot_device_preparation_policy updates to handle settings navigation property ([#2489](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2489)) ([71682f4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/71682f44c092ee48beb2199bee9698f0ca9a60bc))
+
+## [0.45.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.44.0-alpha...v0.45.0-alpha) (2026-02-15)
+
+
+### Features
+
+* add identity schema support for all resources ([fd0696e](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/fd0696eba7a99119369c401139b35cc25da9bc80))
+* added list resource user and updated docs ([53f6229](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/53f6229e068ea00a0afae0c6214f809466bc7694))
+* added list resource user and updated docs ([#2384](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2384)) ([18363c3](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/18363c36f354663993784a29a5294a371a4525b4))
+* Added support for `microsoft365_graph_beta_device_management_windows_platform_script` ([3333200](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/3333200c0aa1f478b32294bbf5cdf168982d33c6))
+* Added support for microsoft365_graph_beta_device_management_windows_platform_script ([#2397](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2397)) ([0f113b8](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/0f113b88fd8aeada9f44721c6391897363d755bc))
+* Enhance StateContainer to support Identity management ([211b2b6](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/211b2b62629c785d8d25b946e83ae3fcaaa1151e))
+
+
+### Bug Fixes
+
+* add AllowSystemGeneratedSetValues modifier for enhanced set management ([ad6a2ca](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/ad6a2cae376343f04bd9472b8d23193b97ee79ca))
+* add GraphToFrameworkStringSetFiltered function for tag filtering ([521db10](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/521db102c02e2c5337514d14a3d1a0bb0f55b759))
+* add validation for Windows feature update policy resource constraints ([#2361](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2361)) ([3d5dca0](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/3d5dca09a52d5d820d4caf19d88c5443294de45f))
+* added support for panicking test cases in bi-weekly test pipeline ([#2398](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2398)) ([475301c](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/475301cda7a656417ba3f12a488189ac0ac83687))
+* All errors from external packages are now properly wrapped with context using fmt.Errorf with the %w verb, satisfying the wrapcheck linter requirements. ([17a2a31](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/17a2a31411e6fdc19967fdf5e363ac591e8ecd87))
+
+## [0.44.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.43.0-alpha...v0.44.0-alpha) (2026-02-03)
+
+
+### Features
+
+* enhance guid_list_sharder to support applications and improve test structure ([#2327](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2327)) ([e8d10f0](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/e8d10f020c2c27f3cc3b48e353818a66802dad5f))
+
+
+### Bug Fixes
+
+* enhance error handling in CRUD operations for MacOS and Win32 apps ([#2325](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2325)) ([5dc4595](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/5dc4595661399c274e23e9a9799759631f6d3e47))
+
+## [0.43.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.42.0-alpha...v0.43.0-alpha) (2026-02-02)
+
+
+### Features
+
+* added resource application, pplication_certificate_credential, application_federated_identity_credential, application_identifier_uri, application_owner, application_password_credential, service_principal, service_principal_owner ([#2321](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2321)) ([9abd25c](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/9abd25c58ef212c8c06eaa816053402127b10bd6))
+
+
+### Bug Fixes
+
+* update HTTP method in Delete request for Conditional Access Terms of Use ([#2238](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2238)) ([82caa60](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/82caa60370243cab63ca1809bcc9f331276e1c27))
 
 ## [0.42.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.41.0-alpha...v0.42.0-alpha) (2026-01-24)
 

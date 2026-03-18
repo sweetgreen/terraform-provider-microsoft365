@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
@@ -45,17 +46,20 @@ var (
 
 	// Enables common validations
 	_ resource.ResourceWithConfigValidators = &ConditionalAccessPolicyResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &ConditionalAccessPolicyResource{}
 )
 
 // https://learn.microsoft.com/en-us/graph/custom-security-attributes-examples?tabs=http#prerequisites
 func NewConditionalAccessPolicyResource() resource.Resource {
 	return &ConditionalAccessPolicyResource{
 		ReadPermissions: []string{
+			"Directory.Read.All",
 			"Policy.Read.All",
-			"Policy.Read.ConditionalAccess",
-			"Directory.Read.All",                    // for validation of roles
-			"CustomSecAttributeAssignment.Read.All", // for custom security attributes
-			"Application.Read.All",                  // for custom security attributes
+			"RoleManagement.Read.All",
+			"User.Read.All",
+			"User.ReadBasic.All",
 		},
 		WritePermissions: []string{
 			"Policy.ReadWrite.ConditionalAccess",
@@ -84,6 +88,17 @@ func (r *ConditionalAccessPolicyResource) Configure(ctx context.Context, req res
 // ImportState imports the resource state.
 func (r *ConditionalAccessPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *ConditionalAccessPolicyResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
 }
 
 // Schema defines the schema for the resource.

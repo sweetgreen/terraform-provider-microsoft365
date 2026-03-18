@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -38,18 +39,27 @@ var (
 
 	// Enables import functionality
 	_ resource.ResourceWithImportState = &AgentIdentityResource{}
+
+	// Enables identity schema for list resource support
+	_ resource.ResourceWithIdentity = &AgentIdentityResource{}
 )
 
 func NewAgentIdentityResource() resource.Resource {
 	return &AgentIdentityResource{
 		ReadPermissions: []string{
-			"AgentInstance.Read.All",
+			"AgentIdentity.Read.All",
+			"AgentIdentityBlueprintPrincipal.Read.All",
+			"Application.Read.All",
 			"Directory.Read.All",
 		},
 		WritePermissions: []string{
-			"AgentInstance.ReadWrite.All",
+			"AgentIdentity.DeleteRestore.All",
+			"AgentIdentity.EnableDisable.All",
+			"AgentIdentity.ReadWrite.All",
+			"AgentIdentityBlueprintPrincipal.DeleteRestore.All",
+			"AgentIdentityBlueprintPrincipal.EnableDisable.All",
+			"Application.ReadWrite.All",
 			"Directory.ReadWrite.All",
-			"AgentIdentity.DeleteRestore.All", // Needed for hard deletion
 		},
 		ResourcePath: "/servicePrincipals",
 	}
@@ -129,6 +139,17 @@ func (r *AgentIdentityResource) ImportState(ctx context.Context, req resource.Im
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hard_delete"), hardDelete)...)
 }
 
+// IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
+func (r *AgentIdentityResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 // Schema returns the schema for the resource.
 func (r *AgentIdentityResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -190,12 +211,6 @@ func (r *AgentIdentityResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-			},
-			"tags": schema.SetAttribute{
-				MarkdownDescription: "Custom strings that can be used to categorize and identify the agent identity.",
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
 			},
 			"sponsor_ids": schema.SetAttribute{
 				MarkdownDescription: "The user IDs of the sponsors for the agent identity. At least one sponsor is " +

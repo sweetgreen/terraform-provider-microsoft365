@@ -21,8 +21,17 @@ Manages a service principal for an Agent Identity Blueprint using the `/serviceP
 The following client `application` permissions are needed in order to use this resource:
 
 **Required:**
+- `AgentIdentity.Create.All`
+- `AgentIdentity.DeleteRestore.All`
+- `AgentIdentity.EnableDisable.All`
+- `AgentIdentity.Read.All`
+- `AgentIdentity.ReadWrite.All`
+- `AgentIdentityBlueprintPrincipal.DeleteRestore.All`
+- `AgentIdentityBlueprintPrincipal.EnableDisable.All`
 - `AgentIdentityBlueprintPrincipal.Read.All`
-- `AgentIdentityBlueprintPrincipal.ReadWrite.All`
+- `Application.Read.All`
+- `Application.ReadWrite.All`
+- `Directory.Read.All`
 - `Directory.ReadWrite.All`
 
 **Optional:**
@@ -82,6 +91,7 @@ output "service_principal_id" {
 ### Optional
 
 - `hard_delete` (Boolean) When set to `true`, the resource will be permanently deleted from the Entra ID (hard delete) rather than being moved to deleted items (soft delete). This prevents the resource from being restored and immediately frees up the resource name for reuse. When `false` (default), the resource is soft deleted and can be restored within 30 days. Note: This field defaults to `false` on import since the API does not return this value.
+- `tags` (Set of String) Custom strings that can be used to categorize and identify the agent identity blueprint service principal. These tags are inherited by all agent identities created from this blueprint.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

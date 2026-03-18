@@ -8,6 +8,7 @@ import (
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
 	errors "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors/kiota"
+	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -93,6 +94,7 @@ func (r *WindowsAutopilotDeviceIdentityResource) Create(ctx context.Context, req
 // Read handles the Read operation.
 func (r *WindowsAutopilotDeviceIdentityResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var object WindowsAutopilotDeviceIdentityResourceModel
+	var identity sharedmodels.ResourceIdentity
 
 	tflog.Debug(ctx, fmt.Sprintf("Starting Read method for: %s", ResourceName))
 
@@ -144,6 +146,15 @@ func (r *WindowsAutopilotDeviceIdentityResource) Read(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
@@ -293,7 +304,7 @@ func (r *WindowsAutopilotDeviceIdentityResource) assignUser(ctx context.Context,
 
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error assigning user to device: %s", err.Error()))
-		return err
+		return fmt.Errorf("failed to assign user %s to device %s: %w", userPrincipalName, deviceId, err)
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Successfully assigned user %s to device %s", userPrincipalName, deviceId))
@@ -313,7 +324,7 @@ func (r *WindowsAutopilotDeviceIdentityResource) unassignUser(ctx context.Contex
 
 	if err != nil {
 		tflog.Error(ctx, fmt.Sprintf("Error unassigning user from device: %s", err.Error()))
-		return err
+		return fmt.Errorf("failed to unassign user from device %s: %w", deviceId, err)
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Successfully unassigned user from device %s", deviceId))

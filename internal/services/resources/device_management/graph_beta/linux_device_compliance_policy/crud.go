@@ -9,6 +9,7 @@ import (
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/crud"
 	customrequest "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/custom_requests"
 	errors "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/errors/kiota"
+	sharedmodels "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/shared_models/graph_beta"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -168,6 +169,7 @@ func (r *LinuxDeviceCompliancePolicyResource) Create(ctx context.Context, req re
 func (r *LinuxDeviceCompliancePolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var object LinuxDeviceCompliancePolicyResourceModel
 	var respResource models.DeviceManagementCompliancePolicyable
+	var identity sharedmodels.ResourceIdentity
 
 	tflog.Debug(ctx, fmt.Sprintf("Starting Read method for: %s", ResourceName))
 
@@ -237,6 +239,15 @@ func (r *LinuxDeviceCompliancePolicyResource) Read(ctx context.Context, req reso
 		return
 	}
 
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
 }
 
@@ -253,7 +264,7 @@ func (r *LinuxDeviceCompliancePolicyResource) getAllPolicySettingsWithPageIterat
 		Get(ctx, nil)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get settings for policy %s: %w", policyId, err)
 	}
 
 	pageIterator, err := graphcore.NewPageIterator[models.DeviceManagementConfigurationSettingable](

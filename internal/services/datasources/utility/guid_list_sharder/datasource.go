@@ -32,11 +32,12 @@ var (
 func NewGuidListSharderDataSource() datasource.DataSource {
 	return &guidListSharderDataSource{
 		ReadPermissions: []string{
-			"User.Read.All",
-			"Group.Read.All",
-			"Device.Read.All",
 			"Application.Read.All",
+			"Device.Read.All",
 			"Directory.Read.All",
+			"Group.Read.All",
+			"User.Read.All",
+			"User.ReadBasic.All",
 		},
 	}
 }
@@ -73,10 +74,11 @@ func (d *guidListSharderDataSource) Schema(ctx context.Context, _ datasource.Sch
 				MarkdownDescription: "The type of Microsoft Graph resource to query and shard. " +
 					"`users` queries `/users` for user-based policies (MFA, conditional access). " +
 					"`devices` queries `/devices` for device policies (Windows Updates, compliance). " +
+					"`applications` queries `/applications` for app registrations. " +
 					"`service_principals` queries `/servicePrincipals` (enterprise apps) for application-based conditional access policies. " +
 					"`group_members` queries `/groups/{id}/members` to split existing group membership (requires `group_id`).",
 				Validators: []validator.String{
-					stringvalidator.OneOf("users", "devices", "service_principals", "group_members"),
+					stringvalidator.OneOf("users", "devices", "applications", "service_principals", "group_members"),
 				},
 			},
 			"group_id": schema.StringAttribute{

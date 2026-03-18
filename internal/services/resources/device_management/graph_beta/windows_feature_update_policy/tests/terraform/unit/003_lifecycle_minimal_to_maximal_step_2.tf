@@ -6,9 +6,9 @@ resource "microsoft365_graph_beta_device_management_windows_feature_update_polic
   install_latest_windows10_on_windows11_ineligible_device = true
 
   rollout_settings = {
-    offer_start_date_time_in_utc = "2025-04-01T00:00:00Z"
-    offer_end_date_time_in_utc   = "2025-05-01T00:00:00Z"
-    offer_interval_in_days       = 7
+    offer_start_date_time_in_utc = "2030-01-13T00:00:00Z"
+    offer_end_date_time_in_utc   = "2030-01-14T00:00:00Z"
+    offer_interval_in_days       = 1
   }
 
   role_scope_tag_ids = ["0", "1"]
