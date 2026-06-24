@@ -147,13 +147,7 @@ func MobileAppWin32LobInstallerMetadataSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"installer_file_path_source": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "The path to the win32 lob app installer file to be uploaded. The file must be a valid `.intunewin` file. Value is not returned by API call.",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`.*\.intunewin$`),
-						"File path must point to a valid .intunewin file.",
-					),
-				},
+				MarkdownDescription: "The local path to the win32 lob app installer file to be uploaded. Any installer file is accepted (e.g. `.intunewin`, `.msix`, `.msi`, `.exe`); the provider AES-encrypts the raw file bytes and uploads them as-is without parsing the file format. Value is not returned by API call.",
 				PlanModifiers: []planmodifier.String{
 					planmodifiers.UseStateForUnknownString(),
 					stringplanmodifier.RequiresReplace(),
@@ -161,7 +155,7 @@ func MobileAppWin32LobInstallerMetadataSchema() schema.SingleNestedAttribute {
 			},
 			"installer_url_source": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "The web location of the win32 lob app installer file, can be a http(s) URL. The file must be a valid `.intunewin` file. Value is not returned by API call.",
+				MarkdownDescription: "The web location of the win32 lob app installer file, can be a http(s) URL. Any installer file is accepted; the provider AES-encrypts the raw file bytes and uploads them as-is without parsing the file format. Value is not returned by API call.",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(constants.HttpOrHttpsUrlRegex),
