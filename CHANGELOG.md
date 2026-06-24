@@ -5,129 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.55.2-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.55.1-alpha...v0.55.2-alpha) (2026-06-23)
+## [0.43.3-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.2-alpha...v0.43.3-alpha) (2026-01-31)
 
 
 ### Bug Fixes
 
-* application federated identity credential ([#3171](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3171)) ([732df3d](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/732df3d91f887dfaa100574ef2b97a2ec6c6ab72))
-* moved the identity set in create under timeouts to handle potential 404's ([#3173](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3173)) ([b9bcb22](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/b9bcb22fa09d212e841829d866ab2b7cb893c037))
+* fix: add gpg-public-key.asc to .gitignore for goreleaser clean build ([dc04e8e](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/dc04e8e9))
+* export GPG public key as release asset for registry verification ([47bde62](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/47bde62e4091e0a1909b26f4a5092d31f3c3fbde))
 
-## [0.55.1-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.55.0-alpha...v0.55.1-alpha) (2026-06-17)
-
-
-### Bug Fixes
-
-* add minimum resource requirements to Win32LobAppResource schema ([#3159](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3159)) ([7caaed5](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/7caaed599362cb1ef316522c62b906cd7bf53497))
-
-## [0.55.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.54.0-alpha...v0.55.0-alpha) (2026-06-15)
-
-
-### Features
-
-* added Graph Beta Users datasource ([#3139](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3139)) ([d362261](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/d362261eb47c58d155e62ef6143081683a1a9f5e))
+## [0.43.2-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.1-alpha...v0.43.2-alpha) (2026-01-30)
 
 
 ### Bug Fixes
 
-* add MinimumFreeDiskSpaceInMB to Win32LobAppResource schema ([#3155](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3155)) ([011d08f](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/011d08fd8895f991851f9b9d791f5c97ecd09da2))
-* deprecate detection_rules and requirement_rules in Win32LobAppResource schema ([#3154](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3154)) ([a6470c9](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/a6470c94567ae70215a4bc95bd3d8a00bbc5b452))
-* update minimum supported Windows release in Win32LobAppResource schema ([#3153](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3153)) ([6a65e2e](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/6a65e2e110d790da33ef162c84c6515707e8048f))
+* replace free-disk-space with disk diagnostics in release workflow ([a3b9a8b](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/a3b9a8b21e2119352a65afc990749a95dfa21af4))
 
-## [0.54.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.53.1-alpha...v0.54.0-alpha) (2026-05-26)
-
-
-### Features
-
-* add settings_catalog_inventory_policy resource ([cda4557](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/cda4557c5e4419cc5f1292729ae74f4d1cc6c2ea))
-* add settings_catalog_inventory_policy resource ([#3105](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3105)) ([03188e3](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/03188e34c2995f71c4a317a331165c0d30590d73))
-
-## [0.53.1-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.53.0-alpha...v0.53.1-alpha) (2026-05-19)
+## [0.43.1-alpha](https://github.com/sweetgreen/terraform-provider-microsoft365/compare/v0.43.0-alpha...v0.43.1-alpha) (2026-01-29)
 
 
 ### Bug Fixes
 
-* [#3085](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3085) ([d624f30](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/d624f305885b40cb980d5d11561ebb7c85681f92))
-* for device_and_app_management_win32_app so handle for correctly for .exe based installers ([#3086](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3086)) ([f5f1571](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/f5f1571e3fa9a0e9a0d738ed86de7548f92c830d))
-* import resource handling for device_and_app_management_win32_app, device_and_app_management_macos_pkg_app and device_and_app_management_macos_dmg_app ([89cbefb](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/89cbefb93098a90f8680c7d1255bd03989db83f3))
-* import resource handling for device_and_app_management_win32_app, device_and_app_management_macos_pkg_app and device_and_app_management_macos_dmg_app ([#3087](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3087)) ([398a2b7](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/398a2b7709e65e5578deebcebeb8e35fb5e1d1ac))
-* updated release please pipeline to use ubuntu latest rather than a large runner ([#3088](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/3088)) ([5210015](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/52100157b325b5e1571d262a1f87e51521c1e25a))
-* updated release please pipeline to use ubuntu latest rather than a large runner which is not needed ([626b4a1](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/626b4a16d5185e3180cecbc807c3d8870fca2a70))
-
-## [0.53.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.52.1-alpha...v0.53.0-alpha) (2026-05-02)
-
-
-### Features
-
-* Enhance Windows Device Compliance Policy with additional system security settings ([a4cb627](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/a4cb6275c2d5c2be31a0c57b05496f353c4a332d))
-
-
-### Bug Fixes
-
-* Enhance Windows Device Compliance Policy with additional keys ([#2991](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2991)) ([0c031fc](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/0c031fc620b28b580463ad3032308a8030c30a1c))
-* Temporarily disable support for 'androidFotaDeployment' assignment target ([#2987](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2987)) ([c387833](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/c387833ba83f1ed11feca97f44ee5decedcb314a))
-* Temporarily disable support for 'androidFotaDeployment' assignment target due to its removal in msgraph-beta-sdk-go v0.160.0. Added error handling and comments for future restoration when the type is reintroduced. Updated related mappings and schema versioning in mobile app assignment resources. ([c387833](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/c387833ba83f1ed11feca97f44ee5decedcb314a))
-* Temporarily disable support for 'androidFotaDeployment' assignment target due to its removal in msgraph-beta-sdk-go v0.160.0. Added error handling and comments for future restoration when the type is reintroduced. Updated related mappings and schema versioning in mobile app assignment resources. ([ea12f94](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/ea12f94d58964346d40ad18281c5b427cff6a271))
-* Update Intune branding profile handling ([#2988](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2988)) ([b8812d1](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/b8812d1bba588f2e18a14baebf28a0c626be64e6))
-* Update Intune branding profile handling: Temporarily comment out 'sendDeviceOwnershipChangePushNotification' due to its removal in msgraph-beta-sdk-go v0.160.0. Added deprecation message in schema and updated versioning in resource files for future reference. ([b29e6e4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/b29e6e4f7ed7613d1ab3c22a10dbe428def1f59a))
-
-## [0.52.1-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.52.0-alpha...v0.52.1-alpha) (2026-03-29)
-
-
-### Bug Fixes
-
-* **macos_software_update_configuration:** persist plan state before ReadWithRetry in Update ([#2689](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2689)) ([3a105a8](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/3a105a821666be8f8059a582d1027e38a6369955))
-
-## [0.52.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.51.0-alpha...v0.52.0-alpha) (2026-03-26)
-
-
-### Features
-
-* added predicates to handle eventual consistency and to move away from hard coded pauses between create -&gt; read and update -&gt; read. ([#2652](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2652)) ([564efe4](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/564efe414678cad3af5756a1e3a9d33d6f927af1))
-* added resource access_administrative_unit_membership ([#2648](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2648)) ([9a30bcd](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/9a30bcd22bdf45e0abc1abfd52623f4bbd933d60))
-* added resource administrative units ([#2623](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2623)) ([0588204](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/05882046291a160a83e3871a2265b0f60c8ed1a7))
-
-
-### Bug Fixes
-
-* bi-weekly tests workflow for windows_updates and change_notifications ([#2649](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2649)) ([deaf2d2](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/deaf2d29da1d46ed24e150515a0a55afb504d748))
-* test fixures for microsoft365_graph_identity_and_access_subscribed_skus ([#2650](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2650)) ([22e3b11](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/22e3b11c2c65f28b517698ee930926ebd1269de4))
-
-## [0.51.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.50.0-alpha...v0.51.0-alpha) (2026-03-23)
-
-
-### Features
-
-* add utility resource for GUID list sharding ([4d742a0](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/4d742a0992e018db5f1a6139b64712e823af314e))
-* add utility resource for GUID list sharding ([#2620](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2620)) ([7f65f48](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/7f65f48281aa24ae5c728c5d5a2bfad9b15d276e))
-* added new search query types for graph_identity_and_access_subscribed_skus and bug fixes for Group License Assignment and device_management_group_policy_uploaded_definition_files ([#2621](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2621)) ([4063307](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/40633075977b47b5bd1d818db6972d7d38d3f9ae))
-* added new search query types for microsoft365_graph_identity_and_access_subscribed_skus and bug fixes for GroupLicenseAssignment ([b9383b5](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/b9383b52bca12385bb807c6dc22d444a1c1dfa78))
-
-
-### Bug Fixes
-
-* added key ' force_definition_file_upload' to microsoft365_graph_beta_device_management_group_policy_uploaded_definition_files to handle upload error scenarios. ([9064d15](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/9064d15abc115730ad3b46c86bb12e166b9772dc))
-* graphBetaWindowsUpdatesAutopatchUpdatableAssetGroup ([dcda75d](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/dcda75dc142d6f8a44154923ffedbc9728234fc4))
-* graphBetaWindowsUpdatesAutopatchUpdatableAssetGroup ([e9e3757](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/e9e3757f4932a4bc15d74760b478bf9329edf99d))
-* resource WindowsUpdatesAutopatchUpdatableAssetGroup state mapping ([#2616](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2616)) ([dcda75d](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/dcda75dc142d6f8a44154923ffedbc9728234fc4))
-* update mobile app data source to refine filtering capabilities ([#2618](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2618)) ([6b0a712](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/6b0a712f57f58a95c52153fc5234ad127a960d3e))
-
-## [0.50.0-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.49.1-alpha...v0.50.0-alpha) (2026-03-20)
-
-
-### Features
-
-* added datasource graph_beta_identity_and_access_device and refactored datasource graph_beta_device_management_managed_device ([#2596](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2596)) ([e3cb8a8](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/e3cb8a872686adcca3e91ac84a5888a29f6c5fba))
-* added windows autopatch resources: ...... ([#2522](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2522)) ([6bff051](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/6bff051e38805507cf15782d96b36cc2d0b2eefb))
-* added windows update autopatch resources to the provider ([#2571](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2571)) ([c4efc8e](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/c4efc8ed2a5ff866a605a251af7833a61d9d011b))
-
-
-### Bug Fixes
-
-* correct attribute name in autopatch_updatable_asset_group_assignment example ([1e2bf8e](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/1e2bf8e79f1235cf8580609b7084cbbce86a8d69))
-* session_controls state mapping for global_secure_access_filtering_profile to prevent post-apply null inconsistency ([#2568](https://github.com/deploymenttheory/terraform-provider-microsoft365/issues/2568)) ([e9df2c6](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/e9df2c6ea01e0d5fcba364fc4ecff7232d6e7482))
-* update autopatch_device_registration acceptance tests for refactored managed_device API ([7ba7006](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/7ba7006c33037a152c6e08d03932242f989aec6e))
-* update autopatch_updatable_asset_group_assignment tests for refactored APIs ([b7b3b5a](https://github.com/deploymenttheory/terraform-provider-microsoft365/commit/b7b3b5a52e117e4e4fde0212ff4fbddb18d1848f))
+* run go mod tidy to sync dependencies ([dc7fefd](https://github.com/sweetgreen/terraform-provider-microsoft365/commit/dc7fefd3213fb2cac4f74bdc2c01439f8d12bd67))
 
 ## [0.49.1-alpha](https://github.com/deploymenttheory/terraform-provider-microsoft365/compare/v0.49.0-alpha...v0.49.1-alpha) (2026-03-13)
 
