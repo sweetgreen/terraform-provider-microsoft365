@@ -21,10 +21,10 @@
 # Delete this workflow, and the gpg-signing-key-migration IAM role in
 # sweetgreen/terraform-infrastructure, once a release has signed from SSM.
 #
-# Hardening option: add `environment: signing-key-migration` to the job and put
-# a required-reviewer rule on that environment to gate each run. The IAM trust
-# policy would then need its `sub` narrowed to
-# `repo:sweetgreen/terraform-provider-microsoft365:environment:signing-key-migration`.
+# The job declares `environment: signing-key-migration`, and the IAM trust
+# policy keys on exactly that subject, so no other workflow in this repository
+# can assume the migration role. Add a required-reviewer rule to that
+# environment in repository settings to also gate each run on human approval.
 
 name: '🔑 Migrate signing key to SSM (one-time)'
 
@@ -51,6 +51,10 @@ jobs:
   migrate:
     name: 'Copy GPG signing key into SSM'
     runs-on: ubuntu-latest
+    # The IAM trust policy keys on this environment, so only this job can
+    # assume the migration role — not every workflow in the repository. Add a
+    # required-reviewer rule to the environment to also gate each run.
+    environment: signing-key-migration
     steps:
       - name: Check confirmation
         if: inputs.confirm != 'migrate'
@@ -77,12 +81,19 @@ jobs:
             echo "::error::GPG_PRIVATE_KEY_PASSPHRASE is empty; SSM cannot store an empty value."
             exit 1
           fi
-          echo "::add-mask::${GPG_PRIVATE_KEY}"
-          echo "::add-mask::${GPG_PRIVATE_KEY_PASSPHRASE}"
+          # Deliberately no ::add-mask:: here. Workflow commands are
+          # line-oriented, so echoing a multi-line armored key would register
+          # only its first line as a mask and print every remaining line to the
+          # log verbatim. Values read from secrets.* are already masked by
+          # GitHub, line by line, so manual masking is both redundant and unsafe.
 
           GNUPGHOME="$(mktemp -d)"
           export GNUPGHOME
           chmod 700 "$GNUPGHOME"
+          # Importing writes the private key to disk. The runner is ephemeral,
+          # but do not leave keyring material lying around for the rest of the
+          # job, and kill the agent so it stops caching the passphrase.
+          trap 'gpgconf --kill gpg-agent 2>/dev/null || true; rm -rf "$GNUPGHOME"' EXIT
           # GnuPG 2.1+ refuses loopback pinentry unless the agent opts in, and
           # without it the test-sign below fails for a perfectly good key.
           echo "allow-loopback-pinentry" > "$GNUPGHOME/gpg-agent.conf"
@@ -97,10 +108,12 @@ jobs:
           fi
 
           # Prove the passphrase actually unlocks the key by signing with it.
-          if ! echo test \
-            | gpg --batch --quiet --pinentry-mode loopback \
-                  --passphrase "$GPG_PRIVATE_KEY_PASSPHRASE" \
-                  --local-user "$FINGERPRINT" --sign --output /dev/null; then
+          # The passphrase goes in on stdin, not --passphrase, so it never
+          # appears in this process's argv.
+          if ! printf '%s' "$GPG_PRIVATE_KEY_PASSPHRASE" \
+            | gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 0 \
+                  --local-user "$FINGERPRINT" --sign --output /dev/null \
+                  /dev/null; then
             echo "::error::GPG_PRIVATE_KEY_PASSPHRASE does not unlock ${FINGERPRINT}."
             exit 1
           fi
@@ -121,26 +134,39 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          echo "::add-mask::${GPG_PRIVATE_KEY}"
-          echo "::add-mask::${GPG_PRIVATE_KEY_PASSPHRASE}"
+          # No ::add-mask:: — see the note in the verification step above.
 
           workdir="$(mktemp -d)"
           trap 'rm -rf "$workdir"' EXIT
 
+          # Calling this from an `if` suspends `set -e` for the whole body, so
+          # every step has to report failure explicitly or a failed write would
+          # fall through and the function would return the status of `echo`.
           put() {
-            name="$1"
-            value="$2"
+            local name="$1" value="$2" version
             jq -n --arg n "$name" --arg v "$value" \
-              '{Name:$n, Value:$v, Type:"SecureString", Overwrite:true}' > "$workdir/payload.json"
+              '{Name:$n, Value:$v, Type:"SecureString", Overwrite:true}' \
+              > "$workdir/payload.json" || return 1
             version="$(aws ssm put-parameter \
               --cli-input-json "file://$workdir/payload.json" \
-              --query Version --output text)"
+              --query Version --output text)" || { rm -f "$workdir/payload.json"; return 1; }
             rm -f "$workdir/payload.json"
             echo "  ${name} -> version ${version}"
           }
 
+          # Passphrase first, key second. These are two calls and the second can
+          # fail, so order them such that a partial run never leaves a fresh key
+          # paired with a stale passphrase. If only the passphrase lands, the key
+          # parameter still holds its placeholder and signing is simply not
+          # enabled yet, which is a safe state to retry from.
           echo "Writing signing key parameters:"
-          put "${PARAM_PREFIX}/gpg-private-key" "$GPG_PRIVATE_KEY"
-          put "${PARAM_PREFIX}/gpg-private-key-passphrase" "$GPG_PRIVATE_KEY_PASSPHRASE"
+          if ! put "${PARAM_PREFIX}/gpg-private-key-passphrase" "$GPG_PRIVATE_KEY_PASSPHRASE"; then
+            echo "::error::Failed writing the passphrase; the key parameter was left untouched. Safe to re-run."
+            exit 1
+          fi
+          if ! put "${PARAM_PREFIX}/gpg-private-key" "$GPG_PRIVATE_KEY"; then
+            echo "::error::Passphrase was written but the key was not. Re-run this workflow from the same secrets to converge."
+            exit 1
+          fi
 
           echo "Done. Release with use-ssm-signing-keys to confirm signing works end to end."
