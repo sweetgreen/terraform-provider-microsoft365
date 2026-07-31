@@ -1,0 +1,146 @@
+# One-time migration of the provider signing key from Actions secrets to SSM.
+#
+# GitHub secrets are write-only, so GPG_PRIVATE_KEY cannot be read back out by
+# hand to populate the SSM parameters that `use-ssm-signing-keys` reads. This
+# workflow moves the value directly from Actions into Parameter Store, so the
+# key never lands in a log, an artifact, or somebody's clipboard.
+#
+# Regenerating the key instead is not an option: the registry publishes a
+# single public key for every provider it serves, so a new key would invalidate
+# the signatures of every release already published for microsoft365, slackapp
+# and tableau.
+#
+# Runs on a GitHub-hosted runner deliberately. Those have no EC2 instance
+# credentials, so the scoped OIDC role below is the only AWS identity in play.
+#
+# ORDERING: run this only after sweetgreen/terraform-infrastructure#1585 has
+# applied. PutParameter creates a parameter that does not exist yet, so running
+# early would leave #1585 trying to create parameters that are already there,
+# and its apply would fail with ParameterAlreadyExists.
+#
+# Delete this workflow, and the gpg-signing-key-migration IAM role in
+# sweetgreen/terraform-infrastructure, once a release has signed from SSM.
+#
+# Hardening option: add `environment: signing-key-migration` to the job and put
+# a required-reviewer rule on that environment to gate each run. The IAM trust
+# policy would then need its `sub` narrowed to
+# `repo:sweetgreen/terraform-provider-microsoft365:environment:signing-key-migration`.
+
+name: '🔑 Migrate signing key to SSM (one-time)'
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'migrate' to confirm writing the signing key to SSM"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  # Full fingerprint of the key the registry publishes. The secret must match
+  # this, or we would silently install a key that verifies nothing.
+  EXPECTED_FINGERPRINT: 0AF4EFDB556A60C24AEEE1C10CD0B605A84D89CA
+  PARAM_PREFIX: /terraform-registry-api-github-proxy
+
+jobs:
+  migrate:
+    name: 'Copy GPG signing key into SSM'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: inputs.confirm != 'migrate'
+        run: |
+          echo "::error::Confirmation phrase not matched; expected 'migrate'."
+          exit 1
+
+      # Fail before touching AWS if the secrets are not exactly what we expect.
+      # A wrong key or a passphrase that does not unlock it would install
+      # material that breaks every subsequent release, so prove both here.
+      - name: Verify the secrets hold a usable signing key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GPG_PRIVATE_KEY:-}" ]; then
+            echo "::error::GPG_PRIVATE_KEY secret is empty or unset."
+            exit 1
+          fi
+          # SSM rejects an empty parameter value, and the release workflow
+          # presets this passphrase into the agent, so it must be present.
+          if [ -z "${GPG_PRIVATE_KEY_PASSPHRASE:-}" ]; then
+            echo "::error::GPG_PRIVATE_KEY_PASSPHRASE is empty; SSM cannot store an empty value."
+            exit 1
+          fi
+          echo "::add-mask::${GPG_PRIVATE_KEY}"
+          echo "::add-mask::${GPG_PRIVATE_KEY_PASSPHRASE}"
+
+          GNUPGHOME="$(mktemp -d)"
+          export GNUPGHOME
+          chmod 700 "$GNUPGHOME"
+          # GnuPG 2.1+ refuses loopback pinentry unless the agent opts in, and
+          # without it the test-sign below fails for a perfectly good key.
+          echo "allow-loopback-pinentry" > "$GNUPGHOME/gpg-agent.conf"
+          gpgconf --reload gpg-agent 2>/dev/null || true
+
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --quiet --import
+          FINGERPRINT="$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/{print $10; exit}')"
+
+          if [ "$FINGERPRINT" != "$EXPECTED_FINGERPRINT" ]; then
+            echo "::error::Secret holds ${FINGERPRINT:-<none>}, expected ${EXPECTED_FINGERPRINT}."
+            exit 1
+          fi
+
+          # Prove the passphrase actually unlocks the key by signing with it.
+          if ! echo test \
+            | gpg --batch --quiet --pinentry-mode loopback \
+                  --passphrase "$GPG_PRIVATE_KEY_PASSPHRASE" \
+                  --local-user "$FINGERPRINT" --sign --output /dev/null; then
+            echo "::error::GPG_PRIVATE_KEY_PASSPHRASE does not unlock ${FINGERPRINT}."
+            exit 1
+          fi
+          echo "Verified signing key ${FINGERPRINT} and its passphrase."
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: arn:aws:iam::224746450967:role/gpg-signing-key-migration-gha-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Values go in via --cli-input-json rather than --value so the key never
+      # appears in this process's argv.
+      - name: Write signing key parameters
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_PASSPHRASE: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          umask 077
+          echo "::add-mask::${GPG_PRIVATE_KEY}"
+          echo "::add-mask::${GPG_PRIVATE_KEY_PASSPHRASE}"
+
+          workdir="$(mktemp -d)"
+          trap 'rm -rf "$workdir"' EXIT
+
+          put() {
+            name="$1"
+            value="$2"
+            jq -n --arg n "$name" --arg v "$value" \
+              '{Name:$n, Value:$v, Type:"SecureString", Overwrite:true}' > "$workdir/payload.json"
+            version="$(aws ssm put-parameter \
+              --cli-input-json "file://$workdir/payload.json" \
+              --query Version --output text)"
+            rm -f "$workdir/payload.json"
+            echo "  ${name} -> version ${version}"
+          }
+
+          echo "Writing signing key parameters:"
+          put "${PARAM_PREFIX}/gpg-private-key" "$GPG_PRIVATE_KEY"
+          put "${PARAM_PREFIX}/gpg-private-key-passphrase" "$GPG_PRIVATE_KEY_PASSPHRASE"
+
+          echo "Done. Release with use-ssm-signing-keys to confirm signing works end to end."
