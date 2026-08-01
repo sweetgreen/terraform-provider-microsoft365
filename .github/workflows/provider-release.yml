@@ -72,15 +72,12 @@ jobs:
     name: '📦 Terraform Provider Release'
     needs: [pre-release-checks]
     uses:  ./.github/workflows/tf-registry-goreleaser.yml
-    secrets:
-      gpg-private-key: '${{ secrets.GPG_PRIVATE_KEY }}'  # Your GPG private key
-      gpg-private-key-passphrase: '${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}'  # Passphrase for your GPG key, if applicable
     with:
       goreleaser-release-args: --verbose --parallelism 1 --timeout 120m0s # parallelism set to match the number of free cores on the runner
-
       release-notes: false
       setup-go-version-file: 'go.mod'
       git-ref: ${{ github.event.inputs.release_version || github.ref }}
+      use-ssm-signing-keys: true
 
   release-notes:
     runs-on: ubuntu-latest
