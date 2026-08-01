@@ -143,9 +143,9 @@ jobs:
           # every step has to report failure explicitly or a failed write would
           # fall through and the function would return the status of `echo`.
           put() {
-            local name="$1" value="$2" version
-            jq -n --arg n "$name" --arg v "$value" \
-              '{Name:$n, Value:$v, Type:"SecureString", Overwrite:true}' \
+            local name="$1" value="$2" tier="${3:-Standard}" version
+            jq -n --arg n "$name" --arg v "$value" --arg t "$tier" \
+              '{Name:$n, Value:$v, Type:"SecureString", Tier:$t, Overwrite:true}' \
               > "$workdir/payload.json" || return 1
             version="$(aws ssm put-parameter \
               --cli-input-json "file://$workdir/payload.json" \
@@ -164,7 +164,11 @@ jobs:
             echo "::error::Failed writing the passphrase; the key parameter was left untouched. Safe to re-run."
             exit 1
           fi
-          if ! put "${PARAM_PREFIX}/gpg-private-key" "$GPG_PRIVATE_KEY"; then
+          # Advanced tier: an armored private key exceeds the 4096-character
+          # ceiling on Standard, which fails with a ValidationException. The
+          # parameter is declared Advanced in Terraform too, so this matches
+          # rather than fights the managed configuration.
+          if ! put "${PARAM_PREFIX}/gpg-private-key" "$GPG_PRIVATE_KEY" Advanced; then
             echo "::error::Passphrase was written but the key was not. Re-run this workflow from the same secrets to converge."
             exit 1
           fi
