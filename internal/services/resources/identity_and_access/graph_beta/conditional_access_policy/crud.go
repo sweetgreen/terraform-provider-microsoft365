@@ -126,6 +126,15 @@ func (r *ConditionalAccessPolicyResource) Read(ctx context.Context, req resource
 	}
 	defer cancel()
 
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	remoteResource, err := r.client.
 		Identity().
 		ConditionalAccess().
@@ -143,15 +152,6 @@ func (r *ConditionalAccessPolicyResource) Read(ctx context.Context, req resource
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
@@ -204,20 +204,13 @@ func (r *ConditionalAccessPolicyResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	// Add delay before read to allow for eventual consistency
-	// it's possible to perform a valid GET request before the update has propagated,
-	// and the response will lack the updated values.
-	// Testing has shown a range between around 5-10 seconds is sufficient for the update to propagate and reach eventual consistency.
-	// The period varies depending on what fields are updated..
-	tflog.Debug(ctx, "Waiting 10 seconds for conditional access policy update to propagate and reach eventual consistency")
-	time.Sleep(10 * time.Second)
-
 	readReq := resource.ReadRequest{State: resp.State, ProviderMeta: req.ProviderMeta}
 	stateContainer := &crud.UpdateResponseContainer{UpdateResponse: resp}
 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationUpdate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = conditionalAccessPolicyConsistencyPredicate(&plan, state.ModifiedDateTime)
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {

@@ -1,0 +1,150 @@
+---
+page_title: "microsoft365_graph_beta_windows_updates_autopatch_updatable_asset_group Resource - terraform-provider-microsoft365"
+subcategory: "Windows Updates"
+
+description: |-
+  Manages a Windows Autopatch updatable asset group and its Entra ID device membership using the /admin/windows/updates/updatableAssets endpoint. Creating the resource provisions an empty group container. The optional entra_device_object_ids attribute manages which Entra ID devices (by object ID) are members of the group. Membership changes are diff-based: on update only the delta is applied via addMembersById and removeMembersById. Deleting the resource permanently removes the group and all its memberships.
+---
+
+# microsoft365_graph_beta_windows_updates_autopatch_updatable_asset_group (Resource)
+
+Manages a Windows Autopatch updatable asset group and its Entra ID device membership using the `/admin/windows/updates/updatableAssets` endpoint. Creating the resource provisions an empty group container. The optional `entra_device_object_ids` attribute manages which Entra ID devices (by object ID) are members of the group. Membership changes are diff-based: on update only the delta is applied via `addMembersById` and `removeMembersById`. Deleting the resource permanently removes the group and all its memberships.
+
+## Microsoft Documentation
+
+- [updatableAssetGroup resource type](https://learn.microsoft.com/en-us/graph/api/resources/windowsupdates-updatableassetgroup?view=graph-rest-beta)
+- [updatableAsset resource type](https://learn.microsoft.com/en-us/graph/api/resources/windowsupdates-updatableasset?view=graph-rest-beta)
+- [Create updatableAsset](https://learn.microsoft.com/en-us/graph/api/adminwindowsupdates-post-updatableassets?view=graph-rest-beta)
+- [Get updatableAsset](https://learn.microsoft.com/en-us/graph/api/windowsupdates-updatableasset-get?view=graph-rest-beta)
+- [addMembersById](https://learn.microsoft.com/en-us/graph/api/windowsupdates-updatableassetgroup-addmembersbyid?view=graph-rest-beta)
+- [removeMembersById](https://learn.microsoft.com/en-us/graph/api/windowsupdates-updatableassetgroup-removemembersbyid?view=graph-rest-beta)
+- [Delete updatableAsset](https://learn.microsoft.com/en-us/graph/api/windowsupdates-updatableasset-delete?view=graph-rest-beta)
+
+## Microsoft Graph API Permissions
+
+The following client `application` permissions are needed in order to use this resource:
+
+**Required:**
+- `WindowsUpdates.Read.All`
+- `WindowsUpdates.ReadWrite.All`
+
+**Optional:**
+- `None` `[N/A]`
+
+## Dependency Notes
+
+Device membership is managed in-place via `entra_device_object_ids`. Devices can be added or removed without replacing the group. The Entra device object IDs must correspond to devices already enrolled in Windows Autopatch.
+
+## Field Mutability
+
+| Field | Mutable after creation |
+|-------|------------------------|
+| `id` | Read-only (computed) |
+| `entra_device_object_ids` | Yes — devices can be added or removed in-place |
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v0.50.0-alpha | Experimental | Initial release |
+| v0.51.0-alpha | Experimental | Merged device membership into single resource |
+
+## Example Usage
+
+### Minimal
+
+```terraform
+# Minimal example — creates an empty updatable asset group with no device members.
+# The group ID is assigned by the service and can be referenced by other resources.
+
+resource "microsoft365_graph_beta_windows_updates_autopatch_updatable_asset_group" "example" {
+  timeouts = {
+    create = "60s"
+    read   = "30s"
+    update = "60s"
+    delete = "60s"
+  }
+}
+```
+
+### With Members
+
+```terraform
+# Example with device members — uses a managed device data source to enrol a single device
+# into the updatable asset group via its Entra device object ID.
+
+data "microsoft365_graph_beta_device_management_managed_device" "devices" {
+  list_all = true
+
+  timeouts = {
+    read = "30s"
+  }
+}
+
+resource "microsoft365_graph_beta_windows_updates_autopatch_updatable_asset_group" "example" {
+  entra_device_object_ids = [
+    data.microsoft365_graph_beta_device_management_managed_device.devices.items[0].azure_active_directory_device_id
+  ]
+
+  timeouts = {
+    create = "60s"
+    read   = "30s"
+    update = "60s"
+    delete = "60s"
+  }
+}
+```
+
+### Multiple Devices
+
+```terraform
+# Multiple devices — assigns multiple devices to an updatable asset group using
+# known Entra device object IDs. Devices can be added or removed in-place without
+# replacing the group.
+
+resource "microsoft365_graph_beta_windows_updates_autopatch_updatable_asset_group" "example" {
+  entra_device_object_ids = [
+    "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "cccccccc-cccc-cccc-cccc-cccccccccccc",
+  ]
+
+  timeouts = {
+    create = "60s"
+    read   = "30s"
+    update = "60s"
+    delete = "60s"
+  }
+}
+```
+
+<!-- schema generated by tfplugindocs -->
+## Schema
+
+### Optional
+
+- `entra_device_object_ids` (Set of String) Set of Entra ID device object IDs to add as members of the updatable asset group. Omit or leave empty to create a group with no initial members.
+- `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+
+### Read-Only
+
+- `id` (String) The unique identifier for the updatable asset group.
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Import an updatable asset group by its ID
+terraform import microsoft365_graph_beta_windows_updates_autopatch_updatable_asset_group.example "12345678-1234-1234-1234-123456789012"
+```

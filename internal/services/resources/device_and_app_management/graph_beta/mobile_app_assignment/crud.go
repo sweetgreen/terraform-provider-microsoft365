@@ -120,6 +120,15 @@ func (r *MobileAppAssignmentResource) Read(ctx context.Context, req resource.Rea
 	}
 	defer cancel()
 
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	// If we don't have an ID yet (during initial creation), try to find the assignment by target and intent
 	if object.ID.IsNull() {
 		assignments, err := r.client.
@@ -170,20 +179,14 @@ func (r *MobileAppAssignmentResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	MapRemoteStateToTerraform(ctx, object, resource)
+	// MapRemoteStateToTerraform takes the model by value and returns the updated copy, so the
+	// return value has to be assigned back. Discarding it left the resource with no working
+	// drift detection: state stayed at whatever was last planned, whatever the service held.
+	object = MapRemoteStateToTerraform(ctx, object, resource)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
@@ -191,9 +194,13 @@ func (r *MobileAppAssignmentResource) Read(ctx context.Context, req resource.Rea
 
 // Update handles the Update operation for Mobile App Assignment resources.
 //
-// Operation: Updates an existing mobile app assignment
+// Operation: Updates the settings of an existing mobile app assignment
 // API Calls:
 //   - PATCH /deviceAppManagement/mobileApps/{mobileAppId}/assignments/{assignmentId}
+//
+// Only settings are sent. Graph rejects a PATCH that carries intent, source or target with
+// 400 "Cannot patch read-only properties: 'Intent', 'Source', 'Target', 'Settings'.", and
+// those attributes force replacement in the schema, so an update never needs to carry them.
 //
 // Reference: https://learn.microsoft.com/en-us/graph/api/intune-apps-mobileappassignment-update?view=graph-rest-beta
 func (r *MobileAppAssignmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -214,7 +221,7 @@ func (r *MobileAppAssignmentResource) Update(ctx context.Context, req resource.U
 	}
 	defer cancel()
 
-	requestBody, err := ConstructMobileAppAssignment(ctx, plan)
+	requestBody, err := ConstructMobileAppAssignmentSettingsUpdate(ctx, plan)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error constructing resource",

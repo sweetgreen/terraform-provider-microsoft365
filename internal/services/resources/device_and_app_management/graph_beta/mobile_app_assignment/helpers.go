@@ -27,7 +27,7 @@ func matchesAssignment(ctx context.Context, object MobileAppAssignmentResourceMo
 	}
 
 	target := assignment.GetTarget()
-	if target != nil {
+	if target != nil && object.Target != nil {
 		odataType := target.GetOdataType()
 		if odataType != nil {
 			targetType := getTargetTypeFromOdataType(*odataType)
@@ -68,8 +68,12 @@ func getTargetTypeFromOdataType(odataType string) string {
 		return "groupAssignment"
 	case "#microsoft.graph.exclusionGroupAssignmentTarget":
 		return "exclusionGroupAssignment"
-	case "#microsoft.graph.androidFotaDeploymentAssignmentTarget":
-		return "androidFotaDeployment"
+	// NOTE: #microsoft.graph.androidFotaDeploymentAssignmentTarget was removed from the
+	// Microsoft Graph beta API and msgraph-beta-sdk-go in v0.160.0. This mapping is retained
+	// as a comment so it can be restored when the SDK re-adds the type. See state_migrations.go.
+	//
+	// case "#microsoft.graph.androidFotaDeploymentAssignmentTarget":
+	// 	return "androidFotaDeployment"
 	case "#microsoft.graph.configurationManagerCollectionAssignmentTarget":
 		return "configurationManagerCollection"
 	default:

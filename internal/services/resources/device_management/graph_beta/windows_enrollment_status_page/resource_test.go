@@ -115,6 +115,7 @@ func TestUnitResourceWindowsEnrollmentStatusPage_02_Maximal(t *testing.T) {
 				Config: loadUnitTestTerraform("resource_maximal.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("id").MatchesRegex(regexp.MustCompile(`^[0-9a-fA-F-]+$`)),
+					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("priority").HasValue("10"),
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("display_name").HasValue("unit-test-windows-enrollment-status-page-maximal"),
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("description").HasValue("Test description for maximal enrollment status page"),
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("show_installation_progress").HasValue("true"),
@@ -129,6 +130,11 @@ func TestUnitResourceWindowsEnrollmentStatusPage_02_Maximal(t *testing.T) {
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("custom_error_message").HasValue("Contact IT support for assistance"),
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("selected_mobile_app_ids.#").HasValue("3"),
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("role_scope_tag_ids.#").HasValue("2"),
+					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal").Key("assignments.#").HasValue("4"),
+					resource.TestCheckTypeSetElemNestedAttrs(graphBetaWindowsEnrollmentStatusPage.ResourceName+".maximal", "assignments.*", map[string]string{
+						"filter_id":   "33333333-3333-3333-3333-333333333333",
+						"filter_type": "include",
+					}),
 				),
 			},
 		},
@@ -277,6 +283,42 @@ func TestUnitResourceWindowsEnrollmentStatusPage_06_Lifecycle_MaximalToMinimal(t
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".lifecycle").Key("allow_device_reset_on_install_failure").HasValue("false"),
 					check.That(graphBetaWindowsEnrollmentStatusPage.ResourceName+".lifecycle").Key("role_scope_tag_ids.#").HasValue("1"),
 				),
+			},
+		},
+	})
+}
+
+// Test 007: Selected mobile app of an unsupported platform is rejected
+func TestUnitResourceWindowsEnrollmentStatusPage_07_SelectedMobileAppInvalidType(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, espMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer espMock.CleanupMockState()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      loadUnitTestTerraform("resource_invalid_app_type.tf"),
+				ExpectError: regexp.MustCompile(`(?s)not\s+a\s+valid\s+Windows\s+app\s+type`),
+			},
+		},
+	})
+}
+
+// Test 008: Selected mobile app that does not exist is rejected
+func TestUnitResourceWindowsEnrollmentStatusPage_08_SelectedMobileAppNotFound(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, espMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer espMock.CleanupMockState()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      loadUnitTestTerraform("resource_unknown_app_id.tf"),
+				ExpectError: regexp.MustCompile(`(?s)not\s+found\s+in\s+Intune`),
 			},
 		},
 	})

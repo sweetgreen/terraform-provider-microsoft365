@@ -28,7 +28,7 @@ jobs:
       ACTIONS_RUNNER_DEBUG: ${{ github.event.inputs.enable_debug == 'true' && 'true' || '' }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -44,10 +44,10 @@ jobs:
           swap-storage: true
 
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
@@ -69,7 +69,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-provider-core
           path: |
@@ -81,7 +81,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-provider-core.txt
@@ -99,7 +99,7 @@ jobs:
       has_tests: ${{ steps.set-matrix.outputs.has_tests }}
     steps:
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix
         id: set-matrix
@@ -128,7 +128,7 @@ jobs:
       has_tests: ${{ steps.set-matrix.outputs.has_tests }}
     steps:
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix
         id: set-matrix
@@ -157,7 +157,7 @@ jobs:
       has_tests: ${{ steps.set-matrix.outputs.has_tests }}
     steps:
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix
         id: set-matrix
@@ -186,7 +186,7 @@ jobs:
       has_tests: ${{ steps.set-matrix.outputs.has_tests }}
     steps:
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix
         id: set-matrix
@@ -215,7 +215,7 @@ jobs:
       has_tests: ${{ steps.set-matrix.outputs.has_tests }}
     steps:
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix
         id: set-matrix
@@ -249,7 +249,7 @@ jobs:
       matrix: ${{ fromJSON(needs.generate-resources-matrix.outputs.matrix) }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -265,10 +265,10 @@ jobs:
           swap-storage: true
 
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
@@ -286,6 +286,8 @@ jobs:
           M365_CLIENT_SECRET_APPLICATIONS: ${{ secrets.M365_CLIENT_SECRET_APPLICATIONS }}
           M365_CLIENT_ID_BACKUP_STORAGE: ${{ secrets.M365_CLIENT_ID_BACKUP_STORAGE }}
           M365_CLIENT_SECRET_BACKUP_STORAGE: ${{ secrets.M365_CLIENT_SECRET_BACKUP_STORAGE }}
+          M365_CLIENT_ID_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_ID_CHANGE_NOTIFICATIONS }}
+          M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS }}
           M365_CLIENT_ID_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_ID_DEVICE_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_MGMT }}
@@ -300,6 +302,8 @@ jobs:
           M365_CLIENT_SECRET_USERS: ${{ secrets.M365_CLIENT_SECRET_USERS }}
           M365_CLIENT_ID_WINDOWS_365: ${{ secrets.M365_CLIENT_ID_WINDOWS_365 }}
           M365_CLIENT_SECRET_WINDOWS_365: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_365 }}
+          M365_CLIENT_ID_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_ID_WINDOWS_UPDATES }}
+          M365_CLIENT_SECRET_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_UPDATES }}
         run: ./scripts/pipeline/bi_weekly_tests/map_credentials.py ${{ matrix.service }}
 
       - name: Run resource tests
@@ -327,7 +331,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-resources-${{ matrix.service }}${{ matrix.total_shards > 1 && format('-shard-{0}', matrix.shard_index) || '' }}
           path: |
@@ -339,7 +343,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-resources-${{ matrix.service }}*.txt
@@ -362,7 +366,7 @@ jobs:
       matrix: ${{ fromJSON(needs.generate-datasources-matrix.outputs.matrix) }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -378,10 +382,10 @@ jobs:
           swap-storage: true
 
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
@@ -396,6 +400,8 @@ jobs:
           M365_CLIENT_SECRET_AGENTS: ${{ secrets.M365_CLIENT_SECRET_AGENTS }}
           M365_CLIENT_ID_APPLICATIONS: ${{ secrets.M365_CLIENT_ID_APPLICATIONS }}
           M365_CLIENT_SECRET_APPLICATIONS: ${{ secrets.M365_CLIENT_SECRET_APPLICATIONS }}
+          M365_CLIENT_ID_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_ID_CHANGE_NOTIFICATIONS }}
+          M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS }}
           M365_CLIENT_ID_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_ID_DEVICE_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_MGMT }}
@@ -412,6 +418,8 @@ jobs:
           M365_CLIENT_SECRET_UTILITY: ${{ secrets.M365_CLIENT_SECRET_UTILITY }}
           M365_CLIENT_ID_WINDOWS_365: ${{ secrets.M365_CLIENT_ID_WINDOWS_365 }}
           M365_CLIENT_SECRET_WINDOWS_365: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_365 }}
+          M365_CLIENT_ID_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_ID_WINDOWS_UPDATES }}
+          M365_CLIENT_SECRET_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_UPDATES }}
         run: ./scripts/pipeline/bi_weekly_tests/map_credentials.py ${{ matrix.service }}
 
       - name: Run datasource tests
@@ -439,7 +447,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-datasources-${{ matrix.service }}${{ matrix.total_shards > 1 && format('-shard-{0}', matrix.shard_index) || '' }}
           path: |
@@ -451,7 +459,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-datasources-${{ matrix.service }}*.txt
@@ -474,7 +482,7 @@ jobs:
       matrix: ${{ fromJSON(needs.generate-actions-matrix.outputs.matrix) }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -490,10 +498,10 @@ jobs:
           swap-storage: true
 
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
@@ -508,6 +516,8 @@ jobs:
           M365_CLIENT_SECRET_AGENTS: ${{ secrets.M365_CLIENT_SECRET_AGENTS }}
           M365_CLIENT_ID_APPLICATIONS: ${{ secrets.M365_CLIENT_ID_APPLICATIONS }}
           M365_CLIENT_SECRET_APPLICATIONS: ${{ secrets.M365_CLIENT_SECRET_APPLICATIONS }}
+          M365_CLIENT_ID_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_ID_CHANGE_NOTIFICATIONS }}
+          M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS }}
           M365_CLIENT_ID_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_ID_DEVICE_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_MGMT }}
@@ -524,6 +534,8 @@ jobs:
           M365_CLIENT_SECRET_UTILITY: ${{ secrets.M365_CLIENT_SECRET_UTILITY }}
           M365_CLIENT_ID_WINDOWS_365: ${{ secrets.M365_CLIENT_ID_WINDOWS_365 }}
           M365_CLIENT_SECRET_WINDOWS_365: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_365 }}
+          M365_CLIENT_ID_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_ID_WINDOWS_UPDATES }}
+          M365_CLIENT_SECRET_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_UPDATES }}
         run: ./scripts/pipeline/bi_weekly_tests/map_credentials.py ${{ matrix.service }}
 
       - name: Run actions tests
@@ -551,7 +563,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-actions-${{ matrix.service }}${{ matrix.total_shards > 1 && format('-shard-{0}', matrix.shard_index) || '' }}
           path: |
@@ -563,7 +575,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-actions-${{ matrix.service }}*.txt
@@ -586,7 +598,7 @@ jobs:
       matrix: ${{ fromJSON(needs.generate-list-resources-matrix.outputs.matrix) }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -602,10 +614,10 @@ jobs:
           swap-storage: true
 
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
@@ -620,6 +632,8 @@ jobs:
           M365_CLIENT_SECRET_AGENTS: ${{ secrets.M365_CLIENT_SECRET_AGENTS }}
           M365_CLIENT_ID_APPLICATIONS: ${{ secrets.M365_CLIENT_ID_APPLICATIONS }}
           M365_CLIENT_SECRET_APPLICATIONS: ${{ secrets.M365_CLIENT_SECRET_APPLICATIONS }}
+          M365_CLIENT_ID_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_ID_CHANGE_NOTIFICATIONS }}
+          M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS }}
           M365_CLIENT_ID_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_ID_DEVICE_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_MGMT }}
@@ -636,6 +650,8 @@ jobs:
           M365_CLIENT_SECRET_UTILITY: ${{ secrets.M365_CLIENT_SECRET_UTILITY }}
           M365_CLIENT_ID_WINDOWS_365: ${{ secrets.M365_CLIENT_ID_WINDOWS_365 }}
           M365_CLIENT_SECRET_WINDOWS_365: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_365 }}
+          M365_CLIENT_ID_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_ID_WINDOWS_UPDATES }}
+          M365_CLIENT_SECRET_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_UPDATES }}
         run: ./scripts/pipeline/bi_weekly_tests/map_credentials.py ${{ matrix.service }}
 
       - name: Run list-resources tests
@@ -663,7 +679,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-list-resources-${{ matrix.service }}${{ matrix.total_shards > 1 && format('-shard-{0}', matrix.shard_index) || '' }}
           path: |
@@ -675,7 +691,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-list-resources-${{ matrix.service }}*.txt
@@ -698,7 +714,7 @@ jobs:
       matrix: ${{ fromJSON(needs.generate-ephemerals-matrix.outputs.matrix) }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -714,10 +730,10 @@ jobs:
           swap-storage: true
 
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
@@ -732,6 +748,8 @@ jobs:
           M365_CLIENT_SECRET_AGENTS: ${{ secrets.M365_CLIENT_SECRET_AGENTS }}
           M365_CLIENT_ID_APPLICATIONS: ${{ secrets.M365_CLIENT_ID_APPLICATIONS }}
           M365_CLIENT_SECRET_APPLICATIONS: ${{ secrets.M365_CLIENT_SECRET_APPLICATIONS }}
+          M365_CLIENT_ID_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_ID_CHANGE_NOTIFICATIONS }}
+          M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS: ${{ secrets.M365_CLIENT_SECRET_CHANGE_NOTIFICATIONS }}
           M365_CLIENT_ID_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT: ${{ secrets.M365_CLIENT_SECRET_DEVICE_AND_APP_MGMT }}
           M365_CLIENT_ID_DEVICE_MGMT: ${{ secrets.M365_CLIENT_ID_DEVICE_MGMT }}
@@ -748,6 +766,8 @@ jobs:
           M365_CLIENT_SECRET_UTILITY: ${{ secrets.M365_CLIENT_SECRET_UTILITY }}
           M365_CLIENT_ID_WINDOWS_365: ${{ secrets.M365_CLIENT_ID_WINDOWS_365 }}
           M365_CLIENT_SECRET_WINDOWS_365: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_365 }}
+          M365_CLIENT_ID_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_ID_WINDOWS_UPDATES }}
+          M365_CLIENT_SECRET_WINDOWS_UPDATES: ${{ secrets.M365_CLIENT_SECRET_WINDOWS_UPDATES }}
         run: ./scripts/pipeline/bi_weekly_tests/map_credentials.py ${{ matrix.service }}
 
       - name: Run ephemerals tests
@@ -775,7 +795,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-ephemerals-${{ matrix.service }}${{ matrix.total_shards > 1 && format('-shard-{0}', matrix.shard_index) || '' }}
           path: |
@@ -787,7 +807,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-ephemerals-${{ matrix.service }}*.txt
@@ -806,7 +826,7 @@ jobs:
       ACTIONS_RUNNER_DEBUG: ${{ github.event.inputs.enable_debug == 'true' && 'true' || '' }}
     steps:
       - name: Check Out
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download all test result artifacts
         if: always()

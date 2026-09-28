@@ -22,6 +22,7 @@ import (
 	graphBetaDeviceManagementManagedDevice "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/managed_device"
 	graphBetaDeviceManagementReuseablePolicySettings "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/reuseable_policy_settings"
 	graphBetaDeviceManagementRoleScopeTag "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/role_scope_tag"
+	graphBetaDeviceManagementWindowsAutopilotDevicePreparationPolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_autopilot_device_preparation_policy"
 	graphBetaDeviceManagementWindowsDriverUpdateInventory "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_driver_update_inventory"
 	graphBetaDeviceManagementWindowsDriverUpdateProfile "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_driver_update_profile"
 	graphBetaDeviceManagementWindowsFeatureUpdateProfile "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_feature_update_policy"
@@ -29,7 +30,6 @@ import (
 	graphBetaDeviceManagementWindowsQualityUpdateExpeditePolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_quality_update_expedite_policy"
 	graphBetaDeviceManagementWindowsQualityUpdatePolicy "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_quality_update_policy"
 	graphBetaDeviceManagementWindowsRemediationScript "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_remediation_script"
-	graphBetaDeviceManagementWindowsUpdateCatalog "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_update_catalog_enteries"
 	graphBetaDeviceManagementWindowsUpdateCatalogItem "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_update_catalog_item"
 	graphBetaDeviceManagementWindowsUpdateRing "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/device_management/graph_beta/windows_update_ring"
 
@@ -41,6 +41,11 @@ import (
 
 	// Graph Beta - Identity and Access datasources
 	graphBetaIdentityAndAccessConditionalAccessTemplate "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/conditional_access_template"
+	graphBetaIdentityAndAccessDevice "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/device"
+	graphBetaIdentityAndAccessDirectoryRole "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/directory_role"
+	graphBetaIdentityAndAccessNetworkForwardingProfile "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/network_forwarding_profile"
+	graphBetaIdentityAndAccessNetworkForwardingProfilePolicyLink "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/network_forwarding_profile_policy_link"
+	graphBetaIdentityAndAccessNetworkManagedTLSCertificate "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/network_managed_tls_certificate"
 	graphBetaIdentityAndAccessRoleDefinitions "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/role_definitions"
 	graphBetaIdentityAndAccessTenantInformation "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_beta/tenant_information"
 
@@ -51,6 +56,16 @@ import (
 	// Graph Beta - Multitenant Management datasources
 	graphBetaMultitenantManagementAggregatedPolicyCompliances "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/multitenant_management/graph_beta/aggregated_policy_compliances"
 	graphBetaMultitenantManagementAuditEvents "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/multitenant_management/graph_beta/audit_events"
+
+	// Graph Beta - Users datasources
+	graphBetaUsersUser "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/users/graph_beta/user"
+
+	// Graph Beta - Windows Updates datasources
+	graphBetaWindowsUpdatesApplicableContent "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_updates/graph_beta/applicable_content"
+	graphBetaWindowsUpdatesCatalogEnteries "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_updates/graph_beta/catalog_enteries"
+	graphBetaWindowsUpdatesComplianceChanges "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_updates/graph_beta/compliance_changes"
+	graphBetaWindowsUpdatesDeviceEnrollment "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_updates/graph_beta/device_enrollment"
+	graphBetaWindowsUpdatesProduct "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/windows_updates/graph_beta/product"
 
 	// Graph v1.0 - Directory Management datasources
 	graphBetaIdentityAndAccessSubscribedSkus "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/identity_and_access/graph_v1.0/subscribed_skus"
@@ -66,7 +81,6 @@ import (
 	// Utilities
 	utilityDeploymentScheduler "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/deployment_scheduler"
 	utilityEntraIdSidConverter "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/entra_id_sid_converter"
-	utilityGuidListSharder "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/guid_list_sharder"
 	utilityItunesAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/itunes_app_metadata"
 	utilityLicensingServicePlanReference "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/licensing_service_plan_reference"
 	utilityMacOSPKGAppMetadata "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/datasources/utility/macos_pkg_app_metadata"
@@ -107,13 +121,18 @@ func (p *M365Provider) DataSources(ctx context.Context) []func() datasource.Data
 		graphBetaDeviceManagementManagedDevice.NewManagedDeviceDataSource,
 		graphBetaDeviceManagementReuseablePolicySettings.NewReuseablePolicySettingsDataSource,
 		graphBetaDeviceManagementRoleScopeTag.NewRoleScopeTagDataSource,
+		graphBetaDeviceManagementWindowsAutopilotDevicePreparationPolicy.NewWindowsAutopilotDevicePreparationPolicyDataSource,
 		graphBetaDeviceManagementWindowsDriverUpdateProfile.NewWindowsDriverUpdateProfileDataSource,
 		graphBetaDeviceManagementWindowsDriverUpdateInventory.NewWindowsDriverUpdateInventoryDataSource,
 		graphBetaDeviceManagementWindowsFeatureUpdateProfile.NewWindowsFeatureUpdateProfileDataSource,
 		graphBetaDeviceManagementWindowsQualityUpdatePolicy.NewWindowsQualityUpdateProfileDataSource,
 		graphBetaDeviceManagementWindowsPlatformScript.NewWindowsPlatformScriptDataSource,
 		graphBetaDeviceManagementWindowsRemediationScript.NewWindowsRemediationScriptDataSource,
-		graphBetaDeviceManagementWindowsUpdateCatalog.NewWindowsUpdateCatalogEnteriesDataSource,
+		graphBetaWindowsUpdatesApplicableContent.NewApplicableContentDataSource,
+		graphBetaWindowsUpdatesCatalogEnteries.NewWindowsUpdateCatalogEnteriesDataSource,
+		graphBetaWindowsUpdatesComplianceChanges.NewComplianceChangesDataSource,
+		graphBetaWindowsUpdatesDeviceEnrollment.NewDeviceEnrollmentDataSource,
+		graphBetaWindowsUpdatesProduct.NewWindowsUpdateProductDataSource,
 		graphBetaDeviceManagementWindowsUpdateCatalogItem.NewWindowsUpdateCatalogItemDataSource,
 		graphBetaDeviceManagementWindowsQualityUpdateExpeditePolicy.NewWindowsQualityUpdateExpeditePolicyDataSource,
 		graphBetaDeviceManagementWindowsUpdateRing.NewWindowsUpdateRingDataSource,
@@ -123,7 +142,12 @@ func (p *M365Provider) DataSources(ctx context.Context) []func() datasource.Data
 
 		// Graph Beta - Identity and Access datasources
 		graphBetaIdentityAndAccessConditionalAccessTemplate.NewConditionalAccessTemplateDataSource,
+		graphBetaIdentityAndAccessDevice.NewDeviceDataSource,
+		graphBetaIdentityAndAccessDirectoryRole.NewDirectoryRoleDataSource,
 		graphBetaIdentityAndAccessDirectorySettingTemplates.NewDirectorySettingTemplatesDataSource,
+		graphBetaIdentityAndAccessNetworkForwardingProfile.NewNetworkForwardingProfileDataSource,
+		graphBetaIdentityAndAccessNetworkForwardingProfilePolicyLink.NewNetworkForwardingProfilePolicyLinkDataSource,
+		graphBetaIdentityAndAccessNetworkManagedTLSCertificate.NewNetworkManagedTLSCertificateDataSource,
 		graphBetaIdentityAndAccessRoleDefinitions.NewRoleDefinitionsDataSource,
 		graphBetaIdentityAndAccessTenantInformation.NewTenantInformationDataSource,
 		// Graph Beta - M365 Admin datasources
@@ -132,6 +156,8 @@ func (p *M365Provider) DataSources(ctx context.Context) []func() datasource.Data
 		// Graph Beta - Multitenant Management datasources
 		graphBetaMultitenantManagementAggregatedPolicyCompliances.NewAggregatedPolicyCompliancesDataSource,
 		graphBetaMultitenantManagementAuditEvents.NewAuditEventsDataSource,
+		// Graph Beta - Users datasources
+		graphBetaUsersUser.NewUserDataSource,
 		// Graph Beta - Windows 365 datasources
 		graphBetaWindows365CloudPcAuditEvent.NewCloudPcAuditEventDataSource,
 		graphBetaWindows365CloudPcFrontlineServicePlan.NewCloudPcFrontlineServicePlanDataSource,
@@ -146,7 +172,6 @@ func (p *M365Provider) DataSources(ctx context.Context) []func() datasource.Data
 		// Utilities
 		utilityDeploymentScheduler.NewDeploymentSchedulerDataSource,
 		utilityEntraIdSidConverter.NewEntraIdSidConverterDataSource,
-		utilityGuidListSharder.NewGuidListSharderDataSource,
 		utilityWindowsRemediationScriptRegistryKeyGenerator.NewWindowsRemediationScriptRegistryKeyGeneratorDataSource,
 		utilityMacOSPKGAppMetadata.NewMacOSPKGAppMetadataDataSource,
 		utilityItunesAppMetadata.NewItunesAppMetadataDataSource,

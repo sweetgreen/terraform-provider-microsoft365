@@ -3,12 +3,12 @@ page_title: "microsoft365_graph_beta_device_and_app_management_win32_app Resourc
 subcategory: "Device and App Management"
 
 description: |-
-  Manages Win32 applications in Microsoft Intune using the /deviceAppManagement/mobileApps endpoint. This resource is used to deploy custom Windows applications (.exe, .msi) with advanced installation logic, detection rules, and dependency management. Applications must be wrapped in the .intunewin file format.
+  Manages Win32 applications in Microsoft Intune using the /deviceAppManagement/mobileApps endpoint. This resource is used to deploy custom Windows applications (.exe, .msi) with advanced installation logic, detection rules, and dependency management. Supply either a prepackaged .intunewin file or an unencrypted installer ZIP.
 ---
 
 # microsoft365_graph_beta_device_and_app_management_win32_app (Resource)
 
-Manages Win32 applications in Microsoft Intune using the `/deviceAppManagement/mobileApps` endpoint. This resource is used to deploy custom Windows applications (.exe, .msi) with advanced installation logic, detection rules, and dependency management. Applications must be wrapped in the .intunewin file format.
+Manages Win32 applications in Microsoft Intune using the `/deviceAppManagement/mobileApps` endpoint. This resource is used to deploy custom Windows applications (.exe, .msi) with advanced installation logic, detection rules, and dependency management. Supply either a prepackaged .intunewin file or an unencrypted installer ZIP.
 
 ## Microsoft Documentation
 
@@ -34,8 +34,11 @@ The following client `application` permissions are needed in order to use this r
 | Version | Status | Notes |
 |---------|--------|-------|
 | v0.42.0-alpha | Experimental | Added missing version history |
+| v0.53.0-alpha | Preview | Added support for EXE-based installers with PowerShell App Deployment Toolkit (PSADT) |
 
 ## Example Usage
+
+### MSI-Based Win32 App (Firefox)
 
 ```terraform
 resource "microsoft365_graph_beta_device_and_app_management_win32_app" "example" {
@@ -378,6 +381,116 @@ EOT
 }
 ```
 
+### EXE-Based Win32 App with PowerShell App Deployment Toolkit (PSADT)
+
+```terraform
+resource "microsoft365_graph_beta_device_and_app_management_win32_app" "notepad_plus_plus" {
+  allow_available_uninstall = true
+
+  app_installer = {
+    installer_file_path_source = "/path/to/notepad++_8.9.5.exe_psadt.intunewin"
+  }
+
+  app_icon = {
+    icon_url_source = "https://upload.wikimedia.org/wikipedia/commons/f/f5/Notepad_plus_plus.png"
+  }
+
+  categories = [
+    "Business",
+    "Productivity",
+  ]
+
+  description     = "Notepad++ v8.9.5 x64 - Free source code editor"
+  publisher       = "Don Ho"
+  developer       = "Don Ho"
+  display_name    = "Notepad++ v8.9.5"
+  display_version = "8.9.5"
+  file_name       = "notepad++_8.9.5.exe_psadt.intunewin"
+  information_url = "https://notepad-plus-plus.org/"
+
+  owner = "IT"
+  notes = "Deployed via PowerShell App Deployment Toolkit (PSADT). msi_information is not required for EXE-based installers."
+
+  allowed_architectures             = ["x64"]
+  minimum_supported_windows_release = "Windows10_22H2"
+
+  install_experience = {
+    device_restart_behavior = "allow"
+    max_run_time_in_minutes = 60
+    run_as_account          = "system"
+  }
+
+  setup_file_path        = "Invoke-AppDeployToolkit.exe"
+  install_command_line   = "Invoke-AppDeployToolkit.exe -DeploymentType Install -DeployMode Silent"
+  uninstall_command_line = "Invoke-AppDeployToolkit.exe -DeploymentType Uninstall -DeployMode Silent"
+
+  # msi_information is omitted - EXE-based installers do not require it.
+  # Only populate msi_information when deploying MSI-based packages.
+
+  rules = [
+    {
+      rule_type                  = "detection"
+      rule_sub_type              = "file_system"
+      path                       = "C:\\Program Files\\Notepad++"
+      file_or_folder_name        = "notepad++.exe"
+      check_32_bit_on_64_system  = false
+      file_system_operation_type = "version"
+      lob_app_rule_operator      = "greaterThanOrEqual"
+      comparison_value           = "8.9.5"
+    },
+  ]
+
+  return_codes = [
+    {
+      return_code = 0
+      type        = "success"
+    },
+    {
+      return_code = 1707
+      type        = "success"
+    },
+    {
+      return_code = 3010
+      type        = "softReboot"
+    },
+    {
+      return_code = 1641
+      type        = "hardReboot"
+    },
+    {
+      return_code = 1618
+      type        = "retry"
+    },
+  ]
+}
+```
+
+### Unencrypted ZIP source (no Content Prep Tool required)
+
+Use one of these source blocks inside the resource, not both. Each block accepts either `installer_file_path_source` or `installer_url_source`:
+
+```hcl
+# A standard ZIP with the installer and its support files at the expected paths.
+app_installer_zip = {
+  installer_file_path_source = "${path.module}/packages/application-v2.zip"
+}
+```
+
+```hcl
+# A package already produced by the Microsoft Win32 Content Prep Tool.
+app_installer = {
+  installer_url_source = "https://example.com/packages/application-v2.intunewin"
+}
+```
+
+For ZIP sources, keep `setup_file_path` and the install/uninstall commands relative to the contents of the ZIP. Configure detection rules and any MSI metadata in Terraform; the ZIP path does not run the Content Prep Tool or discover installer metadata automatically. The provider encrypts a temporary copy and does not modify the original file.
+
+### Migrating the legacy renamed-ZIP workaround
+
+If your current `app_installer` points to a plain ZIP renamed `.intunewin` (the workaround described in issue #3625), move that source into `app_installer_zip`. This block accepts both `.zip` and legacy `.intunewin` filenames, so renaming the file is optional. Keep the resource address and other settings unchanged. Applying the source change publishes a new content version on the existing application; it does not replace the application or its assignments.
+
+Actual Content Prep Tool packages should continue to use `app_installer`. A malformed package is rejected rather than silently re-encrypted as a ZIP.
+
 <!-- schema generated by tfplugindocs -->
 ## Schema
 
@@ -386,10 +499,9 @@ EOT
 - `allow_available_uninstall` (Boolean) When TRUE, indicates that uninstall is supported from the company portal for the Windows app (Win32) with an Available assignment. When FALSE, indicates that uninstall is not supported for the Windows app (Win32) with an Available assignment. Default value is FALSE.
 - `description` (String) Required. The description of the resource. Maximum length is 10000 characters.
 - `display_name` (String) The admin provided or imported title of the app.
-- `file_name` (String) The name of the main Lob application file.
+- `file_name` (String) The configured name of the main LOB application file. For prepackaged content, Microsoft Graph receives the inner filename from `Detection.xml`; for ZIP sources it receives the ZIP filename with an `.intunewin` extension.
 - `install_command_line` (String) The command line to install this app. Typically formatted as 'msiexec /i "application_name.msi" /qn'
 - `minimum_supported_windows_release` (String) The value for the minimum supported windows release.
-- `msi_information` (Attributes) The MSI details if this Win32 app is an MSI app. (see [below for nested schema](#nestedatt--msi_information))
 - `publisher` (String) The publisher of the Intune macOS pkg application.
 - `uninstall_command_line` (String) The command line to uninstall this app. Typically formatted as 'msiexec /x {00000000-0000-0000-0000-000000000000} /qn'
 
@@ -397,10 +509,11 @@ EOT
 
 - `allowed_architectures` (Set of String) The Windows architecture(s) for which this app can run on. Possible values are: none, x64, x86, arm64.
 - `app_icon` (Attributes) The source information for the app icon. Supports various image formats (JPEG, PNG, GIF, etc.) which will be automatically converted to PNG as required by Microsoft Intune. (see [below for nested schema](#nestedatt--app_icon))
-- `app_installer` (Attributes) Metadata related to the win32 lob app installer file, such as size and checksums. This is automatically computed during app creation and updates. (see [below for nested schema](#nestedatt--app_installer))
+- `app_installer` (Attributes) Source for a prepackaged `.intunewin` file containing Detection.xml and its encrypted payload. Mutually exclusive with `app_installer_zip`. Set exactly one local path or URL. Source changes publish a new content version without replacing the application. Omit both source blocks when managing an imported application's metadata only. (see [below for nested schema](#nestedatt--app_installer))
+- `app_installer_zip` (Attributes) Source for an unencrypted installer ZIP (a `.zip` file, or a legacy ZIP renamed `.intunewin`); the provider encrypts it before upload. Mutually exclusive with `app_installer`. Set exactly one local path or URL. Source changes publish a new content version without replacing the application. Omit both source blocks when managing an imported application's metadata only. (see [below for nested schema](#nestedatt--app_installer_zip))
 - `categories` (Set of String) Set of category names to associate with this application. You can use either thebpredefined Intune category names like 'Business', 'Productivity', etc., or provide specific category UUIDs. Predefined values include: 'Other apps', 'Books & Reference', 'Data management', 'Productivity', 'Business', 'Development & Design', 'Photos & Media', 'Collaboration & Social', 'Computer management'.
 - `content_version` (Attributes List) The committed content version of the app, including its files. Only the currently committed version is shown. (see [below for nested schema](#nestedatt--content_version))
-- `detection_rules` (Attributes List) The detection rules to detect Win32 Line of Business (LoB) app. (see [below for nested schema](#nestedatt--detection_rules))
+- `detection_rules` (Attributes List, Deprecated) **DEPRECATED**: Use the `rules` block instead with key rule_type set to `detection`, to configure the detection rules to detect Win32 Line of Business (LoB) app. (see [below for nested schema](#nestedatt--detection_rules))
 - `developer` (String) The developer of the app.
 - `display_version` (String) The version displayed in the UX for this app.
 - `information_url` (String) The more information Url.
@@ -410,10 +523,11 @@ EOT
 - `minimum_free_disk_space_in_mb` (Number) The value for the minimum free disk space which is required to install this app.
 - `minimum_memory_in_mb` (Number) The value for the minimum physical memory which is required to install this app.
 - `minimum_number_of_processors` (Number) The value for the minimum number of processors which is required to install this app.
+- `msi_information` (Attributes) The MSI details if this Win32 app is an MSI app. Only required for MSI-based installers. (see [below for nested schema](#nestedatt--msi_information))
 - `notes` (String) Notes for the app.
 - `owner` (String) The owner of the app.
 - `privacy_information_url` (String) The privacy statement Url.
-- `requirement_rules` (Attributes List) The requirement rules to detect Win32 Line of Business (LoB) app. (see [below for nested schema](#nestedatt--requirement_rules))
+- `requirement_rules` (Attributes List, Deprecated) **DEPRECATED**: Use the `rules` block instead with key rule_type set to `requirement`, to configure the requirement rules to detect Win32 Line of Business (LoB) app. (see [below for nested schema](#nestedatt--requirement_rules))
 - `return_codes` (Attributes List) The return codes for post installation behavior. (see [below for nested schema](#nestedatt--return_codes))
 - `role_scope_tag_ids` (Set of String) Set of scope tag IDs for this Settings Catalog template profile.
 - `rules` (Attributes List) The detection and requirement rules for this app. (see [below for nested schema](#nestedatt--rules))
@@ -434,23 +548,6 @@ EOT
 - `superseding_app_count` (Number) The total number of apps this app directly or indirectly supersedes. This property is read-only.
 - `upload_state` (Number) The upload state. Possible values are: 0 - Not Ready, 1 - Ready, 2 - Processing. This property is read-only.
 
-<a id="nestedatt--msi_information"></a>
-### Nested Schema for `msi_information`
-
-Required:
-
-- `package_type` (String) The MSI package type. Possible values are: perMachine, perUser.
-- `product_version` (String) The MSI product version.
-- `requires_reboot` (Boolean) A value indicating whether the MSI app requires a reboot.
-- `upgrade_code` (String) The MSI upgrade code.
-
-Optional:
-
-- `product_code` (String) The MSI product code.
-- `product_name` (String) The MSI product name.
-- `publisher` (String) The MSI publisher.
-
-
 <a id="nestedatt--app_icon"></a>
 ### Nested Schema for `app_icon`
 
@@ -465,8 +562,17 @@ Optional:
 
 Optional:
 
-- `installer_file_path_source` (String) The path to the win32 lob app installer file to be uploaded. The file must be a valid `.intunewin` file. Value is not returned by API call.
-- `installer_url_source` (String) The web location of the win32 lob app installer file, can be a http(s) URL. The file must be a valid `.intunewin` file. Value is not returned by API call.
+- `installer_file_path_source` (String) Local path to a prepackaged `.intunewin` file containing Detection.xml and its encrypted payload. Not returned by the API. Use a different path for each package version.
+- `installer_url_source` (String) HTTP(S) URL for a prepackaged `.intunewin` file containing Detection.xml and its encrypted payload. Not returned by the API. Use a different URL for each package version.
+
+
+<a id="nestedatt--app_installer_zip"></a>
+### Nested Schema for `app_installer_zip`
+
+Optional:
+
+- `installer_file_path_source` (String) Local path to an unencrypted installer ZIP (a `.zip` file, or a legacy ZIP renamed `.intunewin`); the provider encrypts it before upload. Not returned by the API. Use a different path for each package version.
+- `installer_url_source` (String) HTTP(S) URL for an unencrypted installer ZIP (a `.zip` file, or a legacy ZIP renamed `.intunewin`); the provider encrypts it before upload. Not returned by the API. Use a different URL for each package version.
 
 
 <a id="nestedatt--content_version"></a>
@@ -530,6 +636,23 @@ Optional:
 - `device_restart_behavior` (String) The device restart behavior. Possible values are: basedOnReturnCode, allow, suppress, force.
 - `max_run_time_in_minutes` (Number) The maximum run time in minutes for the installation.
 - `run_as_account` (String) The execution context. Possible values are: system, user.
+
+
+<a id="nestedatt--msi_information"></a>
+### Nested Schema for `msi_information`
+
+Required:
+
+- `package_type` (String) The MSI package type. Possible values are: perMachine, perUser.
+- `product_version` (String) The MSI product version.
+- `requires_reboot` (Boolean) A value indicating whether the MSI app requires a reboot.
+- `upgrade_code` (String) The MSI upgrade code.
+
+Optional:
+
+- `product_code` (String) The MSI product code.
+- `product_name` (String) The MSI product name.
+- `publisher` (String) The MSI publisher.
 
 
 <a id="nestedatt--requirement_rules"></a>
@@ -599,8 +722,9 @@ Optional:
 ## Important Notes
 
 - **Windows Specific**: This resource is specifically for managing Win32 Line of Business (LOB) applications on Windows devices.
-- **App Package Format**: Win32 LOB apps are typically in .msi, .exe, or .appx format and are custom applications developed for the organization.
-- **Content Upload**: The resource handles uploading the app content to Intune for distribution to target devices.
+- **App Package Format**: Choose `app_installer` for a valid `.intunewin` package containing `IntuneWinPackage/Metadata/Detection.xml` and its matching encrypted payload, or `app_installer_zip` for a standard unencrypted ZIP. The blocks are mutually exclusive. A source is required on creation; imported applications can be managed without a local installer when only metadata changes.
+- **Content Upload**: For prepackaged sources, the resource uploads the original encrypted inner content and commits the metadata from `Detection.xml`. For ZIP sources, it encrypts the ZIP and generates the matching encryption metadata. Both paths share the same upload and commit workflow. Graph receives the inner package filename or, for ZIP sources, the ZIP filename with an `.intunewin` extension.
+- **Content Updates**: Changing a source path, URL, or source block creates and commits a new content version on the existing application. The application ID and its assignments are preserved, and Terraform tracks only the currently committed version. Changes to a package at an unchanged path or URL do not create a Terraform plan automatically.
 - **Assignment Required**: Apps must be assigned to user or device groups to be deployed through Intune.
 - **Detection Rules**: Configure detection rules to determine if the app is successfully installed on target devices. Multiple detection rule types are supported:
   - **Registry**: Check registry keys and values
@@ -611,7 +735,8 @@ Optional:
 - **Installation Context**: Win32 LOB apps can be installed in user or system context depending on configuration.
 - **Return Codes**: Configure custom return codes to handle different installation outcomes.
 - **Install Experience**: Control the installation behavior, restart requirements, and user interaction.
-- **MSI Information**: For MSI-based apps, specify product codes, versions, and upgrade codes for proper management.
+- **MSI Information**: For MSI-based apps, specify product codes, versions, and upgrade codes for proper management. `msi_information` is not required for EXE-based installers.
+- **EXE-based installers**: For EXE-based installers, specify the setup file path and installation command line.
 - **Supersedence**: Win32 LOB apps support supersedence relationships to replace older versions.
 
 ## Import
@@ -620,5 +745,5 @@ Import is supported using the following syntax:
 
 ```shell
 # {resource_id}
-terraform import microsoft365_graph_beta_device_and_app_management_win32_lob_app.example 00000000-0000-0000-0000-000000000000
-``` 
+terraform import microsoft365_graph_beta_device_and_app_management_win32_app.example 00000000-0000-0000-0000-000000000000
+```

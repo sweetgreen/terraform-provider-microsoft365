@@ -34,11 +34,12 @@ const (
 )
 
 var (
-	_ resource.Resource                = &IntuneBrandingProfileResource{}
-	_ resource.ResourceWithConfigure   = &IntuneBrandingProfileResource{}
-	_ resource.ResourceWithImportState = &IntuneBrandingProfileResource{}
-	_ resource.ResourceWithModifyPlan  = &IntuneBrandingProfileResource{}
-	_ resource.ResourceWithIdentity    = &IntuneBrandingProfileResource{}
+	_ resource.Resource                  = &IntuneBrandingProfileResource{}
+	_ resource.ResourceWithConfigure     = &IntuneBrandingProfileResource{}
+	_ resource.ResourceWithImportState   = &IntuneBrandingProfileResource{}
+	_ resource.ResourceWithModifyPlan    = &IntuneBrandingProfileResource{}
+	_ resource.ResourceWithIdentity      = &IntuneBrandingProfileResource{}
+	_ resource.ResourceWithUpgradeState  = &IntuneBrandingProfileResource{}
 )
 
 func NewIntuneBrandingProfileResource() resource.Resource {
@@ -85,6 +86,9 @@ func (r *IntuneBrandingProfileResource) IdentitySchema(ctx context.Context, req 
 
 func (r *IntuneBrandingProfileResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		// Version 1: accompanying msgraph-beta-sdk-go v0.160.0.
+		// See state_migrations.go for the full migration history and rationale.
+		Version: 1,
 		MarkdownDescription: "Manages an Intune branding profile resource in Intune.\n\n" +
 			"## API Documentation\n\n" +
 			"- [Graph API Endpoint](https://learn.microsoft.com/en-us/graph/api/resources/intune-wip-intunebrandingprofile?view=graph-rest-beta)",
@@ -235,6 +239,7 @@ func (r *IntuneBrandingProfileResource) Schema(ctx context.Context, req resource
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
+				DeprecationMessage:  "sendDeviceOwnershipChangePushNotification was removed from the Microsoft Graph beta API in msgraph-beta-sdk-go v0.160.0. This field no longer has any effect and will be removed in a future provider version. Remove it from your configuration.",
 				MarkdownDescription: "Boolean that indicates if a push notification is sent to users when their device ownership type changes from personal to corporate.",
 			},
 			"enrollment_availability": schema.StringAttribute{

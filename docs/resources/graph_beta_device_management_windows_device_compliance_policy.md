@@ -25,6 +25,7 @@ The following client `application` permissions are needed in order to use this r
 - `DeviceManagementConfiguration.Read.All`
 - `DeviceManagementConfiguration.ReadWrite.All`
 - `Directory.Read.All`
+- `Group.ManageProtection.All`
 - `Group.Read.All`
 - `GroupMember.Read.All`
 
@@ -446,7 +447,7 @@ Required:
 Required:
 
 - `action_type` (String) What action to take. Possible values are: 'noAction', 'notification', 'block', 'retire', 'wipe', 'removeResourceAccessProfiles', 'pushNotification', 'remoteLock'.
-- `grace_period_hours` (Number) Number of hours to wait till the action will be enforced. Value must be between 0 and 365
+- `grace_period_hours` (Number) Number of hours to wait till the action will be enforced. Value must be between 0 and 8760 (365 days).
 
 Optional:
 
@@ -535,6 +536,7 @@ Optional:
 - `defender_version` (String) Require Windows Defender Antimalware minimum version on Windows devices
 - `password_block_simple` (Boolean) Indicates whether or not to block simple password
 - `password_minimum_character_set_count` (Number) The number of character sets required in the password
+- `password_minutes_of_inactivity_before_lock` (Number) Minutes of inactivity before a password is required.
 - `password_required` (Boolean) Require a password to unlock Windows device
 - `password_required_to_unlock_from_idle` (Boolean) Require a password to unlock an idle device
 - `password_required_type` (String) The required password type. Possible values are: deviceDefault, alphanumeric, numeric

@@ -29,7 +29,7 @@ func ConstructMobileAppAssignment(ctx context.Context, data MobileAppAssignmentR
 	}
 
 	// Set Target
-	target, err := constructAssignmentTarget(ctx, &data.Target)
+	target, err := constructAssignmentTarget(ctx, data.Target)
 	if err != nil {
 		return nil, fmt.Errorf("error constructing mobile app assignment target: %v", err)
 	}
@@ -70,6 +70,44 @@ func ConstructMobileAppAssignment(ctx context.Context, data MobileAppAssignmentR
 	return assignment, nil
 }
 
+// ConstructMobileAppAssignmentSettingsUpdate builds the request body for an in-place update
+// of an existing assignment.
+//
+// Graph rejects a PATCH that carries intent, source or target:
+//
+//	400 "Cannot patch read-only properties: 'Intent', 'Source', 'Target', 'Settings'."
+//
+// Despite naming Settings in that list, a body carrying settings alone is accepted. It
+// replaces the settings object wholesale, so a field left out of it is cleared rather than
+// preserved - which is exactly the behaviour the resource wants, since an omitted attribute
+// means "let the service default apply".
+//
+// intent, source, target and mobile_app_id all force replacement in the schema, so an update
+// only ever needs to carry settings.
+func ConstructMobileAppAssignmentSettingsUpdate(ctx context.Context, data MobileAppAssignmentResourceModel) (graphmodels.MobileAppAssignmentable, error) {
+	tflog.Debug(ctx, fmt.Sprintf("Constructing settings update for %s", ResourceName))
+
+	assignment := graphmodels.NewMobileAppAssignment()
+
+	if data.Settings != nil {
+		settings, err := constructMobileAppAssignmentSettings(ctx, data.Settings)
+		if err != nil {
+			return nil, fmt.Errorf("error constructing settings: %v", err)
+		}
+		if settings != nil {
+			assignment.SetSettings(settings)
+		}
+	}
+
+	if err := constructors.DebugLogGraphObject(ctx, "Constructed mobile app assignment settings update", assignment); err != nil {
+		tflog.Error(ctx, "Failed to log mobile app assignment settings update", map[string]any{
+			"error": err.Error(),
+		})
+	}
+
+	return assignment, nil
+}
+
 // constructAssignmentTarget constructs the mobile app deployment assignment target
 func constructAssignmentTarget(ctx context.Context, data *AssignmentTargetResourceModel) (graphmodels.DeviceAndAppManagementAssignmentTargetable, error) {
 	if data == nil {
@@ -85,12 +123,26 @@ func constructAssignmentTarget(ctx context.Context, data *AssignmentTargetResour
 	case "allLicensedUsers":
 		target = graphmodels.NewAllLicensedUsersAssignmentTarget()
 	case "androidFotaDeployment":
-		androidFotaDeploymentAssignmentTarget := graphmodels.NewAndroidFotaDeploymentAssignmentTarget()
-		if !data.GroupId.IsNull() {
-			id := data.GroupId.ValueString()
-			androidFotaDeploymentAssignmentTarget.SetGroupId(&id)
-		}
-		target = androidFotaDeploymentAssignmentTarget
+		// NOTE: graphmodels.AndroidFotaDeploymentAssignmentTarget (OData type:
+		// #microsoft.graph.androidFotaDeploymentAssignmentTarget) was present in
+		// msgraph-beta-sdk-go v0.158.0 and v0.159.0 but was removed in v0.160.0.
+		// Confirmed absent from the live Microsoft Graph beta $metadata endpoint.
+		// Believed to be an unintentional omission from the OpenAPI specification
+		// generation pipeline. When the SDK re-adds the type, restore this block
+		// and bump the schema version in resource.go / state_migrations.go.
+		//
+		// androidFotaDeploymentAssignmentTarget := graphmodels.NewAndroidFotaDeploymentAssignmentTarget()
+		// if !data.GroupId.IsNull() {
+		// 	id := data.GroupId.ValueString()
+		// 	androidFotaDeploymentAssignmentTarget.SetGroupId(&id)
+		// }
+		// target = androidFotaDeploymentAssignmentTarget
+		return nil, fmt.Errorf(
+			"target_type 'androidFotaDeployment' is temporarily unavailable: " +
+				"graphmodels.AndroidFotaDeploymentAssignmentTarget was removed from " +
+				"msgraph-beta-sdk-go v0.160.0 pending correction of the Microsoft Graph " +
+				"OpenAPI specification; see state_migrations.go for full context",
+		)
 	case "configurationManagerCollection":
 		configManagerTarget := graphmodels.NewConfigurationManagerCollectionAssignmentTarget()
 		if !data.CollectionId.IsNull() {

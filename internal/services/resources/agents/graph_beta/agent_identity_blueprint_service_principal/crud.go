@@ -64,15 +64,13 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) Create(ctx context.Cont
 		return
 	}
 
-	tflog.Debug(ctx, "Waiting 10 seconds for eventual consistency after update")
-	time.Sleep(10 * time.Second)
-
 	readReq := resource.ReadRequest{State: resp.State, ProviderMeta: req.ProviderMeta}
 	stateContainer := &crud.CreateResponseContainer{CreateResponse: resp}
 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationCreate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = agentIdentityBlueprintServicePrincipalConsistencyPredicate(&object)
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
@@ -119,6 +117,15 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) Read(ctx context.Contex
 	}
 	defer cancel()
 
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	servicePrincipal, err := r.client.
 		ServicePrincipals().
 		ByServicePrincipalId(object.ID.ValueString()).
@@ -134,15 +141,6 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) Read(ctx context.Contex
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
@@ -193,9 +191,6 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) Update(ctx context.Cont
 		return
 	}
 
-	tflog.Debug(ctx, "Waiting 10 seconds for eventual consistency after update")
-	time.Sleep(10 * time.Second)
-
 	plan.ID = state.ID
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -208,6 +203,7 @@ func (r *AgentIdentityBlueprintServicePrincipalResource) Update(ctx context.Cont
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationUpdate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = agentIdentityBlueprintServicePrincipalConsistencyPredicate(&plan)
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
