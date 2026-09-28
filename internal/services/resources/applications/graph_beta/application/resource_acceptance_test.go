@@ -26,6 +26,7 @@ func loadAccTestTerraform(filename string) string {
 
 func TestAccResourceApplication_01_Minimal(t *testing.T) {
 	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { mocks.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: mocks.TestAccProtoV6ProviderFactories,
 		CheckDestroy: destroy.CheckDestroyedAllFunc(
 			testResource,

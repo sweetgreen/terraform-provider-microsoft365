@@ -27,13 +27,14 @@ func TestUnitListResourceUser_02_Metadata(t *testing.T) {
 		t.Errorf("Expected ResourcePath to be '/users', got %s", listResource.ResourcePath)
 	}
 
-	if len(listResource.ReadPermissions) != 2 {
-		t.Errorf("Expected 2 read permissions, got %d", len(listResource.ReadPermissions))
+	if len(listResource.ReadPermissions) != 3 {
+		t.Errorf("Expected 3 read permissions, got %d", len(listResource.ReadPermissions))
 	}
 
 	expectedPermissions := []string{
-		"User.Read.All",
 		"Directory.Read.All",
+		"User.Read.All",
+		"User.ReadBasic.All",
 	}
 
 	for i, expected := range expectedPermissions {
