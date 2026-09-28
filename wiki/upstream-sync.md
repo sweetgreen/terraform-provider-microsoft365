@@ -40,6 +40,12 @@ This page covers how to bring `deploymenttheory/terraform-provider-microsoft365@
   - `::add-mask::` on the multi-line armored key only masks the first line.
   - `PRESET_PASSPHRASE` needs `allow-preset-passphrase` in `gpg-agent.conf`, which the SSM path never configures.
 
+## What CI does on a sync PR (expect red)
+- **Dependency Review** flags whatever vulnerable deps upstream pins. For example, grpc 1.79.x in 2026-09. Fix it with a separate bump, not in the merge.
+- **golangci-lint** has failed on every fork PR on record. `only-new-issues` can't fetch diffs over GitHub's 300-file cap.
+- **Go Unit Tests** detect "changed packages" from the diff. On a sync that means nearly all of them, so the job hits `timeout-minutes: 60`. The failures it hit before the timeout were upstream's own: a test/code mismatch, `TestAcc*` tests with no `PreCheck`, and packages moved upstream. Confirm with `git diff upstream/main HEAD -- internal`: if it is empty, the failures are upstream's.
+- **Merging needs a second person.** Ruleset #6835010 sets `require_extra_approval_for_unattributed_changes`, so an agent-authored PR needs another human's approval before it can merge. `gh pr merge` fails with "base branch policy prohibits the merge".
+
 ## History
 - PR #69 (2026-03): v0.43 → v0.49.1-alpha, 180 commits.
 - 2026-09-28 (task cde1-sync-microsoft36): v0.49.1-alpha → v1.2.0, 368 commits, 2 conflicts (release-please.yml, CHANGELOG.md).
