@@ -71,9 +71,6 @@ func (r *ServicePrincipalOwnerResource) Create(ctx context.Context, req resource
 	compositeID := fmt.Sprintf("%s/%s", servicePrincipalId, ownerId)
 	object.ID = types.StringValue(compositeID)
 
-	tflog.Debug(ctx, "Waiting 5 seconds for eventual consistency after create")
-	time.Sleep(5 * time.Second)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -85,6 +82,7 @@ func (r *ServicePrincipalOwnerResource) Create(ctx context.Context, req resource
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationCreate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = servicePrincipalOwnerConsistencyPredicate(&object)
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
@@ -128,6 +126,15 @@ func (r *ServicePrincipalOwnerResource) Read(ctx context.Context, req resource.R
 		return
 	}
 	defer cancel()
+
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 
 	servicePrincipalId := object.ServicePrincipalID.ValueString()
 	ownerId := object.OwnerID.ValueString()
@@ -173,15 +180,6 @@ func (r *ServicePrincipalOwnerResource) Read(ctx context.Context, req resource.R
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))

@@ -54,7 +54,6 @@ func (r *MacOSPKGAppResource) Create(ctx context.Context, req resource.CreateReq
 	defer cancel()
 
 	deadline, _ := ctx.Deadline()
-	retryTimeout := time.Until(deadline) - time.Second
 
 	// Step 1: Determine installer source path (local or download via URL)
 	installerSourcePath, tempFileInfo, err := helpers.SetInstallerSourcePath(ctx, object.AppInstaller)
@@ -304,28 +303,22 @@ func (r *MacOSPKGAppResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	err = retry.RetryContext(ctx, retryTimeout, func() *retry.RetryError {
-		readResp := &resource.ReadResponse{State: resp.State}
-		r.Read(ctx, resource.ReadRequest{
-			State:        resp.State,
-			ProviderMeta: req.ProviderMeta,
-		}, readResp)
+	readReq := resource.ReadRequest{State: resp.State, ProviderMeta: req.ProviderMeta}
+	stateContainer := &crud.CreateResponseContainer{CreateResponse: resp}
 
-		if readResp.Diagnostics.HasError() {
-			return retry.NonRetryableError(fmt.Errorf("%w: %s", sentinels.ErrReadAfterCreate, readResp.Diagnostics.Errors()))
-		}
+	opts := crud.DefaultReadWithRetryOptions()
+	opts.Operation = constants.TfOperationCreate
+	opts.ResourceTypeName = ResourceName
 
-		resp.State = readResp.State
-		return nil
-	})
-
+	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error waiting for resource creation",
-			fmt.Sprintf("Failed to verify resource creation: %s", err),
+			"Error reading resource state after create",
+			fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error()),
 		)
 		return
 	}
+
 	tflog.Debug(ctx, fmt.Sprintf("Finished Create Method: %s", ResourceName))
 }
 
@@ -360,6 +353,15 @@ func (r *MacOSPKGAppResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 	defer cancel()
+
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 
 	// 1. get base resource with expanded query to return categories
 	requestParameters := &deviceappmanagement.MobileAppsMobileAppItemRequestBuilderGetRequestConfiguration{
@@ -432,29 +434,29 @@ func (r *MacOSPKGAppResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// 3. Get app metadata by processing app installer file
-	var existingMetadata sharedmodels.MobileAppMetaDataResourceModel
+	// Use types.Object as intermediate to handle null gracefully (e.g., during terraform import)
 	if !req.State.Raw.IsNull() {
-		diags := req.State.GetAttribute(ctx, path.Root("app_installer"), &existingMetadata)
+		var appInstallerObj types.Object
+		diags := req.State.GetAttribute(ctx, path.Root("app_installer"), &appInstallerObj)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
 			return
 		}
-		object.AppInstaller = sharedstater.MapAppMetadataStateToTerraform(ctx, &existingMetadata)
+		if !appInstallerObj.IsNull() && !appInstallerObj.IsUnknown() {
+			var existingMetadata sharedmodels.MobileAppMetaDataResourceModel
+			diags = appInstallerObj.As(ctx, &existingMetadata, basetypes.ObjectAsOptions{})
+			if diags.HasError() {
+				resp.Diagnostics.Append(diags...)
+				return
+			}
+			object.AppInstaller = sharedstater.MapAppMetadataStateToTerraform(ctx, &existingMetadata)
+		}
 	}
 
 	// 6. set final state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))

@@ -6,8 +6,16 @@ Provides functions for running Go unit tests and race detection.
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
+
+# Packages per `go test` invocation in run_unit_tests.
+BATCH_SIZE = 25
+# Concurrent package builds/test runs within a batch. Each test binary links
+# the msgraph beta SDK; two at a time already exhausts a 16 GiB runner (the
+# runner is shut down / OOM-killed mid-batch), so build and run one at a time.
+PARALLELISM = 1
 
 
 def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
@@ -29,37 +37,54 @@ def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
     
     merged_file = coverage_dir / "unit-coverage.txt"
     coverage_files = []
+    failed_batches = []
     
-    for idx, package in enumerate(packages, 1):
-        safe_name = package.replace('/', '_').replace('.', '_').strip('_')
-        coverage_file = coverage_dir / f"{safe_name}.out"
-        
-        print(f"\n[{idx}/{len(packages)}] Testing: {package}")
-        
+    # Test packages in batches: one `go test` per batch builds and runs the
+    # batch's packages in parallel. One invocation per package serialises
+    # every compile and link, which pushes large PRs past the job timeout.
+    batches = [packages[i:i + BATCH_SIZE] for i in range(0, len(packages), BATCH_SIZE)]
+
+    for idx, batch in enumerate(batches, 1):
+        coverage_file = coverage_dir / f"batch_{idx}.out"
+
+        print(f"\n[{idx}/{len(batches)}] Testing {len(batch)} package(s):")
+        for package in batch:
+            print(f"   - {package}")
+
         cmd = [
             "go", "test", "-v",
+            "-p", str(PARALLELISM),
+            # No symbol table / DWARF: much less linker memory and time.
+            "-ldflags=-s -w",
+            # HashiCorp runs TestAcc* whenever TF_ACC is non-empty, even "0".
+            "-skip=^TestAcc",
             f"-coverprofile={coverage_file}",
             "-covermode=atomic",
-            f"./{package}"
+            *[f"./{package}" for package in batch]
         ]
-        
-        subprocess.run(
+
+        result = subprocess.run(
             cmd,
             env={"TF_ACC": "0", **os.environ},
             check=False
         )
-        
+        if result.returncode != 0:
+            failed_batches.append(idx)
+
         if coverage_file.exists():
             coverage_files.append(coverage_file)
-            print(f"✅ Coverage generated for {package}")
+            print(f"✅ Coverage generated for batch {idx}")
         else:
-            print(f"⚠️  No coverage file for {package}")
+            print(f"⚠️  No coverage file for batch {idx}")
     
     # Merge coverage files
     print(f"\n📊 Merging {len(coverage_files)} coverage file(s)...")
     _merge_coverage_files(coverage_files, merged_file)
     
     print(f"✅ Merged coverage file: {merged_file}")
+    if failed_batches:
+        # Fork: propagate test failures instead of passing on coverage alone.
+        sys.exit(f"❌ go test failed in batch(es) {failed_batches}; see the --- FAIL lines above")
     return merged_file
 
 

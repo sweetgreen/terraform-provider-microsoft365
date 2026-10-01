@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -38,6 +39,15 @@ func (m *OnPremisesIpApplicationSegmentMock) RegisterMocks() {
 		if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
 			return httpmock.NewStringResponse(400, `{"error":{"code":"BadRequest","message":"Invalid request body"}}`), nil
 		}
+		if requestBody["destinationType"] == "ipAddress" {
+			return httpmock.NewStringResponse(400, `{"error":{"code":"InvalidJson_BadRequest","message":"Valid JSON content expected."}}`), nil
+		}
+		if response := normalizeSegmentRequest(requestBody); response != nil {
+			return response, nil
+		}
+		if requestBody["port"] != float64(0) {
+			return httpmock.NewStringResponse(400, `{"error":{"code":"BadRequest","message":"port must be 0 for ip application segments"}}`), nil
+		}
 
 		// Generate a UUID for the new resource
 		newId := uuid.New().String()
@@ -64,8 +74,11 @@ func (m *OnPremisesIpApplicationSegmentMock) RegisterMocks() {
 		if ports, ok := requestBody["ports"]; ok {
 			responseObj["ports"] = ports
 		}
+		if port, ok := requestBody["port"]; ok {
+			responseObj["port"] = port
+		}
 		if protocol, ok := requestBody["protocol"]; ok {
-			responseObj["protocol"] = protocol
+			responseObj["protocol"] = normalizeProtocolResponse(protocol)
 		}
 
 		// Store in mock state
@@ -102,6 +115,15 @@ func (m *OnPremisesIpApplicationSegmentMock) RegisterMocks() {
 		if err := json.NewDecoder(req.Body).Decode(&requestBody); err != nil {
 			return httpmock.NewStringResponse(400, `{"error":{"code":"BadRequest","message":"Invalid request body"}}`), nil
 		}
+		if requestBody["destinationType"] == "ipAddress" {
+			return httpmock.NewStringResponse(400, `{"error":{"code":"InvalidJson_BadRequest","message":"Valid JSON content expected."}}`), nil
+		}
+		if response := normalizeSegmentRequest(requestBody); response != nil {
+			return response, nil
+		}
+		if requestBody["port"] != float64(0) {
+			return httpmock.NewStringResponse(400, `{"error":{"code":"BadRequest","message":"port must be 0 for ip application segments"}}`), nil
+		}
 
 		mockState.Lock()
 		segment, exists := mockState.ipApplicationSegments[segmentId]
@@ -112,6 +134,9 @@ func (m *OnPremisesIpApplicationSegmentMock) RegisterMocks() {
 
 		// Update fields from request
 		for key, value := range requestBody {
+			if key == "protocol" {
+				value = normalizeProtocolResponse(value)
+			}
 			segment[key] = value
 		}
 		mockState.ipApplicationSegments[segmentId] = segment
@@ -138,6 +163,65 @@ func (m *OnPremisesIpApplicationSegmentMock) RegisterMocks() {
 
 		return httpmock.NewStringResponse(204, ""), nil
 	})
+}
+
+// normalizeSegmentRequest mirrors the real beta endpoint's observed behavior
+// for destination types this resource does not send verbatim. The real
+// endpoint infers the stored destination type from the host format (CIDR hosts
+// become "ipRangeCidr", single IPs become "ip", FQDNs become "fqdn"); the
+// resource's ValidateConfig prevents such mismatches from being sent for
+// "ipRange". It mutates requestBody in place and returns a non-nil error
+// response when the real endpoint would reject the request:
+//   - "ipRange" requires destinationHost as start and end addresses separated
+//     by "..", e.g. "192.168.1.1..192.168.1.10"; CIDR hosts are normalized to
+//     destinationType "ipRangeCidr" and other forms return 400
+//     DestinationHost_InvalidIP.
+//   - "dnsSuffix" is accepted, but Graph discards the segment's ports
+//     (returned as []) and protocol (returned as "0").
+func normalizeSegmentRequest(requestBody map[string]any) *http.Response {
+	if requestBody["destinationType"] == "ipRange" {
+		host, _ := requestBody["destinationHost"].(string)
+		if _, _, err := net.ParseCIDR(host); err == nil {
+			requestBody["destinationType"] = "ipRangeCidr"
+		} else if !isValidIpRangeHost(host) {
+			return httpmock.NewStringResponse(400, `{"error":{"code":"DestinationHost_InvalidIP","message":"IP address invalid"}}`)
+		}
+	}
+
+	if requestBody["destinationType"] == "dnsSuffix" {
+		requestBody["ports"] = []any{}
+		requestBody["protocol"] = "0"
+	}
+
+	return nil
+}
+
+func isValidIpRangeHost(host string) bool {
+	parts := strings.Split(host, "..")
+	if len(parts) != 2 {
+		return false
+	}
+	for _, part := range parts {
+		if net.ParseIP(part) == nil {
+			return false
+		}
+	}
+
+	return true
+}
+
+func normalizeProtocolResponse(value any) any {
+	protocol, ok := value.(string)
+	if !ok {
+		return value
+	}
+
+	protocols := strings.Split(protocol, ",")
+	for i := range protocols {
+		protocols[i] = strings.TrimSpace(protocols[i])
+	}
+
+	return strings.Join(protocols, ",")
 }
 
 func (m *OnPremisesIpApplicationSegmentMock) RegisterErrorMocks() {

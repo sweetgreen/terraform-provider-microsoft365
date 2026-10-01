@@ -53,7 +53,7 @@ resource "microsoft365_graph_beta_applications_on_premises_ip_application_segmen
   destination_host      = "192.168.1.100"
   destination_type      = "ipAddress"
   ports                 = ["80-80"]
-  protocol              = "tcp"
+  protocol              = ["tcp"]
 }
 ```
 
@@ -71,7 +71,33 @@ resource "microsoft365_graph_beta_applications_on_premises_ip_application_segmen
   destination_host      = "192.168.1.0/24"
   destination_type      = "ipRangeCidr"
   ports                 = ["443-443"]
-  protocol              = "tcp"
+  protocol              = ["tcp"]
+
+  timeouts = {
+    create = "5m"
+    read   = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+}
+```
+
+### IP Range (start..end Notation)
+
+This example shows how to configure an application segment for a contiguous range of IP addresses using the `start..end` notation.
+
+```terraform
+# IP Application Segment with IP Range (start..end notation)
+# This example demonstrates how to configure an application segment for a
+# contiguous range of IP addresses using the start..end notation required by
+# the Graph API for destination_type = "ipRange".
+
+resource "microsoft365_graph_beta_applications_on_premises_ip_application_segment" "ip_range_start_end" {
+  application_object_id = "00000000-0000-0000-0000-000000000000"
+  destination_host      = "192.168.1.1..192.168.1.10"
+  destination_type      = "ipRange"
+  ports                 = ["80-80"]
+  protocol              = ["tcp"]
 
   timeouts = {
     create = "5m"
@@ -96,7 +122,7 @@ resource "microsoft365_graph_beta_applications_on_premises_ip_application_segmen
   destination_host      = "app.contoso.com"
   destination_type      = "fqdn"
   ports                 = ["443-443", "8443-8443"]
-  protocol              = "tcp"
+  protocol              = ["tcp"]
 
   timeouts = {
     create = "5m"
@@ -107,26 +133,26 @@ resource "microsoft365_graph_beta_applications_on_premises_ip_application_segmen
 }
 ```
 
-### DNS Suffix (Wildcard Domain)
+### Wildcard FQDN
 
-This example shows how to use a wildcard domain to match all subdomains.
+This example shows how to use a wildcard hostname with `destination_type = "fqdn"`.
 
 ```terraform
-# IP Application Segment with DNS Suffix (Wildcard Domain)
-# This example demonstrates how to configure an application segment using a wildcard
-# domain to match all subdomains.
+# IP Application Segment with wildcard FQDN
+# The application-scoped Graph endpoint accepts wildcard hosts when
+# destination_type is fqdn. dnsSuffix is reserved for Quick Access configuration.
 
-resource "microsoft365_graph_beta_applications_on_premises_ip_application_segment" "dns_suffix" {
+resource "microsoft365_graph_beta_applications_on_premises_ip_application_segment" "wildcard_fqdn" {
   application_object_id = "00000000-0000-0000-0000-000000000000"
   destination_host      = "*.internal.contoso.com"
-  destination_type      = "dnsSuffix"
+  destination_type      = "fqdn"
   ports = [
     "80-80",
     "443-443",
     "8080-8080",
     "8443-8443"
   ]
-  protocol = "tcp"
+  protocol = ["tcp"]
 
   timeouts = {
     create = "5m"
@@ -151,7 +177,7 @@ resource "microsoft365_graph_beta_applications_on_premises_ip_application_segmen
   destination_host      = "voip.contoso.com"
   destination_type      = "fqdn"
   ports                 = ["5060-5061", "10000-20000"]
-  protocol              = "udp"
+  protocol              = ["udp"]
 
   timeouts = {
     create = "5m"
@@ -168,10 +194,10 @@ resource "microsoft365_graph_beta_applications_on_premises_ip_application_segmen
 ### Required
 
 - `application_object_id` (String) The unique object identifier of the application.
-- `destination_host` (String) Either the IP address, IP range, or FQDN of the application segment, with or without wildcards.
-- `destination_type` (String) The type of destination for the application segment.The possible values are: `ipAddress`, `ipRange`, `ipRangeCidr`, `fqdn`, `dnsSuffix`, `unknownFutureValue`.
+- `destination_host` (String) Either the IP address, IP range, or FQDN of the application segment, with or without wildcards. For `destination_type = "ipRange"`, use the IPv4 start and end addresses separated by `..` with start <= end, for example `192.168.1.1..192.168.1.10`; this format is validated at plan time because the Graph API infers the stored destination type from the host format (for example, a CIDR host such as `192.168.1.0/24` is stored as `ipRangeCidr` even when `ipRange` is requested), which would otherwise cause a permanent diff.
+- `destination_type` (String) The type of destination for the application segment. The supported values are: `ipAddress`, `ipRange`, `ipRangeCidr`, and `fqdn`. Microsoft Learn also lists `dnsSuffix` for `ipApplicationSegment`, but this resource does not support it because the application-scoped Graph endpoint discards `ports` and `protocol` for `dnsSuffix` segments, which this resource requires.
 - `ports` (Set of String) List of ports supported for the application segment.
-- `protocol` (String) Indicates the protocol of the network traffic acquired for the application segment.The possible values are: `tcp`, `udp`, `unknownFutureValue`.
+- `protocol` (Set of String) The protocols of the network traffic acquired for the application segment. Supported values are `tcp` and `udp`; specify both values to enable both protocols.
 
 ### Optional
 
@@ -198,10 +224,10 @@ Import is supported using the following syntax:
 ```shell
 #!/bin/bash
 
-# Import an existing IP application segment by its ID
-terraform import microsoft365_graph_beta_applications_on_premises_ip_application_segment.example_ip_address "00000000-0000-0000-0000-000000000000"
+# Import an existing IP application segment by application object ID and segment ID
+terraform import microsoft365_graph_beta_applications_on_premises_ip_application_segment.example_ip_address "11111111-1111-1111-1111-111111111111/00000000-0000-0000-0000-000000000000"
 
-# The ID format is the segment's unique identifier (GUID)
-# You can find the segment ID in the Azure Portal or via Microsoft Graph API:
+# The ID format is: {application_object_id}/{ip_application_segment_id}
+# You can find both IDs in the Azure Portal or via Microsoft Graph API:
 # GET https://graph.microsoft.com/beta/applications/{application-id}/onPremisesPublishing/segmentsConfiguration/microsoft.graph.ipSegmentConfiguration/applicationSegments
 ```

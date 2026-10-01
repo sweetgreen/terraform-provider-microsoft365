@@ -18,6 +18,7 @@ import (
 
 func TestAccResourceAgentIdentityBlueprintServicePrincipal_01_Minimal(t *testing.T) {
 	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { mocks.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: mocks.TestAccProtoV6ProviderFactories,
 		CheckDestroy: destroy.CheckDestroyedAllFunc(
 			testResource,
@@ -28,6 +29,10 @@ func TestAccResourceAgentIdentityBlueprintServicePrincipal_01_Minimal(t *testing
 			"random": {
 				Source:            "hashicorp/random",
 				VersionConstraint: constants.ExternalProviderRandomVersion,
+			},
+			"time": {
+				Source:            "hashicorp/time",
+				VersionConstraint: constants.ExternalProviderTimeVersion,
 			},
 		},
 		Steps: []resource.TestStep{

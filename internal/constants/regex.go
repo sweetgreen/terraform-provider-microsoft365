@@ -33,6 +33,23 @@ const (
 	// Example: "https://example.com" or "http://example.org"
 	HttpOrHttpsUrlRegex = "^https?://.*$"
 
+	// httpsURLNoWhitespace is an HTTPS URL without embedded whitespace, without line anchors (non-empty after https://).
+	// Example: "https://example.com/webhook?foo=1"
+	httpsURLNoWhitespace = `https://\S+`
+
+	// HttpsUrlRegex matches a non-empty HTTPS URL without embedded whitespace.
+	// Example: "https://example.com/webhook?foo=1"
+	HttpsUrlRegex = `^` + httpsURLNoWhitespace + `$`
+
+	// HttpsUrlOrEmptyRegex matches an empty string or the same HTTPS URL shape as HttpsUrlRegex.
+	// Example: "" or "https://example.com/lifecycle"
+	HttpsUrlOrEmptyRegex = `^(` + httpsURLNoWhitespace + `)?$`
+
+	// SubscriptionChangeTypeRegex matches a comma-separated list of Microsoft Graph subscription changeType values
+	// (optional ASCII spaces around commas): created, updated, deleted (case-insensitive).
+	// Examples: "created", "updated,deleted", "created, updated"
+	SubscriptionChangeTypeRegex = `^(?i)(created|updated|deleted)(\s*,\s*(created|updated|deleted))*$`
+
 	// EmailRegex matches a valid email address format
 	// Example: "user@example.com"
 	EmailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
@@ -70,9 +87,9 @@ const (
 	// Example: "1.0.0.0"
 	VersionRegex = "^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$"
 
-	// OSVersionRegex matches an operating system version string in the format "X.Y.Z.W" with any number of digits.
+	// OSVersionRegex matches an operating system version string in the format "X.Y.Z(+.W)" with any number of digits.
 	// Example: "10.0.22631.9999" or "1.1.1.1"
-	OSVersionRegex = `^\d+\.\d+\.\d+\.\d+$`
+	OSVersionRegex = `^\d+(\.\d+)*$`
 
 	// SemVerRegex matches a Semantic Versioning string in the format "X.Y.Z" (Major.Minor.Patch).
 	// Examples: "1.0.0", "2.1.3", "10.20.30"
@@ -155,4 +172,13 @@ const (
 	// DayOfWeekRegex matches lowercase day of week names.
 	// Valid values: "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
 	DayOfWeekRegex = `^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$`
+
+	// AlphanumericWithSeparatorsRegex matches a string containing only uppercase letters,
+	// lowercase letters, numbers, dots, hyphens and underscores.
+	// Example: "xpfftq037jwmhs", "9NZVDKPMR9RD", "Microsoft.VisualStudioCode", "my-app_v1.2"
+	AlphanumericWithSeparatorsRegex = `^[A-Za-z0-9._-]+$`
+
+	// Base64Regex matches a standard (RFC 4648) base64 encoded string with optional padding.
+	// Example: "W2NjdGtdCk51bUxvY2s9RW5hYmxlZAo="
+	Base64Regex = `^[A-Za-z0-9+/]*={0,2}$`
 )

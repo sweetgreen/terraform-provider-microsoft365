@@ -78,6 +78,7 @@ func (r *ApplicationPasswordCredentialResource) Create(ctx context.Context, req 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationCreate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = applicationPasswordCredentialConsistencyPredicate(&object)
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
@@ -128,6 +129,15 @@ func (r *ApplicationPasswordCredentialResource) Read(ctx context.Context, req re
 		return
 	}
 	defer cancel()
+
+	identity.ID = object.ApplicationID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 
 	// Preserve secret_text from state since it cannot be retrieved from API
 	secretTextFromState := object.SecretText
@@ -187,15 +197,6 @@ func (r *ApplicationPasswordCredentialResource) Read(ctx context.Context, req re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ApplicationID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))

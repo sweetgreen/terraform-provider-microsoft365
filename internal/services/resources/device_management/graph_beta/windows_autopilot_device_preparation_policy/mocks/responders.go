@@ -54,26 +54,12 @@ func (m *WindowsAutopilotDevicePreparationPolicyMock) RegisterMocks() {
 		"GET",
 		`=~^https://graph\.microsoft\.com/beta/deviceAppManagement/mobileApps`,
 		func(req *http.Request) (*http.Response, error) {
-			return httpmock.NewJsonResponse(200, map[string]any{
-				"@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceAppManagement/mobileApps",
-				"value": []map[string]any{
-					{
-						"@odata.type": "#microsoft.graph.winGetApp",
-						"id":          "00000000-0000-0000-0000-000000000001",
-						"displayName": "Test WinGet App",
-					},
-					{
-						"@odata.type": "#microsoft.graph.win32LobApp",
-						"id":          "00000000-0000-0000-0000-000000000002",
-						"displayName": "Test Win32 LOB App",
-					},
-					{
-						"@odata.type": "#microsoft.graph.officeSuiteApp",
-						"id":          "00000000-0000-0000-0000-000000000003",
-						"displayName": "Test Office Suite App",
-					},
-				},
-			})
+			jsonStr, _ := helpers.ParseJSONFile(
+				"../tests/responses/validate_get/get_mobile_apps.json",
+			)
+			var responseObj map[string]any
+			_ = json.Unmarshal([]byte(jsonStr), &responseObj)
+			return httpmock.NewJsonResponse(200, responseObj)
 		},
 	)
 
@@ -334,7 +320,7 @@ func (m *WindowsAutopilotDevicePreparationPolicyMock) RegisterMocks() {
 
 			// Fallback to static file
 			jsonStr, _ := helpers.ParseJSONFile(
-				"../tests/responses/validate_get/get_windows_autopilot_device_preparation_policy_assignments.json",
+				"../tests/responses/validate_get/get_windows_autopilot_device_preparation_policy_assignments_empty.json",
 			)
 			var responseObj map[string]any
 			_ = json.Unmarshal([]byte(jsonStr), &responseObj)
@@ -347,10 +333,10 @@ func (m *WindowsAutopilotDevicePreparationPolicyMock) RegisterMocks() {
 	// on the 'settings' navigation property of deviceManagementConfigurationPolicy.
 	httpmock.RegisterResponder(
 		"PUT",
-		`=~^https://graph\.microsoft\.com/beta/deviceManagement/configurationPolicies/[0-9a-fA-F-]+$`,
+		`=~^https://graph\.microsoft\.com/beta/deviceManagement/configurationPolicies\('[0-9a-fA-F-]+'\)$`,
 		func(req *http.Request) (*http.Response, error) {
 			parts := strings.Split(req.URL.Path, "/")
-			id := parts[len(parts)-1]
+			id := strings.TrimSuffix(strings.TrimPrefix(parts[len(parts)-1], "configurationPolicies('"), "')")
 
 			var body map[string]any
 			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
@@ -442,6 +428,20 @@ func (m *WindowsAutopilotDevicePreparationPolicyMock) RegisterErrorMocks() {
 	mockState.policySettings = make(map[string][]any)
 	mockState.policyAssignments = make(map[string][]any)
 	mockState.Unlock()
+
+	// Mobile apps - allow validateAllowedApps to pass so POST is reached
+	httpmock.RegisterResponder(
+		"GET",
+		`=~^https://graph\.microsoft\.com/beta/deviceAppManagement/mobileApps`,
+		func(req *http.Request) (*http.Response, error) {
+			jsonStr, _ := helpers.ParseJSONFile(
+				"../tests/responses/validate_get/get_mobile_apps.json",
+			)
+			var responseObj map[string]any
+			_ = json.Unmarshal([]byte(jsonStr), &responseObj)
+			return httpmock.NewJsonResponse(200, responseObj)
+		},
+	)
 
 	// Make groups validation fail during the validation step
 	httpmock.RegisterResponder(

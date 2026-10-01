@@ -5,6 +5,7 @@ Provides functions for querying Git history and identifying changed files.
 """
 
 import subprocess
+from pathlib import Path
 from typing import List, Set
 
 
@@ -56,7 +57,10 @@ def get_changed_packages(base_ref: str) -> List[str]:
         if len(parts) > 1:
             # Get package directory (exclude filename)
             pkg_path = '/'.join(parts[:-1])
-            packages.add(pkg_path)
+            # Skip packages deleted or moved by the diff; `go test` fails
+            # with "directory not found" on them.
+            if any(Path(pkg_path).glob('*.go')):
+                packages.add(pkg_path)
     
     return sorted(packages)
 

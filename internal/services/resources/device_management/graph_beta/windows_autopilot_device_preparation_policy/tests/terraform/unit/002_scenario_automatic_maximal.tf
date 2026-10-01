@@ -7,14 +7,16 @@ resource "microsoft365_graph_beta_device_management_windows_autopilot_device_pre
     deployment_type = "enrollment_autopilot_dpp_deploymenttype_1"
   }
 
+  device_security_group = "00000000-0000-0000-0000-000000000001"
+
   allowed_apps = [
     {
       app_id   = "00000000-0000-0000-0000-000000000001"
-      app_type = "win32LobApp"
+      app_type = "winGetApp"
     },
     {
       app_id   = "00000000-0000-0000-0000-000000000002"
-      app_type = "winGetApp"
+      app_type = "win32LobApp"
     },
     {
       app_id   = "00000000-0000-0000-0000-000000000003"

@@ -38,7 +38,7 @@ func (r *ServicePrincipalResource) Create(ctx context.Context, req resource.Crea
 	}
 	defer cancel()
 
-	requestBody, err := constructResource(ctx, &object)
+	requestBody, err := constructResource(ctx, &object, false)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error constructing resource for Create method",
@@ -122,6 +122,15 @@ func (r *ServicePrincipalResource) Read(ctx context.Context, req resource.ReadRe
 	}
 	defer cancel()
 
+	identity.ID = object.ID.ValueString()
+
+	if resp.Identity != nil {
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	remoteResource, err := r.client.
 		ServicePrincipals().
 		ByServicePrincipalId(object.ID.ValueString()).
@@ -137,15 +146,6 @@ func (r *ServicePrincipalResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, &object)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	identity.ID = object.ID.ValueString()
-
-	if resp.Identity != nil {
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished Read Method: %s", ResourceName))
@@ -174,7 +174,7 @@ func (r *ServicePrincipalResource) Update(ctx context.Context, req resource.Upda
 	}
 	defer cancel()
 
-	requestBody, err := constructResource(ctx, &plan)
+	requestBody, err := constructResource(ctx, &plan, true)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error constructing resource for Update method",
@@ -193,10 +193,6 @@ func (r *ServicePrincipalResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// Allow time for eventual consistency after PATCH
-	tflog.Debug(ctx, "Waiting 20 seconds for eventual consistency after service principal update")
-	time.Sleep(20 * time.Second)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -208,6 +204,7 @@ func (r *ServicePrincipalResource) Update(ctx context.Context, req resource.Upda
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationUpdate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = servicePrincipalConsistencyPredicate(&plan)
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
@@ -262,7 +259,7 @@ func (r *ServicePrincipalResource) Delete(ctx context.Context, req resource.Dele
 		RetryInterval: 5 * time.Second,
 		ResourceType:  directory.ResourceTypeServicePrincipal,
 		ResourceID:    servicePrincipalId,
-		ResourceName:  data.DisplayName.ValueString(),
+		ResourceName:  data.AppID.ValueString(),
 	}
 
 	err := directory.ExecuteDeleteWithVerification(

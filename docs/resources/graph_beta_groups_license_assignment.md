@@ -22,6 +22,7 @@ The following client `application` permissions are needed in order to use this r
 **Required:**
 - `Directory.Read.All`
 - `Directory.ReadWrite.All`
+- `Group.ManageProtection.All`
 - `Group.Read.All`
 - `Group.ReadWrite.All`
 - `GroupMember.Read.All`
@@ -158,7 +159,7 @@ resource "microsoft365_graph_beta_groups_license_assignment" "sales_e3_limited" 
 
 ### Optional
 
-- `disabled_plans` (Set of String) A collection of the unique identifiers for service plans to disable for this license.
+- `disabled_plans` (Set of String) A collection of the unique identifiers for service plans to disable for this license. When omitted from configuration, all plans are enabled (any previously disabled plans are cleared).
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only

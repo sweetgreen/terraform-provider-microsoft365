@@ -45,6 +45,7 @@ def main():
     
     write_output({
         "packages": ' '.join(packages),
+        "packages-args": ' '.join(f"./{pkg}" for pkg in packages),
         "has-changes": "true"
     }, args.github_output)
     

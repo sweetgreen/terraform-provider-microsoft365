@@ -9,6 +9,7 @@ import (
 	planmodifiers "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/plan_modifiers"
 	commonschema "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema"
 	commonschemagraphbeta "github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/schema/graph_beta/device_and_app_management"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -80,6 +81,18 @@ func (r *Win32LobAppResource) Configure(ctx context.Context, req resource.Config
 // ImportState imports the resource state.
 func (r *Win32LobAppResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	for _, attribute := range []string{"app_installer", "app_installer_zip"} {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root(attribute), types.ObjectNull(
+			map[string]attr.Type{
+				"installer_file_path_source": types.StringType,
+				"installer_url_source":       types.StringType,
+			},
+		))...)
+	}
+
 }
 
 // IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
@@ -96,7 +109,7 @@ func (r *Win32LobAppResource) IdentitySchema(ctx context.Context, req resource.I
 // Function to create the full device management win32 lob app schema
 func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages Win32 applications in Microsoft Intune using the `/deviceAppManagement/mobileApps` endpoint. This resource is used to deploy custom Windows applications (.exe, .msi) with advanced installation logic, detection rules, and dependency management. Applications must be wrapped in the .intunewin file format.",
+		MarkdownDescription: "Manages Win32 applications in Microsoft Intune using the `/deviceAppManagement/mobileApps` endpoint. This resource is used to deploy custom Windows applications (.exe, .msi) with advanced installation logic, detection rules, and dependency management. Supply either a prepackaged .intunewin file or an unencrypted installer ZIP.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
@@ -225,7 +238,7 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"file_name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "The name of the main Lob application file.",
+				MarkdownDescription: "The configured name of the main LOB application file. For prepackaged content, Microsoft Graph receives the inner filename from `Detection.xml`; for ZIP sources it receives the ZIP filename with an `.intunewin` extension.",
 			},
 			"size": schema.Int64Attribute{
 				Computed:            true,
@@ -273,7 +286,11 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"detection_rules": schema.ListNestedAttribute{
 				Optional:            true,
-				MarkdownDescription: "The detection rules to detect Win32 Line of Business (LoB) app.",
+				DeprecationMessage:  "Use the `rules` attribute instead. The `detection_rules` attribute is deprecated and will be removed in a future release. Configuring both `detection_rules` and `rules` is not supported.",
+				MarkdownDescription: "**DEPRECATED**: Use the `rules` block instead with key rule_type set to `detection`, to configure the detection rules to detect Win32 Line of Business (LoB) app.",
+				Validators: []validator.List{
+					listvalidator.ConflictsWith(path.MatchRoot("rules")),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						// Common attributes for all detection types
@@ -376,7 +393,11 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"requirement_rules": schema.ListNestedAttribute{
 				Optional:            true,
-				MarkdownDescription: "The requirement rules to detect Win32 Line of Business (LoB) app.",
+				DeprecationMessage:  "Use the `rules` attribute instead. The `requirement_rules` attribute is deprecated and will be removed in a future release. Configuring both `requirement_rules` and `rules` is not supported.",
+				MarkdownDescription: "**DEPRECATED**: Use the `rules` block instead with key rule_type set to `requirement`, to configure the requirement rules to detect Win32 Line of Business (LoB) app.",
+				Validators: []validator.List{
+					listvalidator.ConflictsWith(path.MatchRoot("rules")),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"requirement_type": schema.StringAttribute{
@@ -420,6 +441,12 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 			"rules": schema.ListNestedAttribute{
 				Optional:            true,
 				MarkdownDescription: "The detection and requirement rules for this app.",
+				Validators: []validator.List{
+					listvalidator.ConflictsWith(
+						path.MatchRoot("detection_rules"),
+						path.MatchRoot("requirement_rules"),
+					),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"rule_type": schema.StringAttribute{
@@ -563,8 +590,8 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 				},
 			},
 			"msi_information": schema.SingleNestedAttribute{
-				Required:            true,
-				MarkdownDescription: "The MSI details if this Win32 app is an MSI app.",
+				Optional:            true,
+				MarkdownDescription: "The MSI details if this Win32 app is an MSI app. Only required for MSI-based installers.",
 				Attributes: map[string]schema.Attribute{
 					"package_type": schema.StringAttribute{
 						Required:            true,
@@ -607,7 +634,7 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 				Required:            true,
 				MarkdownDescription: "The value for the minimum supported windows release.",
 				Validators: []validator.String{
-					stringvalidator.OneOf("Windows11_23H2", "Windows11_22H2", "Windows11_21H2", "Windows10_22H2", "Windows10_21H2", "21H1", "2H20", "2004", "1909", "1903", "1809", "1803", "1709", "1703", "1607"),
+					stringvalidator.OneOf("Windows11_24H2", "Windows11_23H2", "Windows11_22H2", "Windows11_21H2", "Windows10_22H2", "Windows10_21H2", "21H1", "2H20", "2004", "1909", "1903", "1809", "1803", "1709", "1703", "1607"),
 				},
 			},
 			"display_version": schema.StringAttribute{
@@ -619,10 +646,11 @@ func (r *Win32LobAppResource) Schema(ctx context.Context, req resource.SchemaReq
 				Required:            true,
 				MarkdownDescription: "When TRUE, indicates that uninstall is supported from the company portal for the Windows app (Win32) with an Available assignment. When FALSE, indicates that uninstall is not supported for the Windows app (Win32) with an Available assignment. Default value is FALSE.",
 			},
-			"content_version": commonschemagraphbeta.MobileAppContentVersionSchema(),
-			"app_installer":   commonschemagraphbeta.MobileAppWin32LobInstallerMetadataSchema(),
-			"app_icon":        commonschemagraphbeta.MobileAppIconSchema(),
-			"timeouts":        commonschema.ResourceTimeouts(ctx),
+			"content_version":   commonschemagraphbeta.MobileAppContentVersionSchema(),
+			"app_installer":     commonschemagraphbeta.MobileAppWin32LobInstallerMetadataSchema(),
+			"app_installer_zip": commonschemagraphbeta.MobileAppWin32ZipInstallerMetadataSchema(),
+			"app_icon":          commonschemagraphbeta.MobileAppIconSchema(),
+			"timeouts":          commonschema.ResourceTimeouts(ctx),
 		},
 	}
 }
