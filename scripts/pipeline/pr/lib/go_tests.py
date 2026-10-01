@@ -6,6 +6,7 @@ Provides functions for running Go unit tests and race detection.
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
 
@@ -36,6 +37,7 @@ def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
     
     merged_file = coverage_dir / "unit-coverage.txt"
     coverage_files = []
+    failed_batches = []
     
     # Test packages in batches: one `go test` per batch builds and runs the
     # batch's packages in parallel. One invocation per package serialises
@@ -54,16 +56,20 @@ def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
             "-p", str(PARALLELISM),
             # No symbol table / DWARF: much less linker memory and time.
             "-ldflags=-s -w",
+            # HashiCorp runs TestAcc* whenever TF_ACC is non-empty, even "0".
+            "-skip=^TestAcc",
             f"-coverprofile={coverage_file}",
             "-covermode=atomic",
             *[f"./{package}" for package in batch]
         ]
 
-        subprocess.run(
+        result = subprocess.run(
             cmd,
             env={"TF_ACC": "0", **os.environ},
             check=False
         )
+        if result.returncode != 0:
+            failed_batches.append(idx)
 
         if coverage_file.exists():
             coverage_files.append(coverage_file)
@@ -76,6 +82,9 @@ def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
     _merge_coverage_files(coverage_files, merged_file)
     
     print(f"✅ Merged coverage file: {merged_file}")
+    if failed_batches:
+        # Fork: propagate test failures instead of passing on coverage alone.
+        sys.exit(f"❌ go test failed in batch(es) {failed_batches}; see the --- FAIL lines above")
     return merged_file
 
 

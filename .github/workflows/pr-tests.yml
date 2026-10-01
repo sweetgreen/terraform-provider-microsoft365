@@ -6,6 +6,8 @@ permissions:
 
 on:
   pull_request:
+    # Fork: `labeled` lets the ci:full-scope label re-run with full scope.
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - '**/*.go'
       - 'go.mod'
@@ -16,8 +18,12 @@ on:
 jobs:
   unit-tests:
     name: '🧪 Go Unit Tests & Coverage'
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 300
+    # Fork: same-repo PRs and manual runs use sweetgreen's self-hosted runner.
+    # The 16 GiB hosted arm runner runs out of memory building/linting
+    # provider packages (upstream measured 14.45 GiB for internal/provider
+    # lint alone, then exit 143). PRs from forks stay on the hosted runner.
+    runs-on: ${{ (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository) && 'ubuntu-xlarge' || 'ubuntu-24.04-arm' }}
+    timeout-minutes: ${{ (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository) && 720 || 60 }}
     outputs:
       has-changes: ${{ steps.detect-changes.outputs.has-changes }}
       has-goroutines: ${{ steps.analyze-code.outputs.has-goroutines }}
@@ -58,11 +64,35 @@ jobs:
             echo "✅ PR is ready for review - enforcing coverage threshold"
           fi
 
+      # Fork: when a PR merges upstream commits that are not on the base branch,
+      # compare against the newest upstream commit it contains, so the check
+      # covers what the fork changed rather than all of upstream's code.
+      # The `ci:full-scope` label (or an upstream fetch failure) keeps the PR
+      # base, i.e. every package the PR touches.
+      - name: Resolve comparison baseline
+        id: baseline
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          FULL_SCOPE: ${{ contains(github.event.pull_request.labels.*.name, 'ci:full-scope') }}
+        run: |
+          base="${PR_BASE:-origin/main}"
+          if [ -n "$PR_BASE" ] && [ "$FULL_SCOPE" != true ] && git fetch --quiet --no-tags \
+              https://github.com/deploymenttheory/terraform-provider-microsoft365.git main; then
+            upstream="$(git merge-base HEAD FETCH_HEAD)"
+            if ! git merge-base --is-ancestor "$upstream" "$PR_BASE"; then
+              echo "PR merges upstream commits not on the base branch; comparing against upstream ${upstream}"
+              base="$upstream"
+            fi
+          fi
+          echo "Comparison baseline: ${base}"
+          echo "base-ref=${base}" >> "$GITHUB_OUTPUT"
+
       - name: 📦 Detect changed packages
         id: detect-changes
+        env:
+          BASE_REF: ${{ steps.baseline.outputs.base-ref }}
         run: |
-          python3 scripts/pipeline/pr/steps/detect_changes.py \
-            --base-ref "origin/${{ github.event.pull_request.base.ref }}"
+          python3 scripts/pipeline/pr/steps/detect_changes.py --base-ref "$BASE_REF"
 
       - name: 📊 Analyze code patterns
         id: analyze-code

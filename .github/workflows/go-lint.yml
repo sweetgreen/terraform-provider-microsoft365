@@ -17,7 +17,12 @@ permissions:
 jobs:
   golint:
     name: '✨ Run golangci-lint'
-    runs-on: ubuntu-24.04-arm
+    # Fork: same-repo PRs and manual runs use sweetgreen's self-hosted runner.
+    # The 16 GiB hosted arm runner runs out of memory building/linting
+    # provider packages (upstream measured 14.45 GiB for internal/provider
+    # lint alone, then exit 143). PRs from forks stay on the hosted runner.
+    runs-on: ${{ (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository) && 'ubuntu-xlarge' || 'ubuntu-24.04-arm' }}
+    timeout-minutes: ${{ (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository) && 240 || 60 }}
 
     steps:
       - name: Harden Runner
@@ -38,13 +43,49 @@ jobs:
           cache: true
           go-version: stable
 
+      # Fork: when a PR merges upstream commits that are not on the base branch,
+      # compare against the newest upstream commit it contains, so the check
+      # covers what the fork changed rather than all of upstream's code.
+      # The `ci:full-scope` label (or an upstream fetch failure) keeps the PR
+      # base, i.e. every package the PR touches.
+      - name: Resolve comparison baseline
+        id: baseline
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          FULL_SCOPE: ${{ contains(github.event.pull_request.labels.*.name, 'ci:full-scope') }}
+        run: |
+          base="${PR_BASE:-origin/main}"
+          if [ -n "$PR_BASE" ] && [ "$FULL_SCOPE" != true ] && git fetch --quiet --no-tags \
+              https://github.com/deploymenttheory/terraform-provider-microsoft365.git main; then
+            upstream="$(git merge-base HEAD FETCH_HEAD)"
+            if ! git merge-base --is-ancestor "$upstream" "$PR_BASE"; then
+              echo "PR merges upstream commits not on the base branch; comparing against upstream ${upstream}"
+              base="$upstream"
+            fi
+          fi
+          echo "Comparison baseline: ${base}"
+          echo "base-ref=${base}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed Go packages
+        id: changes
+        env:
+          BASE_REF: ${{ steps.baseline.outputs.base-ref }}
+        run: python3 scripts/pipeline/pr/steps/detect_changes.py --base-ref "$BASE_REF"
+
+      # Fork: lint only the changed packages, reporting findings on lines changed
+      # since the baseline. The action's only-new-issues mode downloads the PR
+      # patch, which GitHub refuses for diffs over 300 files.
       - name: Run golangci-lint
+        if: steps.changes.outputs.has-changes == 'true'
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
-          version: latest
-          args: --timeout=30m --verbose --config=./.golangci.yml --issues-exit-code=0
-          only-new-issues: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: v2.14.0
+          args: >-
+            --timeout=180m --verbose --config=./.golangci.yml --issues-exit-code=1
+            --fix=false --new=false --new-from-merge-base= --whole-files=false
+            --new-from-rev=${{ steps.baseline.outputs.base-ref }}
+            ${{ steps.changes.outputs.packages-args }}
+          only-new-issues: false
           skip-cache: false              # restore and save cache
           skip-save-cache: false         # allow saving any new cache
           cache-invalidation-interval: 7 # auto-invalidate (refresh) once per week
