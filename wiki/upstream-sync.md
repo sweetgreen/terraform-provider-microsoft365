@@ -26,8 +26,8 @@ This page covers how to bring `deploymenttheory/terraform-provider-microsoft365@
 | `.goreleaser.yaml` | uploads `gpg-public-key.asc` as a release asset |
 | `.gitignore` | ignores `gpg-public-key.asc` |
 | `CHANGELOG.md` | fork 0.43.1–0.43.3-alpha entries on top |
-| `.github/workflows/pr-tests.yml` | unit-tests `timeout-minutes: 180` (upstream: 60) |
-| `scripts/pipeline/pr/lib/git_operations.py`, `go_tests.py` | skip deleted package dirs; batch `go test` 25 packages at a time |
+| `.github/workflows/pr-tests.yml` | unit-tests `timeout-minutes: 300` (upstream: 60) |
+| `scripts/pipeline/pr/lib/git_operations.py`, `go_tests.py` | skip deleted package dirs; batch `go test` 25 packages at a time, `-p 2`, `-ldflags=-s -w` |
 | 2 `list_resource_test.go` files (conditional access policy, users) + 4 `resource_acceptance_test.go` files (agent identity blueprint ×3, application) | test fixes for upstream bugs. If upstream fixes them too, take upstream's version on conflict |
 
 ## Conflict rules
@@ -47,7 +47,7 @@ This page covers how to bring `deploymenttheory/terraform-provider-microsoft365@
 - **Dependency Review** flags whatever vulnerable deps upstream pins. For example, grpc 1.79.x in 2026-09. Fix it with a separate bump, not in the merge.
 - **golangci-lint** has failed on every fork PR on record. `only-new-issues` can't fetch diffs over GitHub's 300-file cap.
 - **Go Unit Tests** (`pr-tests.yml`) test every package the diff touches, which on a sync is about 300. `run_tests.py` ignores `go test`'s exit code (`check=False`), so failing tests do **not** fail the job. Only a timeout or the coverage threshold does. Read the log for `--- FAIL`.
-  - The fork changed three things so the job can finish (2026-09): it skips deleted or moved package dirs, runs packages in batches of 25 per `go test`, and has a 180-minute timeout.
+  - The fork changed three things so the job can finish (2026-09): it skips deleted or moved package dirs, runs packages in batches of 25 per `go test` with `-p 2 -ldflags=-s -w`, and has a 300-minute timeout. With the default `-p` (one per CPU), parallel links of msgraph-beta test binaries exhaust the ubuntu-24.04-arm runner, which then gets a "shutdown signal" (exit 143). A **golangci-lint** death at the same moment is the same symptom.
   - Upstream failures fixed in the fork during the 2026-09 sync:
     - **List-resource permission tests.** Tests went stale after upstream's Graph-permissions bot rewrote `ReadPermissions` (#2754). The fix aligns the tests with the constructors.
     - **Acceptance tests with no `PreCheck`.** `resource.Test` runs whenever `TF_ACC` is non-empty, **including `"0"`**. Every `TestAcc*` needs `PreCheck: func() { mocks.TestAccPreCheck(t) }`.
