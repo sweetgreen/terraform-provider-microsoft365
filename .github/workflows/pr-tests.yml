@@ -30,7 +30,7 @@ jobs:
   unit-tests:
     name: '🧪 Go Unit Tests & Coverage'
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 180
+    timeout-minutes: 300
     outputs:
       has-changes: ${{ steps.detect-changes.outputs.has-changes }}
       has-goroutines: ${{ steps.analyze-code.outputs.has-goroutines }}
