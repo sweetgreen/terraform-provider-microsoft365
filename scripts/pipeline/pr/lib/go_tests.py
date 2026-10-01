@@ -13,9 +13,9 @@ from typing import List
 # Packages per `go test` invocation in run_unit_tests.
 BATCH_SIZE = 25
 # Concurrent package builds/test runs within a batch. Each test binary links
-# the msgraph beta SDK; the runner default (one per CPU) exhausts memory on
-# ubuntu-24.04-arm and the runner is shut down mid-batch.
-PARALLELISM = 2
+# the msgraph beta SDK; two at a time already exhausts a 16 GiB runner (the
+# runner is shut down / OOM-killed mid-batch), so build and run one at a time.
+PARALLELISM = 1
 
 
 def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:

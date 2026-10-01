@@ -17,12 +17,11 @@ permissions:
 jobs:
   golint:
     name: '✨ Run golangci-lint'
-    # Fork: same-repo PRs and manual runs use sweetgreen's self-hosted runner.
-    # The 16 GiB hosted arm runner runs out of memory building/linting
-    # provider packages (upstream measured 14.45 GiB for internal/provider
-    # lint alone, then exit 143). PRs from forks stay on the hosted runner.
-    runs-on: ${{ (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository) && 'ubuntu-xlarge' || 'ubuntu-24.04-arm' }}
-    timeout-minutes: ${{ (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository) && 240 || 60 }}
+    # Fork: longer budget than upstream's 60 min; package loading alone takes
+    # ~15 min cold. Self-hosted ubuntu-xlarge (shared ARM64 org pool) has no
+    # more memory than this runner, so it does not help (2026-10).
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
 
     steps:
       - name: Harden Runner
