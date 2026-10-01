@@ -11,6 +11,10 @@ from typing import List
 
 # Packages per `go test` invocation in run_unit_tests.
 BATCH_SIZE = 25
+# Concurrent package builds/test runs within a batch. Each test binary links
+# the msgraph beta SDK; the runner default (one per CPU) exhausts memory on
+# ubuntu-24.04-arm and the runner is shut down mid-batch.
+PARALLELISM = 2
 
 
 def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
@@ -47,6 +51,9 @@ def run_unit_tests(packages: List[str], output_dir: str = "coverage") -> Path:
 
         cmd = [
             "go", "test", "-v",
+            "-p", str(PARALLELISM),
+            # No symbol table / DWARF: much less linker memory and time.
+            "-ldflags=-s -w",
             f"-coverprofile={coverage_file}",
             "-covermode=atomic",
             *[f"./{package}" for package in batch]
