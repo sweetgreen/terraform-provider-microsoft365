@@ -26,8 +26,8 @@ This page covers how to bring `deploymenttheory/terraform-provider-microsoft365@
 | `.goreleaser.yaml` | uploads `gpg-public-key.asc` as a release asset |
 | `.gitignore` | ignores `gpg-public-key.asc` |
 | `CHANGELOG.md` | fork 0.43.1–0.43.3-alpha entries on top |
-| `.github/workflows/go-lint.yml`, `.github/workflows/pr-tests.yml` | same-repo PRs run on `ubuntu-xlarge`. A **Resolve comparison baseline** step compares a sync PR against the newest upstream commit it contains, so the checks cover fork-owned code (the `ci:full-scope` label overrides this). Lint uses `--new-from-rev=<baseline>` on the changed packages instead of `only-new-issues`. |
-| `scripts/pipeline/pr/lib/{git_operations,go_tests}.py`, `steps/detect_changes.py` | skip deleted package dirs; batch `go test` (25 packages, `-p 2`, `-ldflags=-s -w`, `-skip=^TestAcc`); fail the job on test failures; emit `packages-args` for lint. **Upstream #4037 (v1.3.0) rewrote these files.** On the next sync, take upstream's scripts and workflows, then re-apply only the runner expression and the baseline step. |
+| `.github/workflows/go-lint.yml`, `.github/workflows/pr-tests.yml` | A **Resolve comparison baseline** step compares a sync PR against the newest upstream commit it contains, so the checks cover fork-owned code (the `ci:full-scope` label overrides this). Lint uses `--new-from-rev=<baseline>` on the changed packages instead of `only-new-issues`. Job timeouts are 90 min (lint) and 300 min (tests). |
+| `scripts/pipeline/pr/lib/{git_operations,go_tests}.py`, `steps/detect_changes.py` | skip deleted package dirs; batch `go test` (25 packages, `-p 1`, `-ldflags=-s -w`, `-skip=^TestAcc`); fail the job on test failures; emit `packages-args` for lint. **Upstream #4037 (v1.3.0) rewrote these files.** On the next sync, take upstream's scripts and workflows, then re-apply only the runner expression and the baseline step. |
 | 2 `list_resource_test.go` files (conditional access policy, users) + 4 `resource_acceptance_test.go` files (agent identity blueprint ×3, application) | test fixes for upstream bugs. If upstream fixes them too, take upstream's version on conflict |
 
 ## Conflict rules
@@ -45,7 +45,7 @@ This page covers how to bring `deploymenttheory/terraform-provider-microsoft365@
 
 ## CI on sync PRs
 - **Dependency Review** flags whatever vulnerable deps upstream pins. For example, grpc 1.79.x in 2026-09. Fix it with a separate bump, not in the merge.
-- **Memory.** On the hosted 16 GiB `ubuntu-24.04-arm` runner, golangci-lint and parallel test builds run out of memory. Upstream measured 14.45 GiB of RSS linting `internal/provider` alone. The runner then gets a "shutdown signal" (exit 143), often killing lint and unit tests at the same moment. Every fork PR's lint failed this way until 2026-10. The fork therefore runs both on `ubuntu-xlarge`.
+- **Memory (blocker for lint).** golangci-lint on provider packages needs more than 16 GiB, because it computes analysis facts for the msgraph beta SDK. Hosted `ubuntu-24.04-arm` (16 GiB) is shut down with exit 143. The self-hosted `ubuntu-xlarge` pool, a shared ARM64 org pool of 7, was tried on 2026-10-01: package loading took 14.5 min, then analysis was OOM-killed (exit 137). That pool is no bigger, so lint needs a larger runner (≥32 GiB) before it can pass. Unit tests fit on 16 GiB only when packages build one at a time (`-p 1`). Two at a time gets the runner killed.
 - **Scope.** A sync touches about 300 packages. Comparing against the merged upstream commit limits PR checks to fork-owned changes. For a full unit-test run of the merged code, add the `ci:full-scope` label to the PR.
 - **Upstream test failures** fixed in the fork during the 2026-09 sync:
   - **List-resource permission tests.** Tests went stale after upstream's Graph-permissions bot rewrote `ReadPermissions` (#2754). The fix aligns the tests with the constructors.
