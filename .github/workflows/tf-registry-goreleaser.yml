@@ -55,7 +55,10 @@ jobs:
       - name: Free up Ubuntu runner disk space
         uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6 # v2.0.0
         with:
-          tool-cache: true
+          # Fork: keep the tool cache. On the self-hosted ubuntu-xlarge runner this would
+          # `sudo rm -rf $AGENT_TOOLSDIRECTORY` (/opt/hostedtoolcache), and setup-go, running as
+          # the non-root runner user, then fails with EACCES recreating it (v1.3.0-sg.1 release).
+          tool-cache: false
           android: true
           dotnet: true
           haskell: true
@@ -83,19 +86,38 @@ jobs:
             --name "/terraform-registry-api-github-proxy/gpg-key-id" \
             --query "Parameter.Value" --output text)
 
-          # Mask sensitive values to prevent leaking in logs
-          echo "::add-mask::${GPG_PRIVATE_KEY}"
+          # Mask sensitive values to prevent leaking in logs. ::add-mask:: only masks a
+          # single line, so mask the armored key line by line.
+          while IFS= read -r line; do
+            if [ -n "${line}" ]; then echo "::add-mask::${line}"; fi
+          done <<< "${GPG_PRIVATE_KEY}"
           echo "::add-mask::${GPG_PASSPHRASE}"
+
+          # gpg-agent rejects PRESET_PASSPHRASE unless allow-preset-passphrase is set; without it
+          # gpg falls back to pinentry and signing fails with "Inappropriate ioctl for device"
+          # (v1.3.0-sg.1 release, run 37458797277).
+          mkdir -p ~/.gnupg && chmod 700 ~/.gnupg
+          echo "allow-preset-passphrase" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent || true
 
           # Import the GPG key
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
 
           FINGERPRINT=$(gpg --list-keys --with-colons "${GPG_KEY_ID}" | awk -F: '/^fpr:/{print $10; exit}')
 
-          # Preset passphrase in GPG agent for batch signing (required for goreleaser)
-          KEYGRIP=$(gpg --batch --with-colons --with-keygrip --list-secret-keys "${GPG_KEY_ID}" | awk -F: '/^grp:/{print $10; exit}')
+          # Preset the passphrase for the primary key and every subkey (goreleaser signs
+          # non-interactively), and stop if the agent refuses it.
           HEX_PASSPHRASE=$(echo -n "${GPG_PASSPHRASE}" | xxd -p -c 256 | tr -d '\n' | tr 'a-f' 'A-F')
-          gpg-connect-agent "PRESET_PASSPHRASE ${KEYGRIP} -1 ${HEX_PASSPHRASE}" /bye
+          for KEYGRIP in $(gpg --batch --with-colons --with-keygrip --list-secret-keys "${GPG_KEY_ID}" | awk -F: '/^grp:/{print $10}'); do
+            RESULT=$(gpg-connect-agent "PRESET_PASSPHRASE ${KEYGRIP} -1 ${HEX_PASSPHRASE}" /bye)
+            if [ "${RESULT}" != "OK" ]; then
+              echo "::error::gpg-agent rejected PRESET_PASSPHRASE: ${RESULT}"
+              exit 1
+            fi
+          done
+
+          # Fail now rather than after the build if the key cannot sign non-interactively.
+          echo "signing check" | gpg --batch --local-user "${FINGERPRINT}" --detach-sign --output /dev/null
 
           echo "fingerprint=${FINGERPRINT}" >> "$GITHUB_OUTPUT"
           echo "keyid=${GPG_KEY_ID}" >> "$GITHUB_OUTPUT"
