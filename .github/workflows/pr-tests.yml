@@ -89,7 +89,9 @@ jobs:
             --packages "${{ steps.detect-changes.outputs.packages }}"
 
       - name: 🧪 Run unit tests
-        timeout-minutes: 50
+        # Fork: packages build one at a time (GOMAXPROCS=1, -p=1) and each takes ~12 min on the
+        # hosted arm runner, so 50 min stops a 6-package PR part-way. Stay under the 300 min job cap.
+        timeout-minutes: 280
         id: tests
         if: steps.detect-changes.outputs.has-changes == 'true'
         env:
