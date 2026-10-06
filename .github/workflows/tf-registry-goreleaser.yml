@@ -55,7 +55,10 @@ jobs:
       - name: Free up Ubuntu runner disk space
         uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6 # v2.0.0
         with:
-          tool-cache: true
+          # Fork: keep the tool cache. On the self-hosted ubuntu-xlarge runner this would
+          # `sudo rm -rf $AGENT_TOOLSDIRECTORY` (/opt/hostedtoolcache), and setup-go, running as
+          # the non-root runner user, then fails with EACCES recreating it (v1.3.0-sg.1 release).
+          tool-cache: false
           android: true
           dotnet: true
           haskell: true
