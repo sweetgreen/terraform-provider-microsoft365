@@ -412,3 +412,43 @@ func TestUnitResourceGroup_10_Scenario6_M365GroupAssigned(t *testing.T) {
 		},
 	})
 }
+
+// Graph answers a successful group PATCH with 204 No Content. Update must not depend on a response
+// body (it used to dereference a nil group and crash the plugin).
+func TestUnitResourceGroup_11_UpdateWithNoContentResponse(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	config := func(description string) string {
+		return `
+resource "microsoft365_graph_beta_groups_group" "test" {
+  display_name     = "Unit Test Update Group"
+  description      = "` + description + `"
+  mail_nickname    = "unittestupdategroup"
+  mail_enabled     = false
+  security_enabled = true
+}
+`
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config("before"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "description", "before"),
+				),
+			},
+			{
+				Config: config("after"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "description", "after"),
+					resource.TestCheckResourceAttrSet("microsoft365_graph_beta_groups_group.test", "id"),
+				),
+			},
+		},
+	})
+}

@@ -202,7 +202,7 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	groupId := state.ID.ValueString()
 
-	updatedResource, err := r.client.
+	_, err = r.client.
 		Groups().
 		ByGroupId(groupId).
 		Patch(ctx, requestBody, nil)
@@ -212,7 +212,9 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	plan.ID = types.StringValue(*updatedResource.GetId())
+	// Graph answers a successful group PATCH with 204 No Content, so there is no response body to
+	// read the ID from. The ID cannot change on update; keep the one from state.
+	plan.ID = types.StringValue(groupId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
