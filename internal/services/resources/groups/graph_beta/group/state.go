@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/services/common/convert"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	graphmodels "github.com/microsoftgraph/msgraph-beta-sdk-go/models"
 )
@@ -28,7 +29,13 @@ func MapRemoteStateToTerraform(ctx context.Context, data *GroupResourceModel, re
 	data.SecurityEnabled = convert.GraphToFrameworkBool(remoteResource.GetSecurityEnabled())
 	data.GroupTypes = convert.GraphToFrameworkStringSet(ctx, remoteResource.GetGroupTypes())
 	data.Visibility = convert.GraphToFrameworkString(remoteResource.GetVisibility())
-	data.IsAssignableToRole = convert.GraphToFrameworkBool(remoteResource.GetIsAssignableToRole())
+	// Graph returns null for groups that were never role-assignable. Read that as false, the
+	// schema default, so imported groups don't plan a spurious change on an immutable property.
+	if remoteResource.GetIsAssignableToRole() == nil {
+		data.IsAssignableToRole = types.BoolValue(false)
+	} else {
+		data.IsAssignableToRole = convert.GraphToFrameworkBool(remoteResource.GetIsAssignableToRole())
+	}
 	data.MembershipRule = convert.GraphToFrameworkString(remoteResource.GetMembershipRule())
 	data.MembershipRuleProcessingState = convert.GraphToFrameworkString(remoteResource.GetMembershipRuleProcessingState())
 	data.CreatedDateTime = convert.GraphToFrameworkTime(remoteResource.GetCreatedDateTime())
