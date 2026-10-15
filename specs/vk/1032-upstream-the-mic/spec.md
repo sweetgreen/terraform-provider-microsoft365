@@ -50,10 +50,10 @@ user of the provider can update groups and the fork can drop its patches.
 - Live-tenant acceptance tests.
 
 ## Acceptance Criteria
-- [ ] `go test ./internal/services/resources/groups/graph_beta/group/ -run 'TestConstructResource_|TestMapRemoteState_|TestUnitResourceGroup_' -count=1`
-      passes on the upstream branch.
-- [ ] Reverting either production change makes its test fail.
-- [ ] An upstream PR is open against `deploymenttheory/terraform-provider-microsoft365`
+- [x] `go test ./internal/services/resources/groups/graph_beta/group/ -run 'TestConstructResource_|TestMapRemoteState_|TestUnitResourceGroup_' -count=1`
+      passes on the upstream branch. Passed in fork CI run 38722937803: 15/15.
+- [x] Reverting either production change makes its test fail.
+- [ ] **Blocked (token scope):** an upstream PR is open against `deploymenttheory/terraform-provider-microsoft365`
       `main`, its title passes `pr-title-validation.yml`, and upstream CI
       unit tests are green or any failure is explained.
 - [ ] The upstream merge or feedback is recorded on the tracking issue, and so

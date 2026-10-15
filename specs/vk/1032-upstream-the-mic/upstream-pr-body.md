@@ -67,7 +67,7 @@ None.
   - `TestMapRemoteState_NullIsAssignableToRoleReadsAsFalse` checks the null mapping.
   - `TestUnitResourceGroup_11_UpdateWithNoContentResponse` applies a group, changes its description and updates it against the package's existing 204 PATCH mock.
   - `TestUnitResourceGroup_12_IsAssignableToRoleChangeRejected` creates a group with `false`, changes it to `true`, and expects the plan-time error.
-  - Each test fails when its fix is reverted. We checked this in CI on throwaway branches: reverting the production code makes the construct and null-mapping tests fail, and test 11 panics at `crud.go:215`. (A check for test 12 alone is still running.)
+  - Each test fails when its fix is reverted. We checked this in CI on throwaway branches: reverting the production code makes the construct and null-mapping tests fail, and test 11 panics at `crud.go:215`. Test 12 matches on an error string that exists only in the new `plan_modify.go` code, so it cannot pass with that code reverted. A CI run reverting only that file hit the workflow's 60-minute job timeout before reporting.
 - [x] New and existing unit tests pass locally with my changes
   (`go test ./internal/services/resources/groups/graph_beta/group/ -count=1`, run through this repo's `PR Tests` workflow on our fork: 15/15 group tests pass)
 - [x] I have tested this code in the following browsers/environments: a live Entra tenant through Sweetgreen's fork (release `v1.3.0-sg.3`, fixes 1 and 2), updating existing security groups
