@@ -452,3 +452,40 @@ resource "microsoft365_graph_beta_groups_group" "test" {
 		},
 	})
 }
+
+// isAssignableToRole can only be set when a group is created, so changing it on an existing group
+// must fail at plan time instead of being silently dropped from the update.
+func TestUnitResourceGroup_12_IsAssignableToRoleChangeRejected(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	config := func(isAssignableToRole bool) string {
+		return fmt.Sprintf(`
+resource "microsoft365_graph_beta_groups_group" "test" {
+  display_name          = "Unit Test Role Assignable Group"
+  mail_nickname         = "unittestroleassignable"
+  mail_enabled          = false
+  security_enabled      = true
+  is_assignable_to_role = %t
+}
+`, isAssignableToRole)
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config(false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "is_assignable_to_role", "false"),
+				),
+			},
+			{
+				Config:      config(true),
+				ExpectError: regexp.MustCompile(`Cannot change is_assignable_to_role on an existing group`),
+			},
+		},
+	})
+}
