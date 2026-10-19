@@ -452,3 +452,70 @@ resource "microsoft365_graph_beta_groups_group" "test" {
 		},
 	})
 }
+
+// dynamicGroupConfig is a dynamic device group whose membership_rule the update tests change.
+func dynamicGroupConfig(rule, extra string) string {
+	return `
+resource "microsoft365_graph_beta_groups_group" "test" {
+  display_name                     = "Unit Test Dynamic Group"
+  mail_nickname                    = "unittestdynamicgroup"
+  mail_enabled                     = false
+  security_enabled                 = true
+  group_types                      = ["DynamicMembership"]
+  membership_rule                  = "` + rule + `"
+  membership_rule_processing_state = "On"
+` + extra + `
+}
+`
+}
+
+// Microsoft Entra is eventually consistent: the read straight after a successful PATCH can return
+// the old values. Update must keep reading until Graph returns what it sent instead of storing the
+// stale read, which Terraform rejects as an inconsistent result.
+func TestUnitResourceGroup_12_UpdateWaitsForStaleMembershipRule(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: dynamicGroupConfig("(device.displayName -startsWith \\\"OLD\\\")", ""),
+			},
+			{
+				PreConfig: func() { groupMock.SetStaleReadsAfterPatch(1) },
+				Config:    dynamicGroupConfig("(device.displayName -startsWith \\\"NEW\\\")", ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "membership_rule", `(device.displayName -startsWith "NEW")`),
+				),
+			},
+		},
+	})
+}
+
+// When the reads never catch up, Update fails within its timeout with an error that says the write
+// was accepted and names the stale attribute.
+func TestUnitResourceGroup_13_UpdateNeverConsistentNamesAttribute(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	timeouts := `  timeouts = { update = "6s" }`
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: dynamicGroupConfig("(device.displayName -startsWith \\\"OLD\\\")", timeouts),
+			},
+			{
+				PreConfig:   func() { groupMock.SetStaleReadsAfterPatch(-1) },
+				Config:      dynamicGroupConfig("(device.displayName -startsWith \\\"NEW\\\")", timeouts),
+				ExpectError: regexp.MustCompile(`(?s)Error reading resource state after update.*accepted.*membership_rule`),
+			},
+		},
+	})
+}

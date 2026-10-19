@@ -17,12 +17,26 @@ var mockState struct {
 	sync.Mutex
 	groups       map[string]map[string]any
 	deletedItems map[string]map[string]any
+
+	// staleReadsAfterPatch makes GETs that follow a PATCH return the group as it was before the
+	// PATCH, as a lagging Entra replica does. 0 disables it; -1 never catches up.
+	staleReadsAfterPatch int
+	staleSnapshots       map[string]map[string]any
+	staleReadsRemaining  map[string]int
+}
+
+// resetMockState clears all groups, deleted items and stale-read settings. The caller holds the lock.
+func resetMockState() {
+	mockState.groups = make(map[string]map[string]any)
+	mockState.deletedItems = make(map[string]map[string]any)
+	mockState.staleReadsAfterPatch = 0
+	mockState.staleSnapshots = make(map[string]map[string]any)
+	mockState.staleReadsRemaining = make(map[string]int)
 }
 
 func init() {
 	// Initialize mockState
-	mockState.groups = make(map[string]map[string]any)
-	mockState.deletedItems = make(map[string]map[string]any)
+	resetMockState()
 
 	// Register a default 404 responder for any unmatched requests
 	httpmock.RegisterNoResponder(httpmock.NewStringResponder(404, `{"error":{"code":"ResourceNotFound","message":"Resource not found"}}`))
@@ -41,8 +55,7 @@ var _ mocks.MockRegistrar = (*GroupMock)(nil)
 func (m *GroupMock) RegisterMocks() {
 	// Reset the state when registering mocks
 	mockState.Lock()
-	mockState.groups = make(map[string]map[string]any)
-	mockState.deletedItems = make(map[string]map[string]any)
+	resetMockState()
 	mockState.Unlock()
 
 	// Register GET for listing groups
@@ -77,6 +90,16 @@ func (m *GroupMock) RegisterMocks() {
 
 			mockState.Lock()
 			defer mockState.Unlock()
+
+			if remaining := mockState.staleReadsRemaining[groupID]; remaining != 0 {
+				if remaining > 0 {
+					mockState.staleReadsRemaining[groupID] = remaining - 1
+				}
+				respBody, _ := json.Marshal(mockState.staleSnapshots[groupID])
+				resp := httpmock.NewStringResponse(200, string(respBody))
+				resp.Header.Set("Content-Type", "application/json")
+				return resp, nil
+			}
 
 			if group, exists := mockState.groups[groupID]; exists {
 				respBody, _ := json.Marshal(group)
@@ -172,6 +195,15 @@ func (m *GroupMock) RegisterMocks() {
 			defer mockState.Unlock()
 
 			if group, exists := mockState.groups[groupID]; exists {
+				if mockState.staleReadsAfterPatch != 0 {
+					snapshot := make(map[string]any, len(group))
+					for k, v := range group {
+						snapshot[k] = v
+					}
+					mockState.staleSnapshots[groupID] = snapshot
+					mockState.staleReadsRemaining[groupID] = mockState.staleReadsAfterPatch
+				}
+
 				// Update the existing group
 				for k, v := range requestBody {
 					group[k] = v
@@ -196,6 +228,9 @@ func (m *GroupMock) RegisterMocks() {
 				// Move to deletedItems (soft delete behavior)
 				mockState.deletedItems[groupID] = group
 				delete(mockState.groups, groupID)
+				// A deleted group must read as gone, not as a stale replica's copy.
+				delete(mockState.staleSnapshots, groupID)
+				delete(mockState.staleReadsRemaining, groupID)
 				return httpmock.NewStringResponse(204, ""), nil
 			}
 
@@ -272,10 +307,18 @@ func (m *GroupMock) RegisterErrorMocks() {
 		httpmock.NewStringResponder(400, errorBadRequest))
 }
 
+// SetStaleReadsAfterPatch makes the next n GETs of a group after each PATCH return the group as it
+// was before that PATCH, like a Microsoft Entra replica that hasn't caught up with the write yet.
+// n = -1 never catches up; n = 0 turns stale reads off.
+func (m *GroupMock) SetStaleReadsAfterPatch(n int) {
+	mockState.Lock()
+	defer mockState.Unlock()
+	mockState.staleReadsAfterPatch = n
+}
+
 // CleanupMockState cleans up the mock state (called after each test)
 func (m *GroupMock) CleanupMockState() {
 	mockState.Lock()
 	defer mockState.Unlock()
-	mockState.groups = make(map[string]map[string]any)
-	mockState.deletedItems = make(map[string]map[string]any)
+	resetMockState()
 }
