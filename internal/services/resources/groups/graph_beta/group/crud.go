@@ -3,6 +3,7 @@ package graphBetaGroup
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
@@ -48,6 +49,9 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
+	// Captured before sending: the request body is what later reads must reflect.
+	consistency := newGroupConsistency(ctx, requestBody)
+
 	groupObject, err := r.client.
 		Groups().
 		Post(ctx, requestBody, nil)
@@ -70,13 +74,13 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationCreate
 	opts.ResourceTypeName = ResourceName
-	opts.ConsistencyPredicate = groupConsistencyPredicate(&object)
+	opts.ConsistencyPredicate = consistency.predicate
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading resource state after create",
-			fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error()),
+			consistencyErrorDetail("create", object.ID.ValueString(), err, consistency.staleAttributes()),
 		)
 		return
 	}
@@ -200,6 +204,9 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
+	// Captured before sending: the request body is what later reads must reflect.
+	consistency := newGroupConsistency(ctx, requestBody)
+
 	groupId := state.ID.ValueString()
 
 	_, err = r.client.
@@ -227,17 +234,32 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationUpdate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = consistency.predicate
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading resource state after update",
-			fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error()),
+			consistencyErrorDetail("update", groupId, err, consistency.staleAttributes()),
 		)
 		return
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished updating %s with ID: %s", ResourceName, state.ID.ValueString()))
+}
+
+// consistencyErrorDetail describes a failed read after a write. When the last successful read still
+// differed from what was sent, it says the write was accepted and names the stale attributes, so
+// the error isn't mistaken for a failed write.
+func consistencyErrorDetail(operation, groupId string, err error, stale []string) string {
+	if len(stale) == 0 {
+		return fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error())
+	}
+	return fmt.Sprintf(
+		"Graph accepted the %s of %s %s, but reads still return a different value for: %s. "+
+			"The change may still be replicating; run terraform plan to check whether it has landed. (%s)",
+		operation, ResourceName, groupId, strings.Join(stale, "; "), err.Error(),
+	)
 }
 
 // Delete handles the Delete operation for Group resources.
