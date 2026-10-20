@@ -1,7 +1,7 @@
 ---
 title: Microsoft Graph group PATCH behaviour
-tags: [graph, groups, microsoft365_graph_beta_groups_group, task-1032]
-updated: 2026-10-15
+tags: [graph, groups, microsoft365_graph_beta_groups_group, task-1032, task-6a42]
+updated: 2026-10-19
 ---
 
 # Microsoft Graph group PATCH behaviour
@@ -40,9 +40,15 @@ the sweetgreen-test tenant on 2026-10-14 and 15 (terraform-infrastructure #1899)
 - The package's `mocks/responders.go` PATCH responder already returns 204, so
   unit tests exercise this path.
 
+## The read after a successful PATCH can be stale
+
+Entra replicas lag. A 204 PATCH can be followed by a GET that returns the old values. Since
+`1.3.0-sg.4`, Create and Update poll until every attribute they sent reads back. See
+[reading back after a Graph write](entra-read-after-write-consistency.md).
+
 ## Where the fixes live
 
 - Fork: sweetgreen/terraform-provider-microsoft365#89 and #90, released as
-  `v1.3.0-sg.2` and `v1.3.0-sg.3`.
+  `v1.3.0-sg.2` and `v1.3.0-sg.3`; #92 (stale reads after a write) as `v1.3.0-sg.4`.
 - Upstream: see [upstreaming fork fixes](upstreaming-fork-fixes.md) for the PR
   and its status.

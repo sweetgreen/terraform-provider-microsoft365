@@ -46,10 +46,15 @@ the tracking issue; the next `sg` rebase drops the fork patch.
 - Do not introduce new top-level dependencies without recording the reason in
   the plan's research notes.
 - Never change upstream behaviour beyond the bug being fixed in an upstream PR.
+- A read that follows a Graph write (Create, Update) must not accept a stale
+  replica. Use `crud.ReadWithRetry` with a `ConsistencyPredicate` that checks
+  every attribute the request sent, compared after `Read`'s own normalisation,
+  and fail with an error that names the attribute still stale.
 
 ## Governance
 This constitution supersedes ad-hoc preferences. When a spec or plan conflicts
 with it, the constitution wins or the conflict is recorded as an open question.
 
-**Version**: 1.0.0 (replaced the vibe-kanban-specific principles IV–VII with
-provider principles; 2026-10-15)
+**Version**: 1.1.0 (added the post-write consistency constraint; 2026-10-19.
+1.0.0 replaced the vibe-kanban-specific principles IV–VII with provider
+principles; 2026-10-15)
