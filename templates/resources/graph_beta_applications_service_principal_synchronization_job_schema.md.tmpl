@@ -1,0 +1,56 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Applications"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Microsoft Documentation
+
+- [synchronizationSchema resource type](https://learn.microsoft.com/en-us/graph/api/resources/synchronization-synchronizationschema?view=graph-rest-beta)
+- [Get synchronizationSchema](https://learn.microsoft.com/en-us/graph/api/synchronization-synchronizationschema-get?view=graph-rest-beta)
+- [Update synchronizationSchema](https://learn.microsoft.com/en-us/graph/api/synchronization-synchronizationschema-update?view=graph-rest-beta)
+- [List functions](https://learn.microsoft.com/en-us/graph/api/synchronization-synchronizationschema-functions?view=graph-rest-beta)
+- [Writing expressions for attribute mappings](https://learn.microsoft.com/en-us/entra/identity/app-provisioning/functions-for-customizing-application-data)
+
+## Microsoft Graph API Permissions
+
+The following client `application` permissions are needed in order to use this {{.Type | lower}}:
+
+**Required:**
+- `Synchronization.ReadWrite.All`
+
+**Optional:**
+- `Synchronization.Read.All` (plan and refresh only)
+- `Application.ReadWrite.OwnedBy` or `Application.ReadWrite.All` (higher-privileged alternatives)
+
+## Version History
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| v1.3.0-sg.5 | Experimental | Initial release (Sweetgreen fork) |
+
+## Important Notes
+
+- **Import first.** Every provisioning job already has a schema. Creating the resource writes the configuration over whatever is in Entra, so import the job and make the configuration match before the first apply.
+- **Authoritative for one rule.** Object mappings are keyed by target object (for example `sys_user`) and attribute mappings by target attribute (for example `active`). Mappings in Entra that are missing from the configuration are removed. Directory definitions, other synchronization rules, and rule and mapping `metadata` are sent back as Entra returned them.
+- **Expressions.** `source_expression` takes the expression shown in the Entra portal. The provider parses it and builds the source tree Graph stores, using the function definitions from `GET .../schema/functions`. An unchanged expression keeps the tree Entra returned. Write expressions as Entra stores them (`, ` between arguments, an empty argument as `, ,`); validation rejects other spellings and prints the expected form.
+- **Changes made after the plan.** The `version` attribute records the schema version read during the plan. If someone changes the mappings in the portal before the apply, the apply fails without writing and asks for a new plan.
+- **Destroy** removes the resource from state only. The mappings in Entra are not reset to the application template.
+- **Read after write.** Entra can return the previous schema right after an update. The provider keeps reading until the new mappings come back, and names any mapping that never does.
+
+## Example Usage
+
+{{ tffile "examples/resources/microsoft365_graph_beta_applications_service_principal_synchronization_job_schema/resource.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" "examples/resources/microsoft365_graph_beta_applications_service_principal_synchronization_job_schema/import.sh" }}
