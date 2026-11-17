@@ -23,11 +23,13 @@ import (
 // fakeGroupsAPI serves GET /beta/groups from a fixed list of pages and records every request.
 // A POST fails the test unless allowPost is set.
 type fakeGroupsAPI struct {
-	t         *testing.T
-	server    *httptest.Server
-	pages     [][]string // each page holds JSON group objects
-	status    int        // non-zero: answer the list with this status and a Graph error
-	allowPost bool
+	t      *testing.T
+	server *httptest.Server
+	pages  [][]string // each page holds JSON group objects
+	status int        // non-zero: answer the list with this status and a Graph error
+	// noContentType answers the list without a JSON content type, so Kiota returns no page.
+	noContentType bool
+	allowPost     bool
 
 	mu      sync.Mutex
 	filters []string
@@ -58,6 +60,11 @@ func (f *fakeGroupsAPI) serve(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet || req.URL.Path != "/beta/groups" {
 		f.t.Errorf("unexpected request: %s %s", req.Method, req.URL)
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if f.noContentType {
+		w.Header().Del("Content-Type")
+		fmt.Fprint(w, `{"value":[]}`)
 		return
 	}
 	if f.status != 0 {
@@ -220,5 +227,19 @@ func TestCreate_RefusesDuplicateWithoutPosting(t *testing.T) {
 	}
 	if api.posts != 0 {
 		t.Errorf("Create sent %d POST requests, want 0", api.posts)
+	}
+}
+
+// Kiota returns (nil, nil) when it can't parse the list. That must fail the check, not read as
+// "no duplicates" and not panic.
+func TestFindGroupsByDisplayName_UnparseableResponseFailsClosed(t *testing.T) {
+	api := newFakeGroupsAPI(t)
+	api.noContentType = true
+
+	var diags diag.Diagnostics
+	api.resource(t).checkDuplicateDisplayName(context.Background(), "POS Ring 1", &diags)
+
+	if !diags.HasError() || diags.Errors()[0].Summary() != duplicateLookupSummary {
+		t.Fatalf("an unparseable list must fail the check, got %v", diags)
 	}
 }

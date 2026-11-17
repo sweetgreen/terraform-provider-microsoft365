@@ -88,7 +88,9 @@ func (m *GroupMock) RegisterMocks() {
 			}
 
 			respBody, _ := json.Marshal(response)
-			return httpmock.NewStringResponse(200, string(respBody)), nil
+			resp := httpmock.NewStringResponse(200, string(respBody))
+			resp.Header.Set("Content-Type", "application/json")
+			return resp, nil
 		})
 
 	// Register GET for specific group with special test IDs

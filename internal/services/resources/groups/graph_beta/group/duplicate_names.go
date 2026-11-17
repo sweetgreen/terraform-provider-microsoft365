@@ -52,6 +52,11 @@ func (r *GroupResource) findGroupsByDisplayName(ctx context.Context, displayName
 		if err != nil {
 			return nil, err
 		}
+		// Kiota returns no page and no error when the body can't be parsed, for example without a
+		// JSON content type. Treat that as a failed lookup rather than as "no matches".
+		if page == nil {
+			return nil, fmt.Errorf("no parseable group list returned by Graph for %s", filter)
+		}
 		for _, group := range page.GetValue() {
 			if group.GetId() == nil || group.GetDisplayName() == nil {
 				continue
