@@ -30,5 +30,24 @@ func (r *GroupResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanR
 		return
 	}
 
+	// Refuse to plan a new group whose display name is already taken, so the plan fails rather than
+	// the apply. Only a create has no prior state; update, refresh and import never check, so an
+	// existing group can still be adopted. An unknown name is checked again in Create.
+	if req.State.Raw.IsNull() && shouldCheckDuplicateName(&plan) && r.client != nil {
+		r.checkDuplicateDisplayName(ctx, plan.DisplayName.ValueString(), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	tflog.Debug(ctx, "Finished plan modification for group resource")
+}
+
+// shouldCheckDuplicateName reports whether the duplicate-name check applies to a planned group: the
+// flag is known and true, and the display name is known.
+func shouldCheckDuplicateName(plan *GroupResourceModel) bool {
+	if plan.PreventDuplicateNames.IsNull() || plan.PreventDuplicateNames.IsUnknown() || !plan.PreventDuplicateNames.ValueBool() {
+		return false
+	}
+	return !plan.DisplayName.IsNull() && !plan.DisplayName.IsUnknown()
 }

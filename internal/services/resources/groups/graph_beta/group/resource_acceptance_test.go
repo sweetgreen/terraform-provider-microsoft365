@@ -622,3 +622,89 @@ resource "microsoft365_graph_beta_groups_group" "test" {
 }
 `
 }
+
+// TestAccResourceGroup_11_PreventDuplicateNames shows, against a real tenant, that a guarded group
+// can't be created with a display name that is already in use, and that the existing group can
+// still be adopted by import and updated with the guard on.
+func TestAccResourceGroup_11_PreventDuplicateNames(t *testing.T) {
+	var existingID string
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { mocks.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: mocks.TestAccProtoV6ProviderFactories,
+		CheckDestroy: destroy.CheckDestroyedAllFunc(
+			testResource,
+			resourceType,
+			20*time.Second,
+		),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				Source:            "hashicorp/random",
+				VersionConstraint: constants.ExternalProviderRandomVersion,
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					testlog.StepAction(resourceType, "Creating the group that already holds the name")
+				},
+				Config: loadAcceptanceTestTerraform("resource_prevent_duplicate_names_1_existing.tf"),
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						rs, ok := s.RootModule().Resources[resourceType+".existing"]
+						if !ok {
+							return fmt.Errorf("resource not found: %s.existing", resourceType)
+						}
+						existingID = rs.Primary.ID
+						testlog.WaitForConsistency("group", 20*time.Second)
+						time.Sleep(20 * time.Second)
+						return nil
+					},
+					check.That(resourceType+".existing").ExistsInGraph(testResource),
+				),
+			},
+			{
+				PreConfig: func() {
+					testlog.StepAction(resourceType, "Planning a guarded group with the same name")
+				},
+				Config:      loadAcceptanceTestTerraform("resource_prevent_duplicate_names_2_duplicate.tf"),
+				ExpectError: regexp.MustCompile(`(?s)Group display name already in use.*acc-test-dup-group-`),
+			},
+			{
+				PreConfig: func() {
+					testlog.StepAction(resourceType, "Importing the existing group into a guarded resource")
+				},
+				Config:             loadAcceptanceTestTerraform("resource_prevent_duplicate_names_3_adopt.tf"),
+				ResourceName:       resourceType + ".adopted",
+				ImportState:        true,
+				ImportStatePersist: true,
+				ImportStateIdFunc: func(_ *terraform.State) (string, error) {
+					if existingID == "" {
+						return "", fmt.Errorf("the existing group's ID was not captured")
+					}
+					return existingID, nil
+				},
+			},
+			{
+				PreConfig: func() {
+					testlog.StepAction(resourceType, "Updating the adopted group with the guard on")
+				},
+				Config: loadAcceptanceTestTerraform("resource_prevent_duplicate_names_4_adopt.tf"),
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						rs, ok := s.RootModule().Resources[resourceType+".adopted"]
+						if !ok {
+							return fmt.Errorf("resource not found: %s.adopted", resourceType)
+						}
+						if rs.Primary.ID != existingID {
+							return fmt.Errorf("adopted group ID = %s, want the existing group %s", rs.Primary.ID, existingID)
+						}
+						return nil
+					},
+					check.That(resourceType+".adopted").Key("description").HasValue("adopted and updated"),
+					check.That(resourceType+".adopted").Key("prevent_duplicate_names").HasValue("true"),
+				),
+			},
+		},
+	})
+}

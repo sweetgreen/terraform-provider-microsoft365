@@ -36,6 +36,7 @@ The following client `application` permissions are needed in order to use this r
 | Version | Status | Notes |
 |---------|--------|-------|
 | v0.15.0-alpha | Experimental | Initial release |
+| v1.3.0-sg.5 | Experimental | Added `prevent_duplicate_names`. Updates that change no Graph property no longer send a PATCH. |
 
 ## Example Usage
 
@@ -171,6 +172,7 @@ resource "microsoft365_graph_beta_groups_group" "m365_role_assignable" {
 - `is_assignable_to_role` (Boolean) Indicates whether this group can be assigned to a Microsoft Entra role. This property can only be set while creating the group and is immutable. If set to true, the securityEnabled property must also be set to true, visibility must be Hidden, and the group can't be a dynamic group. Default is false.
 - `membership_rule` (String) The rule that determines members for this group if the group is a dynamic group (groupTypes contains DynamicMembership). For more information about the syntax of the membership rule, see Membership Rules syntax.
 - `membership_rule_processing_state` (String) Indicates whether the dynamic membership processing is on or paused. Possible values are 'On' or 'Paused'. Only applicable for dynamic groups (when groupTypes contains DynamicMembership).
+- `prevent_duplicate_names` (Boolean) When `true`, the provider refuses to create the group if the tenant already has a group with the same `display_name` (compared case-insensitively), and names the existing object ID(s) so the group can be imported instead. The check runs when a new group is planned, if `display_name` is known then, and again just before it is created. It never runs on update, refresh or import, so existing and imported groups are unaffected. Replacing a group whose name stays the same fails while this is `true`, because the old group still holds the name. Requires permission to list groups. Defaults to `false`, and to `false` on import.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `visibility` (String) Specifies the group join policy and group content visibility for groups. Possible values are: `Private`, `Public`, or `HiddenMembership`. `HiddenMembership` can be set only for Microsoft 365 groups when the groups are created and cannot be updated later. Other values of visibility can be updated after group creation. If visibility value is not specified during group creation, a security group is created as `Private` by default, and a Microsoft 365 group is `Public`. Groups assignable to roles are always `Private`. Returned by default. Nullable.
 
@@ -200,6 +202,7 @@ Optional:
 - **Length Limits**: Display names are limited to 256 characters, mail nicknames to 64 characters.
 - **Owners and Members**: A maximum of 20 relationships (owners and members combined) can be added during group creation. Additional owners/members must be added after creation.
 - **Description**: May be auto-populated by the API for certain group types (e.g., Microsoft 365 groups).
+- **Duplicate display names**: Microsoft Graph allows several groups with the same display name. Set `prevent_duplicate_names = true` to refuse creating a group whose display name (compared case-insensitively) is already in use; the error names the existing object ID(s) so the group can be imported instead. The check runs when a new group is planned, if its `display_name` is known then, and again just before it is created. It never runs on update, refresh or import, so existing and imported groups plan and update normally. Replacing a group whose name stays the same (`-replace`, or a tainted resource) fails while the flag is `true`, because the old group still holds the name; set it to `false` for that change. Changing only `prevent_duplicate_names`, `hard_delete` or `timeouts` updates state without sending a request to Microsoft Graph.
 
 ## Import
 

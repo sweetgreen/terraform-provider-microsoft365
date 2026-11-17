@@ -37,6 +37,7 @@ The following client `application` permissions are needed in order to use this {
 | Version | Status | Notes |
 |---------|--------|-------|
 | v0.15.0-alpha | Experimental | Initial release |
+| v1.3.0-sg.5 | Experimental | Added `prevent_duplicate_names`. Updates that change no Graph property no longer send a PATCH. |
 
 ## Example Usage
 
@@ -77,6 +78,7 @@ The following client `application` permissions are needed in order to use this {
 - **Length Limits**: Display names are limited to 256 characters, mail nicknames to 64 characters.
 - **Owners and Members**: A maximum of 20 relationships (owners and members combined) can be added during group creation. Additional owners/members must be added after creation.
 - **Description**: May be auto-populated by the API for certain group types (e.g., Microsoft 365 groups).
+- **Duplicate display names**: Microsoft Graph allows several groups with the same display name. Set `prevent_duplicate_names = true` to refuse creating a group whose display name (compared case-insensitively) is already in use; the error names the existing object ID(s) so the group can be imported instead. The check runs when a new group is planned, if its `display_name` is known then, and again just before it is created. It never runs on update, refresh or import, so existing and imported groups plan and update normally. Replacing a group whose name stays the same (`-replace`, or a tainted resource) fails while the flag is `true`, because the old group still holds the name; set it to `false` for that change. Changing only `prevent_duplicate_names`, `hard_delete` or `timeouts` updates state without sending a request to Microsoft Graph.
 
 ## Import
 

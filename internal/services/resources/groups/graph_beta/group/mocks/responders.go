@@ -23,6 +23,9 @@ var mockState struct {
 	staleReadsAfterPatch int
 	staleSnapshots       map[string]map[string]any
 	staleReadsRemaining  map[string]int
+
+	// patchCount counts PATCH requests, so tests can prove an update made no Graph write.
+	patchCount int
 }
 
 // resetMockState clears all groups, deleted items and stale-read settings. The caller holds the lock.
@@ -32,6 +35,7 @@ func resetMockState() {
 	mockState.staleReadsAfterPatch = 0
 	mockState.staleSnapshots = make(map[string]map[string]any)
 	mockState.staleReadsRemaining = make(map[string]int)
+	mockState.patchCount = 0
 }
 
 func init() {
@@ -61,9 +65,19 @@ func (m *GroupMock) RegisterMocks() {
 	// Register GET for listing groups
 	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/groups",
 		func(req *http.Request) (*http.Response, error) {
+			// Honour $filter=displayName eq '...', as the duplicate-name check uses it. Graph compares
+			// display names case-insensitively.
+			wantName, filtered := displayNameFromFilter(req.URL.Query().Get("$filter"))
+
 			mockState.Lock()
 			groups := make([]map[string]any, 0, len(mockState.groups))
 			for _, group := range mockState.groups {
+				if filtered {
+					name, _ := group["displayName"].(string)
+					if !strings.EqualFold(name, wantName) {
+						continue
+					}
+				}
 				groups = append(groups, group)
 			}
 			mockState.Unlock()
@@ -194,6 +208,8 @@ func (m *GroupMock) RegisterMocks() {
 			mockState.Lock()
 			defer mockState.Unlock()
 
+			mockState.patchCount++
+
 			if group, exists := mockState.groups[groupID]; exists {
 				if mockState.staleReadsAfterPatch != 0 {
 					snapshot := make(map[string]any, len(group))
@@ -314,6 +330,53 @@ func (m *GroupMock) SetStaleReadsAfterPatch(n int) {
 	mockState.Lock()
 	defer mockState.Unlock()
 	mockState.staleReadsAfterPatch = n
+}
+
+// SeededGroupDescription is the description SeedGroup gives every group.
+const SeededGroupDescription = "Created outside Terraform"
+
+// displayNameFromFilter extracts the name from a "displayName eq '<name>'" OData filter, undoing
+// the doubled-quote escape. It reports false for any other filter.
+func displayNameFromFilter(filter string) (string, bool) {
+	const prefix = "displayName eq '"
+	if !strings.HasPrefix(filter, prefix) || !strings.HasSuffix(filter, "'") || len(filter) < len(prefix)+1 {
+		return "", false
+	}
+	return strings.ReplaceAll(filter[len(prefix):len(filter)-1], "''", "'"), true
+}
+
+// SeedGroup adds an existing private security group, as if it had been created outside Terraform,
+// and returns its object ID. Its description is SeededGroupDescription.
+func (m *GroupMock) SeedGroup(displayName, mailNickname string) string {
+	id := uuid.New().String()
+	mockState.Lock()
+	defer mockState.Unlock()
+	mockState.groups[id] = map[string]any{
+		"id":              id,
+		"displayName":     displayName,
+		"description":     SeededGroupDescription,
+		"mailNickname":    mailNickname,
+		"mailEnabled":     false,
+		"securityEnabled": true,
+		"groupTypes":      []any{},
+		"visibility":      "Private",
+		"createdDateTime": "2023-01-01T00:00:00Z",
+	}
+	return id
+}
+
+// GroupCount returns the number of groups the mock holds.
+func (m *GroupMock) GroupCount() int {
+	mockState.Lock()
+	defer mockState.Unlock()
+	return len(mockState.groups)
+}
+
+// PatchCount returns the number of PATCH requests received since the mocks were registered.
+func (m *GroupMock) PatchCount() int {
+	mockState.Lock()
+	defer mockState.Unlock()
+	return mockState.patchCount
 }
 
 // CleanupMockState cleans up the mock state (called after each test)
