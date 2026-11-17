@@ -615,7 +615,7 @@ func TestUnitResourceGroup_16_PreventDuplicateNamesTwoMatchesNamesBoth(t *testin
 				Config:   guardedGroupConfig("Joe's Lab Devices", "dup", "joeslab3", true),
 				PlanOnly: true,
 				ExpectError: regexp.MustCompile(
-					`(?s)Group display name already in use.*2 group\(s\).*(` + first + `.*` + second + `|` + second + `.*` + first + `)`,
+					`(?s)Group display name already in use.*2\s+group\(s\).*(` + first + `.*` + second + `|` + second + `.*` + first + `)`,
 				),
 			},
 		},
