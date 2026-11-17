@@ -519,3 +519,186 @@ func TestUnitResourceGroup_13_UpdateNeverConsistentNamesAttribute(t *testing.T) 
 		},
 	})
 }
+
+// guardedGroupConfig is a security group with prevent_duplicate_names set to flag.
+func guardedGroupConfig(displayName, description, mailNickname string, flag bool) string {
+	return fmt.Sprintf(`
+resource "microsoft365_graph_beta_groups_group" "test" {
+  display_name            = %q
+  description             = %q
+  mail_nickname           = %q
+  mail_enabled            = false
+  security_enabled        = true
+  prevent_duplicate_names = %t
+}
+`, displayName, description, mailNickname, flag)
+}
+
+// With the guard on and no group holding the name, the group is created as usual.
+func TestUnitResourceGroup_14_PreventDuplicateNamesNoMatchCreates(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	groupMock.SeedGroup("Some Other Group", "someothergroup")
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: guardedGroupConfig("Unit Test Unique Group", "unique", "unittestuniquegroup", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "prevent_duplicate_names", "true"),
+					resource.TestCheckResourceAttrSet("microsoft365_graph_beta_groups_group.test", "id"),
+					func(_ *terraform.State) error {
+						if n := groupMock.GroupCount(); n != 2 {
+							return fmt.Errorf("mock holds %d groups, want 2", n)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+// With the guard on and one group holding the name (in a different case), the plan fails, names
+// the existing object ID and creates nothing. Terraform re-plans at apply time, so ModifyPlan also
+// refuses names that only become known during apply; Create's own check, for a group created by
+// someone else after the plan, is covered by TestCreate_RefusesDuplicateWithoutPosting.
+func TestUnitResourceGroup_15_PreventDuplicateNamesOneMatchFails(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	existing := groupMock.SeedGroup("POS Ring 1 Windows Devices", "posring1")
+	refused := regexp.MustCompile(`(?s)Group display name already in use.*` + existing)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      guardedGroupConfig("pos ring 1 windows devices", "dup", "posring1dup", true),
+				PlanOnly:    true,
+				ExpectError: refused,
+			},
+			{
+				Config:      guardedGroupConfig("pos ring 1 windows devices", "dup", "posring1dup", true),
+				ExpectError: refused,
+			},
+		},
+		CheckDestroy: func(_ *terraform.State) error {
+			if n := groupMock.GroupCount(); n != 1 {
+				return fmt.Errorf("mock holds %d groups after a refused create, want 1", n)
+			}
+			return nil
+		},
+	})
+}
+
+// With two groups holding the name, including one with a single quote, the error lists both IDs.
+func TestUnitResourceGroup_16_PreventDuplicateNamesTwoMatchesNamesBoth(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	first := groupMock.SeedGroup("Joe's Lab Devices", "joeslab1")
+	second := groupMock.SeedGroup("JOE'S LAB DEVICES", "joeslab2")
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:   guardedGroupConfig("Joe's Lab Devices", "dup", "joeslab3", true),
+				PlanOnly: true,
+				ExpectError: regexp.MustCompile(
+					`(?s)Group display name already in use.*2\s+group\(s\).*(` + first + `.*` + second + `|` + second + `.*` + first + `)`,
+				),
+			},
+		},
+	})
+}
+
+// With the guard off (the default), a duplicate name is still created, as before.
+func TestUnitResourceGroup_17_PreventDuplicateNamesOffAllowsDuplicate(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	groupMock.SeedGroup("Unit Test Shared Name", "sharedname1")
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: guardedGroupConfig("Unit Test Shared Name", "second", "sharedname2", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "prevent_duplicate_names", "false"),
+					func(_ *terraform.State) error {
+						if n := groupMock.GroupCount(); n != 2 {
+							return fmt.Errorf("mock holds %d groups, want 2", n)
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+// An existing group is adopted with an import block while the guard is on: the check never runs
+// for a resource with prior state. Turning the guard on (false after import -> true) changes state
+// only and sends no PATCH; a later description change is sent as usual.
+func TestUnitResourceGroup_18_PreventDuplicateNamesImportThenUpdate(t *testing.T) {
+	mocks.SetupUnitTestEnvironment(t)
+	_, groupMock := setupMockEnvironment()
+	defer httpmock.DeactivateAndReset()
+	defer groupMock.CleanupMockState()
+
+	existing := groupMock.SeedGroup("Unit Test Adopted Group", "unittestadopted")
+	importBlock := fmt.Sprintf(`
+import {
+  to = microsoft365_graph_beta_groups_group.test
+  id = %q
+}
+`, existing)
+
+	patches := func(want int) resource.TestCheckFunc {
+		return func(_ *terraform.State) error {
+			if got := groupMock.PatchCount(); got != want {
+				return fmt.Errorf("mock received %d PATCH requests, want %d", got, want)
+			}
+			return nil
+		}
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: importBlock + guardedGroupConfig("Unit Test Adopted Group", groupMocks.SeededGroupDescription, "unittestadopted", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "id", existing),
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "prevent_duplicate_names", "true"),
+					patches(0),
+				),
+			},
+			{
+				Config:   importBlock + guardedGroupConfig("Unit Test Adopted Group", groupMocks.SeededGroupDescription, "unittestadopted", true),
+				PlanOnly: true,
+			},
+			{
+				Config: importBlock + guardedGroupConfig("Unit Test Adopted Group", "adopted and updated", "unittestadopted", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "description", "adopted and updated"),
+					resource.TestCheckResourceAttr("microsoft365_graph_beta_groups_group.test", "id", existing),
+					patches(1),
+				),
+			},
+		},
+	})
+}

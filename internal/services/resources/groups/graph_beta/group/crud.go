@@ -40,6 +40,15 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 	defer cancel()
 
+	// ModifyPlan already checked a name known at plan time. Check again here: the name may only now
+	// be known, and another group may have taken it since the plan.
+	if shouldCheckDuplicateName(&object) {
+		r.checkDuplicateDisplayName(ctx, object.DisplayName.ValueString(), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	requestBody, err := constructResource(ctx, &object, false)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -209,14 +218,21 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	groupId := state.ID.ValueString()
 
-	_, err = r.client.
-		Groups().
-		ByGroupId(groupId).
-		Patch(ctx, requestBody, nil)
+	// Skip the PATCH when everything it would send already matches state, which was refreshed
+	// during plan. That is the case when only provider-side settings change (hard_delete,
+	// prevent_duplicate_names, timeouts), so those changes never write to Entra.
+	if consistency.matches(&state) {
+		tflog.Debug(ctx, fmt.Sprintf("No Graph-visible change for %s %s; skipping PATCH", ResourceName, groupId))
+	} else {
+		_, err = r.client.
+			Groups().
+			ByGroupId(groupId).
+			Patch(ctx, requestBody, nil)
 
-	if err != nil {
-		errors.HandleKiotaGraphError(ctx, err, resp, constants.TfOperationUpdate, r.WritePermissions)
-		return
+		if err != nil {
+			errors.HandleKiotaGraphError(ctx, err, resp, constants.TfOperationUpdate, r.WritePermissions)
+			return
+		}
 	}
 
 	// Graph answers a successful group PATCH with 204 No Content, so there is no response body to
