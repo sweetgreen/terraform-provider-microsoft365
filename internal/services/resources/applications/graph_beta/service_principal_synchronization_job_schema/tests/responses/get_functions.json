@@ -1,0 +1,215 @@
+{
+  "value": [
+    {
+      "id": "Append",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "suffix",
+          "required": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "Coalesce",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": true,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "IsNullOrEmpty",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "IIF",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "one",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "two",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "three",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "four",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "five",
+          "required": false,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "Join",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "separator",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": true,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "NormalizeDiacritics",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "Not",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "Boolean"
+        }
+      ]
+    },
+    {
+      "id": "Replace",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "Find",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "RegularExpression",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "RegularExpressionGroupName",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "Replacement",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "ReplacementPropertyName",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "Template",
+          "required": false,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "SingleAppRoleAssignment",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "Switch",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "defaultValue",
+          "required": false,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": true,
+          "name": "switchValue",
+          "required": false,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "ToLower",
+      "parameters": [
+        {
+          "allowMultipleOccurrences": false,
+          "name": "source",
+          "required": true,
+          "type": "String"
+        },
+        {
+          "allowMultipleOccurrences": false,
+          "name": "culture",
+          "required": false,
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}
