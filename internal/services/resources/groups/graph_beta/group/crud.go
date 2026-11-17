@@ -3,6 +3,7 @@ package graphBetaGroup
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/deploymenttheory/terraform-provider-microsoft365/internal/constants"
@@ -39,6 +40,15 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 	defer cancel()
 
+	// ModifyPlan already checked a name known at plan time. Check again here: the name may only now
+	// be known, and another group may have taken it since the plan.
+	if shouldCheckDuplicateName(&object) {
+		r.checkDuplicateDisplayName(ctx, object.DisplayName.ValueString(), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
 	requestBody, err := constructResource(ctx, &object, false)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -47,6 +57,9 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		)
 		return
 	}
+
+	// Captured before sending: the request body is what later reads must reflect.
+	consistency := newGroupConsistency(ctx, requestBody)
 
 	groupObject, err := r.client.
 		Groups().
@@ -70,13 +83,13 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationCreate
 	opts.ResourceTypeName = ResourceName
-	opts.ConsistencyPredicate = groupConsistencyPredicate(&object)
+	opts.ConsistencyPredicate = consistency.predicate
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading resource state after create",
-			fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error()),
+			consistencyErrorDetail("create", object.ID.ValueString(), err, consistency.staleAttributes()),
 		)
 		return
 	}
@@ -200,19 +213,31 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
+	// Captured before sending: the request body is what later reads must reflect.
+	consistency := newGroupConsistency(ctx, requestBody)
+
 	groupId := state.ID.ValueString()
 
-	updatedResource, err := r.client.
-		Groups().
-		ByGroupId(groupId).
-		Patch(ctx, requestBody, nil)
+	// Skip the PATCH when everything it would send already matches state, which was refreshed
+	// during plan. That is the case when only provider-side settings change (hard_delete,
+	// prevent_duplicate_names, timeouts), so those changes never write to Entra.
+	if consistency.matches(&state) {
+		tflog.Debug(ctx, fmt.Sprintf("No Graph-visible change for %s %s; skipping PATCH", ResourceName, groupId))
+	} else {
+		_, err = r.client.
+			Groups().
+			ByGroupId(groupId).
+			Patch(ctx, requestBody, nil)
 
-	if err != nil {
-		errors.HandleKiotaGraphError(ctx, err, resp, constants.TfOperationUpdate, r.WritePermissions)
-		return
+		if err != nil {
+			errors.HandleKiotaGraphError(ctx, err, resp, constants.TfOperationUpdate, r.WritePermissions)
+			return
+		}
 	}
 
-	plan.ID = types.StringValue(*updatedResource.GetId())
+	// Graph answers a successful group PATCH with 204 No Content, so there is no response body to
+	// read the ID from. The ID cannot change on update; keep the one from state.
+	plan.ID = types.StringValue(groupId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -225,17 +250,32 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	opts := crud.DefaultReadWithRetryOptions()
 	opts.Operation = constants.TfOperationUpdate
 	opts.ResourceTypeName = ResourceName
+	opts.ConsistencyPredicate = consistency.predicate
 
 	err = crud.ReadWithRetry(ctx, r.Read, readReq, stateContainer, opts)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading resource state after update",
-			fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error()),
+			consistencyErrorDetail("update", groupId, err, consistency.staleAttributes()),
 		)
 		return
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Finished updating %s with ID: %s", ResourceName, state.ID.ValueString()))
+}
+
+// consistencyErrorDetail describes a failed read after a write. When the last successful read still
+// differed from what was sent, it says the write was accepted and names the stale attributes, so
+// the error isn't mistaken for a failed write.
+func consistencyErrorDetail(operation, groupId string, err error, stale []string) string {
+	if len(stale) == 0 {
+		return fmt.Sprintf("Could not read resource state: %s: %s", ResourceName, err.Error())
+	}
+	return fmt.Sprintf(
+		"Graph accepted the %s of %s %s, but reads still return a different value for: %s. "+
+			"The change may still be replicating; run terraform plan to check whether it has landed. (%s)",
+		operation, ResourceName, groupId, strings.Join(stale, "; "), err.Error(),
+	)
 }
 
 // Delete handles the Delete operation for Group resources.

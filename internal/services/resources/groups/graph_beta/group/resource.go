@@ -123,6 +123,9 @@ func (r *GroupResource) ImportState(ctx context.Context, req resource.ImportStat
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), resourceID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hard_delete"), hardDelete)...)
+	// The duplicate-name check only guards creation, so an imported group records it as off. A
+	// config that omits the attribute then plans no change.
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("prevent_duplicate_names"), false)...)
 }
 
 // IdentitySchema defines the identity schema for this resource, used by list operations to uniquely identify instances
@@ -261,6 +264,18 @@ func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				MarkdownDescription: "When `true`, the group will be permanently deleted (hard delete) during destroy. " +
 					"When `false` (default), the group will only be soft deleted and moved to the deleted items container where it can be restored within 30 days. " +
 					"Note: This field defaults to `false` on import since the API does not return this value.",
+			},
+			"prevent_duplicate_names": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				MarkdownDescription: "When `true`, the provider refuses to create the group if the tenant already has a group " +
+					"with the same `display_name` (compared case-insensitively), and names the existing object ID(s) so the " +
+					"group can be imported instead. The check runs when a new group is planned, if `display_name` is known " +
+					"then, and again just before it is created. It never runs on update, refresh or import, so existing and " +
+					"imported groups are unaffected. Replacing a group whose name stays the same fails while this is `true`, " +
+					"because the old group still holds the name. Requires permission to list groups. Defaults to `false`, " +
+					"and to `false` on import.",
 			},
 			"timeouts": commonschema.ResourceTimeouts(ctx),
 		},

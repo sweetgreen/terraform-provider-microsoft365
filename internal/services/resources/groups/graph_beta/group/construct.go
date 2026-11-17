@@ -29,7 +29,11 @@ func constructResource(ctx context.Context, data *GroupResourceModel, isUpdate b
 	}
 
 	convert.FrameworkToGraphString(data.Visibility, requestBody.SetVisibility)
-	convert.FrameworkToGraphBool(data.IsAssignableToRole, requestBody.SetIsAssignableToRole)
+	// isAssignableToRole can only be set when a group is created. Graph rejects any PATCH that
+	// includes it, even when the value is unchanged, so it is only sent on create.
+	if !isUpdate {
+		convert.FrameworkToGraphBool(data.IsAssignableToRole, requestBody.SetIsAssignableToRole)
+	}
 	convert.FrameworkToGraphString(data.MembershipRule, requestBody.SetMembershipRule)
 	convert.FrameworkToGraphString(data.MembershipRuleProcessingState, requestBody.SetMembershipRuleProcessingState)
 

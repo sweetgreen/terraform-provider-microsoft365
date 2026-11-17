@@ -17,12 +17,30 @@ var mockState struct {
 	sync.Mutex
 	groups       map[string]map[string]any
 	deletedItems map[string]map[string]any
+
+	// staleReadsAfterPatch makes GETs that follow a PATCH return the group as it was before the
+	// PATCH, as a lagging Entra replica does. 0 disables it; -1 never catches up.
+	staleReadsAfterPatch int
+	staleSnapshots       map[string]map[string]any
+	staleReadsRemaining  map[string]int
+
+	// patchCount counts PATCH requests, so tests can prove an update made no Graph write.
+	patchCount int
+}
+
+// resetMockState clears all groups, deleted items and stale-read settings. The caller holds the lock.
+func resetMockState() {
+	mockState.groups = make(map[string]map[string]any)
+	mockState.deletedItems = make(map[string]map[string]any)
+	mockState.staleReadsAfterPatch = 0
+	mockState.staleSnapshots = make(map[string]map[string]any)
+	mockState.staleReadsRemaining = make(map[string]int)
+	mockState.patchCount = 0
 }
 
 func init() {
 	// Initialize mockState
-	mockState.groups = make(map[string]map[string]any)
-	mockState.deletedItems = make(map[string]map[string]any)
+	resetMockState()
 
 	// Register a default 404 responder for any unmatched requests
 	httpmock.RegisterNoResponder(httpmock.NewStringResponder(404, `{"error":{"code":"ResourceNotFound","message":"Resource not found"}}`))
@@ -41,16 +59,25 @@ var _ mocks.MockRegistrar = (*GroupMock)(nil)
 func (m *GroupMock) RegisterMocks() {
 	// Reset the state when registering mocks
 	mockState.Lock()
-	mockState.groups = make(map[string]map[string]any)
-	mockState.deletedItems = make(map[string]map[string]any)
+	resetMockState()
 	mockState.Unlock()
 
 	// Register GET for listing groups
 	httpmock.RegisterResponder("GET", "https://graph.microsoft.com/beta/groups",
 		func(req *http.Request) (*http.Response, error) {
+			// Honour $filter=displayName eq '...', as the duplicate-name check uses it. Graph compares
+			// display names case-insensitively.
+			wantName, filtered := displayNameFromFilter(req.URL.Query().Get("$filter"))
+
 			mockState.Lock()
 			groups := make([]map[string]any, 0, len(mockState.groups))
 			for _, group := range mockState.groups {
+				if filtered {
+					name, _ := group["displayName"].(string)
+					if !strings.EqualFold(name, wantName) {
+						continue
+					}
+				}
 				groups = append(groups, group)
 			}
 			mockState.Unlock()
@@ -61,7 +88,9 @@ func (m *GroupMock) RegisterMocks() {
 			}
 
 			respBody, _ := json.Marshal(response)
-			return httpmock.NewStringResponse(200, string(respBody)), nil
+			resp := httpmock.NewStringResponse(200, string(respBody))
+			resp.Header.Set("Content-Type", "application/json")
+			return resp, nil
 		})
 
 	// Register GET for specific group with special test IDs
@@ -77,6 +106,16 @@ func (m *GroupMock) RegisterMocks() {
 
 			mockState.Lock()
 			defer mockState.Unlock()
+
+			if remaining := mockState.staleReadsRemaining[groupID]; remaining != 0 {
+				if remaining > 0 {
+					mockState.staleReadsRemaining[groupID] = remaining - 1
+				}
+				respBody, _ := json.Marshal(mockState.staleSnapshots[groupID])
+				resp := httpmock.NewStringResponse(200, string(respBody))
+				resp.Header.Set("Content-Type", "application/json")
+				return resp, nil
+			}
 
 			if group, exists := mockState.groups[groupID]; exists {
 				respBody, _ := json.Marshal(group)
@@ -171,7 +210,18 @@ func (m *GroupMock) RegisterMocks() {
 			mockState.Lock()
 			defer mockState.Unlock()
 
+			mockState.patchCount++
+
 			if group, exists := mockState.groups[groupID]; exists {
+				if mockState.staleReadsAfterPatch != 0 {
+					snapshot := make(map[string]any, len(group))
+					for k, v := range group {
+						snapshot[k] = v
+					}
+					mockState.staleSnapshots[groupID] = snapshot
+					mockState.staleReadsRemaining[groupID] = mockState.staleReadsAfterPatch
+				}
+
 				// Update the existing group
 				for k, v := range requestBody {
 					group[k] = v
@@ -196,6 +246,9 @@ func (m *GroupMock) RegisterMocks() {
 				// Move to deletedItems (soft delete behavior)
 				mockState.deletedItems[groupID] = group
 				delete(mockState.groups, groupID)
+				// A deleted group must read as gone, not as a stale replica's copy.
+				delete(mockState.staleSnapshots, groupID)
+				delete(mockState.staleReadsRemaining, groupID)
 				return httpmock.NewStringResponse(204, ""), nil
 			}
 
@@ -272,10 +325,65 @@ func (m *GroupMock) RegisterErrorMocks() {
 		httpmock.NewStringResponder(400, errorBadRequest))
 }
 
+// SetStaleReadsAfterPatch makes the next n GETs of a group after each PATCH return the group as it
+// was before that PATCH, like a Microsoft Entra replica that hasn't caught up with the write yet.
+// n = -1 never catches up; n = 0 turns stale reads off.
+func (m *GroupMock) SetStaleReadsAfterPatch(n int) {
+	mockState.Lock()
+	defer mockState.Unlock()
+	mockState.staleReadsAfterPatch = n
+}
+
+// SeededGroupDescription is the description SeedGroup gives every group.
+const SeededGroupDescription = "Created outside Terraform"
+
+// displayNameFromFilter extracts the name from a "displayName eq '<name>'" OData filter, undoing
+// the doubled-quote escape. It reports false for any other filter.
+func displayNameFromFilter(filter string) (string, bool) {
+	const prefix = "displayName eq '"
+	if !strings.HasPrefix(filter, prefix) || !strings.HasSuffix(filter, "'") || len(filter) < len(prefix)+1 {
+		return "", false
+	}
+	return strings.ReplaceAll(filter[len(prefix):len(filter)-1], "''", "'"), true
+}
+
+// SeedGroup adds an existing private security group, as if it had been created outside Terraform,
+// and returns its object ID. Its description is SeededGroupDescription.
+func (m *GroupMock) SeedGroup(displayName, mailNickname string) string {
+	id := uuid.New().String()
+	mockState.Lock()
+	defer mockState.Unlock()
+	mockState.groups[id] = map[string]any{
+		"id":              id,
+		"displayName":     displayName,
+		"description":     SeededGroupDescription,
+		"mailNickname":    mailNickname,
+		"mailEnabled":     false,
+		"securityEnabled": true,
+		"groupTypes":      []any{},
+		"visibility":      "Private",
+		"createdDateTime": "2023-01-01T00:00:00Z",
+	}
+	return id
+}
+
+// GroupCount returns the number of groups the mock holds.
+func (m *GroupMock) GroupCount() int {
+	mockState.Lock()
+	defer mockState.Unlock()
+	return len(mockState.groups)
+}
+
+// PatchCount returns the number of PATCH requests received since the mocks were registered.
+func (m *GroupMock) PatchCount() int {
+	mockState.Lock()
+	defer mockState.Unlock()
+	return mockState.patchCount
+}
+
 // CleanupMockState cleans up the mock state (called after each test)
 func (m *GroupMock) CleanupMockState() {
 	mockState.Lock()
 	defer mockState.Unlock()
-	mockState.groups = make(map[string]map[string]any)
-	mockState.deletedItems = make(map[string]map[string]any)
+	resetMockState()
 }

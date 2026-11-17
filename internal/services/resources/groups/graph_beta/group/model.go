@@ -22,5 +22,6 @@ type GroupResourceModel struct {
 	GroupOwners                   types.Set      `tfsdk:"group_owners"`
 	GroupMembers                  types.Set      `tfsdk:"group_members"`
 	HardDelete                    types.Bool     `tfsdk:"hard_delete"`
+	PreventDuplicateNames         types.Bool     `tfsdk:"prevent_duplicate_names"`
 	Timeouts                      timeouts.Value `tfsdk:"timeouts"`
 }

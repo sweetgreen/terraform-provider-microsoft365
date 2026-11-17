@@ -24,6 +24,13 @@ builds:
       - amd64
       - arm64
     binary: '{{ .ProjectName }}_v{{ .Version }}'
+    # Fork: each GOOS/GOARCH target builds its own copy of the msgraph beta SDK into the Go
+    # build cache, and none of it is reused by the next target. Six targets filled the 91 GB
+    # self-hosted runner ("no space left on device", v1.3.0-sg.1). Clear the cache after
+    # each target so disk use stays at one target's worth.
+    hooks:
+      post:
+        - go clean -cache
 archives:
   - format: zip
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
