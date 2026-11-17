@@ -564,8 +564,9 @@ func TestUnitResourceGroup_14_PreventDuplicateNamesNoMatchCreates(t *testing.T) 
 }
 
 // With the guard on and one group holding the name (in a different case), the plan fails, names
-// the existing object ID and creates nothing. When the name is only known at apply time, Create
-// makes the same check before it posts.
+// the existing object ID and creates nothing. Terraform re-plans at apply time, so ModifyPlan also
+// refuses names that only become known during apply; Create's own check, for a group created by
+// someone else after the plan, is covered by TestCreate_RefusesDuplicateWithoutPosting.
 func TestUnitResourceGroup_15_PreventDuplicateNamesOneMatchFails(t *testing.T) {
 	mocks.SetupUnitTestEnvironment(t)
 	_, groupMock := setupMockEnvironment()
@@ -574,22 +575,6 @@ func TestUnitResourceGroup_15_PreventDuplicateNamesOneMatchFails(t *testing.T) {
 
 	existing := groupMock.SeedGroup("POS Ring 1 Windows Devices", "posring1")
 	refused := regexp.MustCompile(`(?s)Group display name already in use.*` + existing)
-
-	// terraform_data's output is unknown until apply, so the plan-time check is skipped and only
-	// the create-time check can refuse the group.
-	nameKnownAtApply := `
-resource "terraform_data" "name" {
-  input = "pos ring 1 windows devices"
-}
-
-resource "microsoft365_graph_beta_groups_group" "test" {
-  display_name            = terraform_data.name.output
-  mail_nickname           = "posring1dup"
-  mail_enabled            = false
-  security_enabled        = true
-  prevent_duplicate_names = true
-}
-`
 
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: mocks.TestUnitTestProtoV6ProviderFactories,
@@ -600,7 +585,7 @@ resource "microsoft365_graph_beta_groups_group" "test" {
 				ExpectError: refused,
 			},
 			{
-				Config:      nameKnownAtApply,
+				Config:      guardedGroupConfig("pos ring 1 windows devices", "dup", "posring1dup", true),
 				ExpectError: refused,
 			},
 		},
