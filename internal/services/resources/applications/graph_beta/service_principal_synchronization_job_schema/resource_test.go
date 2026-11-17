@@ -71,7 +71,7 @@ func TestUnitResourceSynchronizationJobSchema_01_Lifecycle(t *testing.T) {
 					check.That(resourceAddress).Key("object_mappings.sys_user.attribute_mappings.active.source_expression").
 						HasValue(`Switch([IsSoftDeleted], , "False", "1", "True", "0")`),
 					check.That(resourceAddress).Key("object_mappings.sys_user.attribute_mappings.email.flow_type").HasValue("Always"),
-					check.That(resourceAddress).Key("object_mappings.cmn_cost_center.name").IsEmpty(),
+					check.That(resourceAddress).Key("object_mappings.cmn_cost_center.name").DoesNotExist(),
 					check.That(resourceAddress).Key("version").HasValue("Date:2026-11-17T00:00:00.0000000Z, ActivityId:put-1"),
 				),
 			},

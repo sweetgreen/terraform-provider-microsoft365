@@ -33,9 +33,11 @@ type Mock struct {
 	Puts []map[string]any
 	// FunctionGets counts GET .../schema/functions requests.
 	FunctionGets int
-	// staleReads is the number of GETs after a PUT that still return the old schema.
-	staleReads int
-	stale      map[string]any
+	// pendingStaleReads arms staleReads at the next PUT; staleReads is the number of
+	// GETs that still return stale, the schema from before that PUT.
+	pendingStaleReads int
+	staleReads        int
+	stale             map[string]any
 	// changeVersionOnEveryGet simulates someone editing the schema in the portal
 	// between every read.
 	changeVersionOnEveryGet bool
@@ -77,11 +79,11 @@ func decode(q *http.Request) (map[string]any, error) {
 	return body, nil
 }
 
-// SetStaleReadsAfterPut makes the next n GETs after a PUT return the schema from before it.
+// SetStaleReadsAfterPut makes the n GETs after the next PUT return the schema from before it.
 func (m *Mock) SetStaleReadsAfterPut(n int) {
 	m.Lock()
 	defer m.Unlock()
-	m.staleReads = n
+	m.pendingStaleReads = n
 }
 
 // ChangeVersionOnEveryGet makes every GET return a new schema version.
@@ -105,7 +107,7 @@ func (m *Mock) RegisterMocks() {
 		if m.changeVersionOnEveryGet {
 			m.Schema["version"] = fmt.Sprintf("Date:2026-11-17T00:00:%02d.0000000Z, ActivityId:edited-in-portal", m.gets)
 		}
-		if m.stale != nil && m.staleReads > 0 {
+		if m.staleReads > 0 {
 			m.staleReads--
 			return httpmock.NewJsonResponse(200, m.stale)
 		}
@@ -132,6 +134,8 @@ func (m *Mock) RegisterMocks() {
 		defer m.Unlock()
 		m.Puts = append(m.Puts, body)
 		m.stale = m.Schema
+		m.staleReads = m.pendingStaleReads
+		m.pendingStaleReads = 0
 		stored := map[string]any{"@odata.context": m.Schema["@odata.context"]}
 		for k, v := range body {
 			stored[k] = v
@@ -155,6 +159,7 @@ func (m *Mock) CleanupMockState() {
 	m.Schema = nil
 	m.Puts = nil
 	m.FunctionGets = 0
+	m.pendingStaleReads = 0
 	m.staleReads = 0
 	m.stale = nil
 	m.changeVersionOnEveryGet = false
